@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:order_food/View/Page/Login/ForgotPasswordPage.dart';
+import 'package:order_food/View/Widget/ForgotPasswordForm.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -10,6 +10,25 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  void ForgotPassword(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          contentPadding: const EdgeInsets.all(20), // Thêm padding cho nội dung
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: 220, // Giới hạn chiều cao tối đa
+            ),
+            child: ForgotPasswordForm(),
+          ),
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -78,7 +97,6 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 10),
 
-          // Remember me & Forgot Password
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -98,7 +116,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordPage()));
+                  ForgotPassword(context);
                 },
                 child: const Text(
                   "Forgot Password ?",

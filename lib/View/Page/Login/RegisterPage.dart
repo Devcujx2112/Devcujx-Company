@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:order_food/View/Page/Login/LoginPage.dart';
 import 'package:order_food/View/Widget/LoginForm.dart';
 import 'package:order_food/View/Widget/RegisterForm.dart';
 class RegisterPage extends StatefulWidget {
@@ -59,7 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginForm()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                         },
                         child: const Text(
                           "Login",

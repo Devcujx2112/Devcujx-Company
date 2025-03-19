@@ -11,76 +11,65 @@ class ForgotPasswordForm extends StatefulWidget {
 class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 24, vertical: 32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Forgot Password",
+          style: TextStyle(
+            fontFamily: "Outfit",
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            color: Color(0xFFD05558),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Center(
-            child: Text(
-              "Forgot Password",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFD05558),
-              ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Please enter your email to receive a password reset link.",
+          style: TextStyle(
+              fontFamily: "Poppins",color: Colors.black87, fontWeight: FontWeight.w500, fontSize: 14),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            hintText: "Enter your email",
+            hintStyle: const TextStyle(color: Colors.grey),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-          const SizedBox(height: 20),
-
-          // Input Email
-          TextField(
-            decoration: InputDecoration(
-              hintText: "Enter your email",
-              hintStyle: const TextStyle(color: Colors.grey),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 12),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Confirm Button
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {
-                // Xử lý khi nhấn Confirm
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD05558),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                "Confirm",
+        ),
+        const SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Padding(
+                padding: EdgeInsets.only(right: 10),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "Hủy",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFD05558),
+                        fontSize: 14),
+                  ),
+                )),
+            ElevatedButton(
+              onPressed: () {},
+              child: Text(
+                "Gửi yêu cầu",
                 style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD05558),
+                    fontSize: 14),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        )
+      ],
     );
   }
 }

@@ -16,10 +16,10 @@ class _LoginFormState extends State<LoginForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20), // Thêm padding cho nội dung
+          contentPadding: const EdgeInsets.all(20),
           content: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: 220, // Giới hạn chiều cao tối đa
+              maxHeight: 220,
             ),
             child: ForgotPasswordForm(),
           ),

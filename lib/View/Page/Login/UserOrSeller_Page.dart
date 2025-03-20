@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:order_food/Services/Auth_Service.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 
 class UserOrSellerPage extends StatefulWidget {
-  const UserOrSellerPage({super.key});
+  final String uid;
+  const UserOrSellerPage({super.key,required this.uid});
 
   @override
   State<UserOrSellerPage> createState() => _UserOrSellerPageState();
 }
 
 class _UserOrSellerPageState extends State<UserOrSellerPage> {
+  final AuthViewModel authViewModel = AuthViewModel();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,26 +20,23 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Ảnh nền phủ toàn màn hình
           Positioned.fill(
             child: Image.asset(
               'asset/images/backgrUserSeller.png',
               fit: BoxFit.cover,
             ),
           ),
-
-          // Đưa nội dung xuống cuối màn hình
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 50), // Khoảng cách từ đáy màn hình
+              padding: const EdgeInsets.only(bottom: 50),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Chỉ chiếm không gian cần thiết
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Nút "Bạn là người mua hàng?"
                   OutlinedButton(
                     onPressed: () {
-                      // Xử lý khi chọn "người mua hàng"
+                      authViewModel.UpdateRoleVM("User",widget.uid);
+                      print('UserSeller uid ${widget.uid}');
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -53,10 +55,7 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                           fontFamily: "Outfit"),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
-                  // Chữ "or"
                   const Text(
                     "or",
                     style: TextStyle(
@@ -65,13 +64,10 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                         fontWeight: FontWeight.w500,
                         fontFamily: "Outfit"),
                   ),
-
                   const SizedBox(height: 10),
-
-                  // Nút "Bạn là người bán hàng?"
                   ElevatedButton(
                     onPressed: () {
-                      // Xử lý khi chọn "người bán hàng"
+                      authViewModel.UpdateRoleVM("Seller", widget.uid);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[900],

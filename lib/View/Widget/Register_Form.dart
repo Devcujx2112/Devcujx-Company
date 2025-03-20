@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:order_food/Services/Auth_Service.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,11 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController password = TextEditingController();
   final TextEditingController againPass = TextEditingController();
 
-  void DialogMessage(BuildContext context, message, {bool isSuccess = false}) {
+  bool _hidePassword = true;
+  bool _hidePasswordAgain = true;
+
+  void DialogMessage(BuildContext context, message, uid,
+      {bool isSuccess = false}) {
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -29,7 +34,9 @@ class _RegisterFormState extends State<RegisterForm> {
             if (isSuccess) {
               Navigator.of(context, rootNavigator: true).pushReplacement(
                 MaterialPageRoute(
-                    builder: (context) => const UserOrSellerPage()),
+                    builder: (context) => UserOrSellerPage(
+                          uid: uid,
+                        )),
               );
             }
           }
@@ -38,10 +45,7 @@ class _RegisterFormState extends State<RegisterForm> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
-          content: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: 80,
-            ),
+          content: IntrinsicHeight(
             child: DialogMessageForm(message: message),
           ),
         );
@@ -97,7 +101,7 @@ class _RegisterFormState extends State<RegisterForm> {
           const SizedBox(height: 15),
           TextField(
             controller: password,
-            obscureText: true,
+            obscureText: _hidePassword,
             decoration: InputDecoration(
               label: Text(
                 "Password",
@@ -108,10 +112,16 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               suffixIcon: IconButton(
                   icon: Icon(
-                    Icons.visibility_off_rounded,
+                    _hidePassword
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility,
                     color: Colors.black87,
                   ),
-                  onPressed: () {}),
+                  onPressed: () {
+                    setState(() {
+                      _hidePassword = !_hidePassword;
+                    });
+                  }),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -120,7 +130,7 @@ class _RegisterFormState extends State<RegisterForm> {
           const SizedBox(height: 20),
           TextField(
             controller: againPass,
-            obscureText: true,
+            obscureText: _hidePasswordAgain,
             decoration: InputDecoration(
               label: Text(
                 "Reenter password",
@@ -131,10 +141,16 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               suffixIcon: IconButton(
                   icon: Icon(
-                    Icons.visibility_off_rounded,
+                    _hidePasswordAgain
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility,
                     color: Colors.black87,
                   ),
-                  onPressed: () {}),
+                  onPressed: () {
+                    setState(() {
+                      _hidePasswordAgain = !_hidePasswordAgain;
+                    });
+                  }),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -147,13 +163,18 @@ class _RegisterFormState extends State<RegisterForm> {
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () async {
-                      bool success = await authVM.register(
+                      bool success = await authVM.RegisterVM(
                           email.text, password.text, againPass.text);
+                      String uidAccount = authVM.uid.toString();
+                      print('uid form $uidAccount');
                       if (success) {
-                        DialogMessage(context, "Đăng kí thành công",
-                            isSuccess: true);
+                        DialogMessage(
+                            context,
+                            "Đăng kí thành công",
+                            isSuccess: true,
+                            uidAccount);
                       } else {
-                        DialogMessage(context, authVM.errorMessage,
+                        DialogMessage(context, authVM.errorMessage, uidAccount,
                             isSuccess: false);
                       }
                     },

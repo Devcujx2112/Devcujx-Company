@@ -1,23 +1,22 @@
 class Account{
-  late String _userName;
-  late String _password;
+  late String _uid;
+  late String _email;
   late String _role;
   late String _status;
   late String _createAt;
 
-  Account(this._userName, this._password, this._role, this._status, this._createAt);
+  Account(this._uid,this._email, this._role, this._status, this._createAt);
 
+  String get uid => _uid;
 
-  String get userName => _userName;
-
-  set userName(String value) {
-    _userName = value;
+  set uid(String value) {
+    _uid = value;
   }
 
-  String get password => _password;
+  String get email => _email;
 
-  set password(String value) {
-    _password = value;
+  set email(String value) {
+    _email = value;
   }
 
   String get role => _role;
@@ -38,14 +37,8 @@ class Account{
     _createAt = value;
   }
 
-
-  Map<String, dynamic> dataJson(){
-    return{
-      "userName" : userName,
-      "password" : password,
-      "role" : role,
-      "status": status,
-      "createAt":createAt
-    };
+  @override
+  String toString() {
+    return 'Account{_uid: $_uid, _email: $_email, _role: $_role, _status: $_status, _createAt: $_createAt}';
   }
 }

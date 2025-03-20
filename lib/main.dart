@@ -1,13 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:order_food/View/Page/Login/FirstPage.dart';
+import 'package:order_food/View/Page/Login/FirstPage_Page.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:provider/provider.dart';
 import 'Services/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(CompanyDev());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => AuthViewModel())
+  ],child: CompanyDev(),));
 }
 
 class CompanyDev extends StatefulWidget {
@@ -21,9 +25,8 @@ class _CompanyDevState extends State<CompanyDev> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(useMaterial3: true),
-      home: FirstPage()
-    );
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData.light(useMaterial3: true),
+        home: FirstPage());
   }
 }

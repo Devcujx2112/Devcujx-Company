@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:order_food/View/Widget/ForgotPasswordForm.dart';
+import 'package:order_food/View/Widget/ForgotPassword_Form.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:order_food/View/Page/Login/LoginPage.dart';
-import 'package:order_food/View/Widget/LoginForm.dart';
-import 'package:order_food/View/Widget/RegisterForm.dart';
+import 'package:order_food/View/Page/Login/Login_Page.dart';
+import 'package:order_food/View/Widget/Login_Form.dart';
+import 'package:order_food/View/Widget/Register_Form.dart';
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -10,6 +10,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:order_food/View/Widget/LoginForm.dart';
+import 'package:order_food/View/Widget/Login_Form.dart';
 
-import 'RegisterPage.dart';
+import 'Register_Page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

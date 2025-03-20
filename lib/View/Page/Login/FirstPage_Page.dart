@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'LoginPage.dart';
-import 'RegisterPage.dart';
+import 'Login_Page.dart';
+import 'Register_Page.dart';
 
 class FirstPage extends StatefulWidget {
   const FirstPage({super.key});

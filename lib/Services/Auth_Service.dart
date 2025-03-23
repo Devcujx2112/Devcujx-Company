@@ -66,4 +66,58 @@ class AuthService {
       print('Erros RealTime API update role $e');
     }
   }
+
+  Future<bool> CheckEmailExistsService(String email) async {
+    try {
+      final response = await http.get(Uri.parse("$realTimeAPI.json"));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if (data != null) {
+          for (var key in data.keys) {
+            if (data[key]["Email"] == email) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    } catch (e) {
+      print("Lỗi kiểm tra Email: $e");
+      return false;
+    }
+  }
+
+  Future<User?> LoginService(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      return userCredential.user;
+    } catch (e) {
+      print("Lỗi đăng nhập: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserDataService(String uid) async {
+    try {
+      final response = await http.get(Uri.parse("$realTimeAPI/$uid.json"));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print("Lỗi lấy dữ liệu người dùng: $e");
+    }
+    return null;
+  }
+
+  Future<bool> ForgotPasswordService(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      return true;
+    } catch (e) {
+      print("❌ Lỗi gửi email đặt lại mật khẩu: $e");
+      return false;
+    }
+  }
 }

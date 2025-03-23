@@ -1,20 +1,29 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:order_food/Helpers/ValidateInput.dart';
 import 'package:order_food/Models/Account.dart';
 import '../Services/Auth_Service.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
-
+  final ValidateInput _validateInput = ValidateInput();
   bool _isLoading = false;
   String? _errorMessage;
   String? _uid;
+  String? _role;
 
   bool get isLoading => _isLoading;
+
   String? get errorMessage => _errorMessage;
+
   String? get uid => _uid;
 
-  Future<bool> RegisterVM(String email, String password, String againPassword) async {
+  String? get role => _role;
+
+  Future<bool> RegisterVM(
+      String email, String password, String againPassword) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -25,20 +34,13 @@ class AuthViewModel extends ChangeNotifier {
       return false;
     }
 
-    bool isValidEmail(String email) {
-      String emailPattern =
-          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-      RegExp regex = RegExp(emailPattern);
-      return regex.hasMatch(email);
-    }
-
-    if (!isValidEmail(email)) {
+    if (!_validateInput.isValidEmail(email)) {
       _SetError("Email không hợp lệ");
       return false;
     }
 
-    if (password.length < 6) {
-      _SetError("Mật khẩu phải có ít nhất 6 ký tự");
+    if (_validateInput.LenghtPassword(password) == false) {
+      _SetError("Password phải có nhều hơn 6 kí tự");
       return false;
     }
 
@@ -49,9 +51,12 @@ class AuthViewModel extends ChangeNotifier {
     }
 
     try {
+      bool emailExists = await CheckEmailExists(email);
+      if(emailExists == false){
+        _SetError("Tài khoản đã được sử dụng");
+      }
       final user = await _authService.RegisterService(email, password);
       if (user == null) {
-        print("Không tìm thấy uid tài khoản hiện tại.");
         _isLoading = false;
         notifyListeners();
         return false;
@@ -59,7 +64,7 @@ class AuthViewModel extends ChangeNotifier {
       _uid = user.uid;
 
       String createAt = DateTime.now().toIso8601String();
-      Account account = Account(_uid!,email,"","Active",createAt);
+      Account account = Account(_uid!, email, "", "Active", createAt);
       await _authService.AddAccountService(account);
 
       _isLoading = false;
@@ -73,13 +78,102 @@ class AuthViewModel extends ChangeNotifier {
 
   void UpdateRoleVM(String role, String uid) {
     _isLoading = true;
-    try{
-      if (role.isNotEmpty && uid.isNotEmpty){
+    try {
+      if (role.isNotEmpty && uid.isNotEmpty) {
         _authService.UpdateRoleUserService(uid, role);
         _isLoading = false;
       }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  //Check Email
+  Future<bool> CheckEmailExists(String email) async {
+    bool emailExists = await _authService.CheckEmailExistsService(email);
+    if (emailExists) {
+      return false;
+    }
+    return true;
+  }
+
+  //Login
+  Future<bool> LoginVM(String email, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    if (email.isEmpty || password.isEmpty) {
+      _isLoading = false;
+      _SetError("Hãy điền đầy đủ các trường");
+      return false;
+    }
+
+    if (!_validateInput.isValidEmail(email)) {
+      _SetError("Email không hợp lệ");
+      _isLoading = false;
+      return false;
+    }
+
+    if (_validateInput.LenghtPassword(password) == false) {
+      _SetError("Mật khẩu phải đủ 6 kí tự");
+      _isLoading = false;
+      return false;
+    }
+
+    try {
+      final user = await _authService.LoginService(email, password);
+      if (user == null) {
+        _SetError("Tên đăng nhập hoặc mật khẩu không chính xác");
+        _isLoading = false;
+        return false;
+      }
+      _uid = user.uid;
+
+      final roleAccount = await _authService.getUserDataService(_uid!);
+      if (roleAccount != null && roleAccount.containsKey("Role")) {
+        _role = roleAccount["Role"];
+        print('Role Account $_uid : is $_role');
+      } else {
+        _role = "Unknown";
+        print('Không tìm thấy dữ liệu người dùng');
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _SetError("Lỗi đăng nhập ${e.toString()}");
+      return false;
+    }
+  }
+
+  Future<bool> ForgotPassword(String email) async{
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    if (email.isEmpty) {
+      _isLoading = false;
+      _SetError("Hãy điền Email của bạn");
+      return false;
+    }
+
+    if (!_validateInput.isValidEmail(email)) {
+      _SetError("Email không hợp lệ");
+      return false;
+    }
+    try{
+      bool success = await _authService.ForgotPasswordService(email);
+      _isLoading = false;
+      notifyListeners();
+      if(!success){
+        _SetError("Gửi Email thất bại. Vui lòng thử lại!");
+        return false;
+      }
+      return true;
     }catch(e){
       print(e);
+      return false;
     }
   }
 
@@ -89,4 +183,3 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
-

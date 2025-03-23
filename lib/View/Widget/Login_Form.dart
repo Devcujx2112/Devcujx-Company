@@ -1,6 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:order_food/View/Page/HomePage/AdminHome_Page.dart';
+import 'package:order_food/View/Page/HomePage/SellerHome_Page.dart';
+import 'package:order_food/View/Page/HomePage/UserHome_Page.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/View/Widget/ForgotPassword_Form.dart';
+import 'package:provider/provider.dart';
+
+import '../../ViewModels/Auth_ViewModel.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -10,12 +17,16 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  TextEditingController txt_email = TextEditingController();
+  TextEditingController txt_pasword = TextEditingController();
+
   void ForgotPassword(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: ConstrainedBox(
             constraints: BoxConstraints(
@@ -28,9 +39,51 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
+  void DialogMessage(BuildContext context, message, String role,
+      {bool isSuccess = false}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 1), () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+            if (isSuccess) {
+              if (role.toString() == "Admin") {
+                Navigator.of(context, rootNavigator: true)
+                    .pushReplacement(MaterialPageRoute(
+                  builder: (context) => AdminHomePage(),
+                ));
+              } else if (role.toString() == "Seller") {
+                Navigator.of(context, rootNavigator: true)
+                    .pushReplacement(MaterialPageRoute(
+                  builder: (context) => SellerHomePage(),
+                ));
+              } else if (role.toString() == "User") {
+                Navigator.of(context, rootNavigator: true)
+                    .pushReplacement(MaterialPageRoute(
+                  builder: (context) => UserHomePage(),
+                ));
+              }
+            }
+          }
+        });
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          contentPadding: const EdgeInsets.all(20),
+          content: IntrinsicHeight(
+            child: DialogMessageForm(message: message),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final authVM = Provider.of<AuthViewModel>(context);
+
     return Container(
       padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
       decoration: BoxDecoration(
@@ -56,10 +109,10 @@ class _LoginFormState extends State<LoginForm> {
               color: Color(0xFFD05558),
             ),
           ),
-
           const SizedBox(height: 20),
-
           TextField(
+            style: TextStyle(fontSize: 14, color: Colors.black),
+            controller: txt_email,
             decoration: InputDecoration(
               label: Text(
                 "Email",
@@ -75,6 +128,8 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 15),
           TextField(
+            style: TextStyle(fontSize: 14, color: Colors.black),
+            controller: txt_pasword,
             obscureText: true,
             decoration: InputDecoration(
               label: Text(
@@ -96,7 +151,6 @@ class _LoginFormState extends State<LoginForm> {
             ),
           ),
           const SizedBox(height: 10),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -127,22 +181,34 @@ class _LoginFormState extends State<LoginForm> {
             ],
           ),
           const SizedBox(height: 10),
-
-          // Nút đăng nhập
-          ElevatedButton(
-            onPressed: () {
-              // Xử lý đăng nhập
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFB02700),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              minimumSize: const Size(double.infinity, 50),
-            ),
-            child: const Text(
-              "Log In",
-              style: TextStyle(fontSize: 18, color: Colors.white),
-            ),
-          ),
+          authVM.isLoading
+              ? CircularProgressIndicator()
+              : ElevatedButton(
+                  onPressed: () async {
+                    bool success =
+                        await authVM.LoginVM(txt_email.text, txt_pasword.text);
+                    if (success) {
+                      DialogMessage(
+                        context,
+                        "Đăng nhập thành công",
+                        authVM.role ?? "Unknown",
+                        isSuccess: true,
+                      );
+                    } else {
+                      DialogMessage(context, authVM.errorMessage, "Unknown",
+                          isSuccess: false);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB02700),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text(
+                    "Log In",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                ),
         ],
       ),
     );

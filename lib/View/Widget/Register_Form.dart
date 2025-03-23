@@ -84,6 +84,7 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 20),
           TextField(
+            style: TextStyle(fontSize: 14,color: Colors.black),
             controller: email,
             decoration: InputDecoration(
               label: Text(
@@ -100,6 +101,7 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 15),
           TextField(
+            style: TextStyle(fontSize: 14,color: Colors.black),
             controller: password,
             obscureText: _hidePassword,
             decoration: InputDecoration(
@@ -129,6 +131,7 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 20),
           TextField(
+            style: TextStyle(fontSize: 14,color: Colors.black),
             controller: againPass,
             obscureText: _hidePasswordAgain,
             decoration: InputDecoration(

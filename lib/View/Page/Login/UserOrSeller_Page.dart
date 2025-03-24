@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:order_food/Services/Auth_Service.dart';
+import 'package:order_food/View/Page/Profile/CreateProfileUser_Page.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:provider/provider.dart';
+
+import '../Profile/CreateProfileSeller_Page.dart';
 
 class UserOrSellerPage extends StatefulWidget {
   final String uid;
-  const UserOrSellerPage({super.key,required this.uid});
+
+  const UserOrSellerPage({super.key, required this.uid});
 
   @override
   State<UserOrSellerPage> createState() => _UserOrSellerPageState();
@@ -15,6 +20,8 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authVM = Provider.of<AuthViewModel>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -35,8 +42,15 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                 children: [
                   OutlinedButton(
                     onPressed: () {
-                      authViewModel.UpdateRoleVM("User",widget.uid);
-                      print('UserSeller uid ${widget.uid}');
+                      bool success =
+                          authViewModel.UpdateRoleVM("User", widget.uid);
+                      if (success) {
+                        Navigator.of(context, rootNavigator: true)
+                            .pushReplacement(MaterialPageRoute(
+                          builder: (context) =>
+                              CreateProfileUser(uid: widget.uid),
+                        ));
+                      }
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -67,7 +81,16 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      authViewModel.UpdateRoleVM("Seller", widget.uid);
+                      bool success =
+                          authViewModel.UpdateRoleVM("Seller", widget.uid);
+                      if (success) {
+                        Navigator.of(context, rootNavigator: true)
+                            .pushReplacement(MaterialPageRoute(
+                          builder: (context) => CreateProfileSeller(
+                            uid: widget.uid,
+                          ),
+                        ));
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[900],

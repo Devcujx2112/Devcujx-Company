@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:order_food/View/Page/Login/FirstPage_Page.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';

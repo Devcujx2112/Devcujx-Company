@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:order_food/Helpers/ValidateInput.dart';
 import 'package:order_food/Models/Account.dart';
+import 'package:provider/provider.dart';
 import '../Services/Auth_Service.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthService _authService = AuthService();
   final ValidateInput _validateInput = ValidateInput();
+
   bool _isLoading = false;
   String? _errorMessage;
   String? _uid;
@@ -22,8 +24,9 @@ class AuthViewModel extends ChangeNotifier {
 
   String? get role => _role;
 
-  Future<bool> RegisterVM(
-      String email, String password, String againPassword) async {
+
+  Future<bool> RegisterVM(String email, String password,
+      String againPassword) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -52,7 +55,7 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       bool emailExists = await CheckEmailExists(email);
-      if(emailExists == false){
+      if (emailExists == false) {
         _SetError("Tài khoản đã được sử dụng");
       }
       final user = await _authService.RegisterService(email, password);
@@ -76,15 +79,18 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  void UpdateRoleVM(String role, String uid) {
+  bool UpdateRoleVM(String role, String uid) {
     _isLoading = true;
     try {
       if (role.isNotEmpty && uid.isNotEmpty) {
         _authService.UpdateRoleUserService(uid, role);
         _isLoading = false;
+        return true;
       }
+      return false;
     } catch (e) {
       print(e);
+      return false;
     }
   }
 
@@ -147,7 +153,7 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> ForgotPassword(String email) async{
+  Future<bool> ForgotPassword(String email) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -162,16 +168,16 @@ class AuthViewModel extends ChangeNotifier {
       _SetError("Email không hợp lệ");
       return false;
     }
-    try{
+    try {
       bool success = await _authService.ForgotPasswordService(email);
       _isLoading = false;
       notifyListeners();
-      if(!success){
+      if (!success) {
         _SetError("Gửi Email thất bại. Vui lòng thử lại!");
         return false;
       }
       return true;
-    }catch(e){
+    } catch (e) {
       print(e);
       return false;
     }
@@ -182,4 +188,10 @@ class AuthViewModel extends ChangeNotifier {
     _errorMessage = message;
     notifyListeners();
   }
+
+  void setUid(String newUid) {
+    _uid = newUid;
+    notifyListeners();
+  }
+
 }

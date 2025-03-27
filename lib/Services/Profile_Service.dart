@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,14 +8,15 @@ import 'package:http/http.dart' as http;
 import 'package:order_food/Models/ProfileSeller.dart';
 import 'package:order_food/Models/ProfileUser.dart';
 
-class Profile_Service{
+class Profile_Service {
   static const String realTimeAPI =
       "https://crud-firebase-7b852-default-rtdb.firebaseio.com";
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   Future<String?> LoadEmailService(String uid) async {
     try {
-      final String requestUrl = "$realTimeAPI/Account/${Uri.encodeComponent(uid)}.json";
+      final String requestUrl =
+          "$realTimeAPI/Account/${Uri.encodeComponent(uid)}.json";
 
       final response = await http.get(Uri.parse(requestUrl));
 
@@ -36,7 +38,8 @@ class Profile_Service{
     }
   }
 
-  Future<bool> CreateProfileUser(ProfileUser profile,File selectedImage) async{
+  Future<bool> CreateProfileUser(
+      ProfileUser profile, File selectedImage) async {
     try {
       //Firebase Storage
       String fileName = "Profile/User/${profile.uid}.jpg";
@@ -75,10 +78,11 @@ class Profile_Service{
     }
   }
 
-  Future<bool> CreateProfileSeller (ProfileSeller profileSeller, File selectedImage)async{
+  Future<bool> CreateProfileSeller(
+      ProfileSeller profileSeller, File selectedImage) async {
     try {
       //Firebase Storage
-      String fileName = "Profile/User/${profileSeller.uid}.jpg";
+      String fileName = "Profile/Seller/${profileSeller.uid}.jpg";
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       UploadTask uploadTask = storageRef.putFile(selectedImage);
       TaskSnapshot snapshot = await uploadTask;
@@ -89,9 +93,9 @@ class Profile_Service{
       Map<String, dynamic> userData = {
         "Uid": profileSeller.uid,
         "Avatar": profileSeller.image,
-        "StoreName" : profileSeller.storeName,
-        "OwnerName" : profileSeller.ownerName,
-        "Phone" : profileSeller.phone,
+        "StoreName": profileSeller.storeName,
+        "OwnerName": profileSeller.ownerName,
+        "Phone": profileSeller.phone,
         "Address": profileSeller.address,
         "Bio": profileSeller.bio
       };
@@ -115,6 +119,41 @@ class Profile_Service{
     }
   }
 
+  Future<bool> SaveLocationStore(
+      String uid, double latitude, double longitude) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('locations')
+          .doc(uid)
+          .set({'latitude': latitude, 'longitude': longitude});
+      return true;
+    } catch (e) {
+      print("Lỗi Service $e");
+      return false;
+    }
+  }
+
+  Future<List<double>?> LoadLocationStore(String uid) async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('locations')
+          .doc(uid)
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        double latitude = (data['latitude'] as num).toDouble();
+        double longitude = (data['longitude'] as num).toDouble();
+        return [latitude, longitude];
+      } else {
+        print("⚠️ Không tìm thấy dữ liệu vị trí.");
+        return null;
+      }
+    } catch (e) {
+      print("❌ Lỗi LoadLocationStore: $e");
+      return null;
+    }
+  }
 
 
 }

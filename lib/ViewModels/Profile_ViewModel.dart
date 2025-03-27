@@ -37,8 +37,8 @@ class Profile_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> CreateProfileUserVM(ProfileUser profile,
-      File? selectedImage) async {
+  Future<bool> CreateProfileUserVM(
+      ProfileUser profile, File? selectedImage) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -48,7 +48,7 @@ class Profile_ViewModel extends ChangeNotifier {
         print("Không có ảnh được chọn, sử dụng ảnh mặc định.");
 
         ByteData byteData =
-        await rootBundle.load("asset/images/avatar_default.jpg");
+            await rootBundle.load("asset/images/avatar_default.jpg");
         Uint8List imageData = byteData.buffer.asUint8List();
         File tempFile = File("${Directory.systemTemp.path}/avatar_default.jpg");
         await tempFile.writeAsBytes(imageData);
@@ -63,7 +63,7 @@ class Profile_ViewModel extends ChangeNotifier {
           age: profile.age,
           gender: profile.gender);
       bool success =
-      await profile_service.CreateProfileUser(profile, selectedImage);
+          await profile_service.CreateProfileUser(profile, selectedImage);
       if (success == false) {
         print('KHông thể tạo profile');
         _SetError("Lỗi khi khởi tạo profile");
@@ -81,8 +81,8 @@ class Profile_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> CreateProfileSeller(ProfileSeller profileSeller,
-      File selectedImage) async {
+  Future<bool> CreateProfileSeller(
+      ProfileSeller profileSeller, File selectedImage) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -92,6 +92,7 @@ class Profile_ViewModel extends ChangeNotifier {
       if (success == false) {
         _SetError("Vui lòng điền đầy đủ thông tin");
         _isLoading = false;
+        notifyListeners();
         return false;
       }
 
@@ -104,10 +105,13 @@ class Profile_ViewModel extends ChangeNotifier {
           profileSeller.address,
           profileSeller.bio);
 
-      bool queryRealtime = await profile_service.CreateProfileSeller(profileSeller, selectedImage);
-      if(queryRealtime == false){
+      bool queryRealtime = await profile_service.CreateProfileSeller(
+          profileSeller, selectedImage);
+      if (queryRealtime == false) {
         _isLoading = false;
         _SetError("Tạo Profile thất bại");
+        notifyListeners();
+        return false;
       }
 
       _isLoading = false;
@@ -119,6 +123,49 @@ class Profile_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<bool> SaveLocationStore(
+      String uid, double latitude, double longitude) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      bool success =
+          await profile_service.SaveLocationStore(uid, latitude, longitude);
+      if (success == false) {
+        _isLoading = false;
+        _SetError("Lưu vị trí cửa hàng thất bại");
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<List<double>?> LoadLocationStore(String uid) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    List<double>? location = [];
+    try {
+      if (uid.isEmpty) {
+        _isLoading = false;
+        _SetError("Không lấy được UID của tài khoản");
+        return null;
+      }
+      location = await profile_service.LoadLocationStore(uid);
+      _isLoading = false;
+      notifyListeners();
+      return location;
+    } catch (e) {
+      _isLoading = false;
+      _SetError("Lỗi khi lấy vị trí cửa hàng : $e");
     }
   }
 

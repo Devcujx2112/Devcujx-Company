@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:order_food/Models/ProfileSeller.dart';
 import 'package:order_food/Services/Profile_Service.dart';
+import 'package:order_food/View/Page/Login/Login_Page.dart';
 import 'package:order_food/View/Page/Profile/GoogleMap_Page.dart';
 import 'package:provider/provider.dart';
 import '../../../ViewModels/Auth_ViewModel.dart';
@@ -77,8 +78,9 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
           if (Navigator.canPop(context)) {
             Navigator.pop(context);
             if (isSuccess) {
-              Navigator.of(context, rootNavigator: true).pop();
-            }
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );            }
           }
         });
         return AlertDialog(
@@ -149,8 +151,9 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                           height: 45,
                           child: ElevatedButton.icon(
                             onPressed: () {
-                              Navigator.of(context, rootNavigator: true).pushReplacement(
-                                  MaterialPageRoute(builder: (context) => GooglemapPage()));
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => GoogleMapScreenPage()),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blueAccent,
@@ -246,7 +249,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                             profileSeller, _selectedImage!);
                         if (success) {
                           showDialogMessage(context, "Tạo Profile thành công",
-                              isSuccess: false);
+                              isSuccess: true);
                         } else {
                           showDialogMessage(context,
                               "Tạo Profile thất bại :${profileVM.errorMessage}",
@@ -261,7 +264,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                       ),
                       child: const Text(
                         "SUBMIT",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        style: TextStyle(color: Colors.white,fontFamily: "Poppins",fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ),
             ),

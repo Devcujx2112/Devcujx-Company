@@ -47,8 +47,7 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                       if (success) {
                         Navigator.of(context, rootNavigator: true)
                             .pushReplacement(MaterialPageRoute(
-                          builder: (context) =>
-                              CreateProfileUser(uid: widget.uid),
+                          builder: (context) => CreateProfileUser(),
                         ));
                       }
                     },
@@ -86,9 +85,7 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                       if (success) {
                         Navigator.of(context, rootNavigator: true)
                             .pushReplacement(MaterialPageRoute(
-                          builder: (context) => CreateProfileSeller(
-                            uid: widget.uid,
-                          ),
+                          builder: (context) => CreateProfileSeller(),
                         ));
                       }
                     },

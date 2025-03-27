@@ -24,7 +24,7 @@ class _RegisterFormState extends State<RegisterForm> {
 
   void DialogMessage(BuildContext context, message, uid,
       {bool isSuccess = false}) {
-    showDialog(
+    showCupertinoDialog(
       barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {

@@ -1,11 +1,11 @@
-class Account{
-  late String _uid;
-  late String _email;
-  late String _role;
-  late String _status;
-  late String _createAt;
+class Account {
+  String _uid;
+  String _email;
+  String _role;
+  String _status;
+  String _createAt;
 
-  Account(this._uid,this._email, this._role, this._status, this._createAt);
+  Account(this._uid, this._email, this._role, this._status, this._createAt);
 
   String get uid => _uid;
 

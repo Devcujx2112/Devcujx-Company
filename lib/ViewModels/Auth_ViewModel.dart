@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:order_food/Helpers/ValidateInput.dart';
 import 'package:order_food/Models/Account.dart';
-import 'package:provider/provider.dart';
 import '../Services/Auth_Service.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -38,11 +36,13 @@ class AuthViewModel extends ChangeNotifier {
     }
 
     if (!_validateInput.isValidEmail(email)) {
+      _isLoading = false;
       _SetError("Email không hợp lệ");
       return false;
     }
 
     if (_validateInput.LenghtPassword(password) == false) {
+      _isLoading = false;
       _SetError("Password phải có nhều hơn 6 kí tự");
       return false;
     }

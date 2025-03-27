@@ -1,26 +1,108 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:order_food/Models/Account.dart';
+import 'package:order_food/Models/ProfileUser.dart';
+import 'package:order_food/View/Page/Login/Login_Page.dart';
+import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 
 import '../../../ViewModels/Auth_ViewModel.dart';
+import '../../Widget/DialogMessage_Form.dart';
 
 class CreateProfileUser extends StatefulWidget {
-  String uid;
-  CreateProfileUser({super.key, required this.uid});
+  const CreateProfileUser({super.key});
 
   @override
   State<CreateProfileUser> createState() => _CreateProfileUserState();
 }
 
 class _CreateProfileUserState extends State<CreateProfileUser> {
+  Profile_ViewModel profileViewModel = Profile_ViewModel();
+
+  File? _selectedImage;
   String selectedGender = "Male";
   TextEditingController txtFullName = TextEditingController();
-  TextEditingController txtPhone = TextEditingController();
-  TextEditingController txtAge = TextEditingController();
+  TextEditingController? txtPhone = TextEditingController();
+  TextEditingController? txtAge = TextEditingController();
+  String? email;
+  String? fullName;
+  late String uid;
+
+  Future<void> LoadEmail(String uid) async {
+    if (uid.isNotEmpty) {
+      bool success = await profileViewModel.LoadEmailAccount(uid);
+      if (success) {
+        setState(() {
+          email = profileViewModel.email!;
+        });
+        print('Create profile user Email : $email');
+      }
+    }
+  }
+
+  Future<void> _PickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      if (authVM.uid != null) {
+        uid = authVM.uid!;
+        LoadEmail(authVM.uid!);
+      }
+    });
+    txtFullName.addListener(() {
+      setState(() {
+        fullName = txtFullName.text;
+      });
+    });
+  }
+
+  void DialogMessage(BuildContext context, String message,
+      {bool isSuccess = false}) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+            if (isSuccess) {
+              Navigator.of(context, rootNavigator: true).pushReplacement(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            }
+          }
+        });
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          contentPadding: const EdgeInsets.all(20),
+          content: IntrinsicHeight(
+            child: DialogMessageForm(message: message),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final authVM = Provider.of<AuthViewModel>(context);
+    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
 
     return Scaffold(
       body: Stack(
@@ -29,7 +111,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
             children: [
               // Phần xám trên cùng
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Container(
                   width: double.infinity,
                   height: 180,
@@ -42,9 +124,8 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                   ),
                 ),
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 120),
 
-              // Form nhập liệu (Khoảng cách giữa các TextField đồng đều)
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -52,21 +133,19 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildLabel("Email"),
-                      _buildReadOnlyTextField("dev.duongvu2112@gmail.com"),
+                      _buildReadOnlyTextField(email ?? "Loading..."),
                       const SizedBox(height: 15),
-
                       _buildLabel("Full Name"),
                       _buildTextField(controller: txtFullName),
                       const SizedBox(height: 15),
-
                       _buildLabel("Phone Number"),
-                      _buildTextField(controller: txtPhone, isNumber: true, maxLength: 10),
+                      _buildTextField(
+                          controller: txtPhone!, isNumber: true, maxLength: 10),
                       const SizedBox(height: 15),
-
                       _buildLabel("Year of Birth"),
-                      _buildTextField(controller: txtAge, isNumber: true, maxLength: 4),
+                      _buildTextField(
+                          controller: txtAge!, isNumber: true, maxLength: 4),
                       const SizedBox(height: 15),
-
                       _buildLabel("Gender"),
                       _buildGenderDropdown(),
                     ],
@@ -76,48 +155,82 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
 
               // Nút Submit
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      print("Create User "+ authVM.uid.toString());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
-                      "SUBMIT",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  child: profileVM.isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: () async {
+                            ProfileUser? profile = ProfileUser(
+                                uid: uid,
+                                fullName: fullName ?? "",
+                                image: "",
+                                phone: txtPhone?.text ?? "",
+                                age: txtAge?.text ?? "",
+                                gender: selectedGender);
+                            bool success = await profileVM.CreateProfileUserVM(
+                                profile, _selectedImage);
+                            if (success) {
+                              DialogMessage(context, "Tạo profile thành công",
+                                  isSuccess: true);
+                            } else {
+                              DialogMessage(context, "Tạo profile thất bại",
+                                  isSuccess: false);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            "SUBMIT",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ),
             ],
           ),
 
-          // Avatar
+          // Avatar + Tên
           Positioned(
-            top: 110,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage:
-                const AssetImage('asset/images/default_avatar.png'),
-                backgroundColor: Colors.grey[300],
-              ),
-            ),
-          ),
+              top: 120,
+              left: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: _PickImage,
+                child: Column(
+                  children: [
+                    // Avatar
+                    CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: _selectedImage != null
+                          ? FileImage(_selectedImage!)
+                          : const AssetImage('asset/images/avatar_default.jpg')
+                              as ImageProvider,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      fullName?.isNotEmpty == true ? fullName! : "Your name",
+                      style: const TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              )),
         ],
       ),
     );
@@ -128,24 +241,28 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 14,
-        fontFamily: "Poppins",
-        color: Colors.grey,
-        fontWeight: FontWeight.bold
-      ),
+          fontSize: 14,
+          fontFamily: "Poppins",
+          color: Colors.grey,
+          fontWeight: FontWeight.bold),
     );
   }
 
   /// Ô nhập liệu có thể chỉnh sửa
-  Widget _buildTextField({required TextEditingController controller, bool isNumber = false, int? maxLength}) {
+  Widget _buildTextField(
+      {required TextEditingController controller,
+      bool isNumber = false,
+      int? maxLength}) {
     return TextField(
       style: const TextStyle(fontFamily: "Outfit", fontSize: 15),
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
       maxLength: maxLength,
       decoration: InputDecoration(
-        counterText: "", // Ẩn số ký tự nhập vào
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        counterText: "",
+        // Ẩn số ký tự nhập vào
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         filled: true,
         fillColor: Colors.grey[200],
         border: OutlineInputBorder(
@@ -163,7 +280,8 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
       readOnly: true,
       style: const TextStyle(fontFamily: "Outfit", fontSize: 15),
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         filled: true,
         fillColor: Colors.grey[200],
         border: OutlineInputBorder(
@@ -177,27 +295,32 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
 
   /// Dropdown chọn giới tính
   Widget _buildGenderDropdown() {
-    return DropdownButtonFormField<String>(
-      style: const TextStyle(fontFamily: "Outfit", color: Colors.black, fontSize: 16),
-      value: selectedGender,
-      items: ["Male", "Female"].map((String gender) {
-        return DropdownMenuItem<String>(
-          value: gender,
-          child: Text(gender),
-        );
-      }).toList(),
-      onChanged: (String? newValue) {
-        setState(() {
-          selectedGender = newValue!;
-        });
-      },
-      decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.grey),
+    return Container(
+      width: 150,
+      child: DropdownButtonFormField<String>(
+        style: const TextStyle(
+            fontFamily: "Outfit", color: Colors.black, fontSize: 16),
+        value: selectedGender,
+        items: ["Male", "Female"].map((String gender) {
+          return DropdownMenuItem<String>(
+            value: gender,
+            child: Text(gender),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            selectedGender = newValue!;
+          });
+        },
+        decoration: InputDecoration(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          filled: true,
+          fillColor: Colors.grey[200],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
         ),
       ),
     );

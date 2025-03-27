@@ -6,6 +6,7 @@ import 'package:order_food/View/Page/HomePage/UserHome_Page.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/View/Widget/ForgotPassword_Form.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../ViewModels/Auth_ViewModel.dart';
 
@@ -19,6 +20,30 @@ class LoginForm extends StatefulWidget {
 class _LoginFormState extends State<LoginForm> {
   TextEditingController txt_email = TextEditingController();
   TextEditingController txt_pasword = TextEditingController();
+  bool _valueAccount = false;
+  bool _hidePassword = true;
+
+  void SaveData() async {
+    final SharedPreferences accountSave = await SharedPreferences.getInstance();
+    await accountSave.setString("Email", txt_email.text);
+    await accountSave.setString("Password", txt_pasword.text);
+    await accountSave.setBool("CheckBox", _valueAccount);
+  }
+
+  void LoadData() async {
+    final SharedPreferences accountSave = await SharedPreferences.getInstance();
+    setState(() {
+      txt_email.text = accountSave.getString("Email") ?? "";
+      txt_pasword.text = accountSave.getString("Password") ?? "";
+      _valueAccount = accountSave.getBool("CheckBox") ?? false;
+    });
+  }
+
+  @override
+  void initState() {
+    LoadData();
+    super.initState();
+  }
 
   void ForgotPassword(BuildContext context) {
     showDialog(
@@ -130,7 +155,7 @@ class _LoginFormState extends State<LoginForm> {
           TextField(
             style: TextStyle(fontSize: 14, color: Colors.black),
             controller: txt_pasword,
-            obscureText: true,
+            obscureText: _hidePassword,
             decoration: InputDecoration(
               label: Text(
                 "Password",
@@ -141,10 +166,16 @@ class _LoginFormState extends State<LoginForm> {
               ),
               suffixIcon: IconButton(
                   icon: Icon(
-                    Icons.visibility_off,
+                    _hidePassword
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility,
                     color: Colors.black87,
                   ),
-                  onPressed: () {}),
+                  onPressed: () {
+                    setState(() {
+                      _hidePassword = !_hidePassword;
+                    });
+                  }),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -157,8 +188,13 @@ class _LoginFormState extends State<LoginForm> {
               Row(
                 children: [
                   Checkbox(
-                    value: false,
-                    onChanged: (value) {},
+                    value: _valueAccount,
+                    onChanged: (value) {
+                      setState(() {
+                        _valueAccount = !_valueAccount;
+                      });
+                      SaveData();
+                    },
                     activeColor: const Color(0xFFB02700),
                   ),
                   const Text(

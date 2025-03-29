@@ -85,6 +85,7 @@ class AuthViewModel extends ChangeNotifier {
       if (role.isNotEmpty && uid.isNotEmpty) {
         _authService.UpdateRoleUserService(uid, role);
         _isLoading = false;
+        _role = role;
         return true;
       }
       return false;
@@ -137,12 +138,13 @@ class AuthViewModel extends ChangeNotifier {
       _uid = user.uid;
 
       final roleAccount = await _authService.getUserDataService(_uid!);
-      if (roleAccount != null && roleAccount.containsKey("Role")) {
+      if (roleAccount != null && roleAccount.containsKey("Role") && roleAccount.containsKey("Status")) {
         _role = roleAccount["Role"];
-        print('Role Account $_uid : is $_role');
-      } else {
-        _role = "Unknown";
-        print('Không tìm thấy dữ liệu người dùng');
+        if(roleAccount["Status"] == "Ban"){
+          _isLoading = false;
+          _SetError("Tài khoản của bạn đã bị khóa");
+          return false;
+        }
       }
       _isLoading = false;
       notifyListeners();

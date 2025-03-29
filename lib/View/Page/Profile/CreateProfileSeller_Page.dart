@@ -29,8 +29,11 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
   String? email;
   String? storeName;
   late String uid;
+  String role = "Seller";
+  String status = "Active";
+  String createAt = DateTime.now().toIso8601String();
 
-  Future<void> loadEmail(String uid) async {
+  Future<void> loadEmailAndRole(String uid) async {
     if (uid.isNotEmpty) {
       bool success = await profileViewModel.LoadEmailAccount(uid);
       if (success) {
@@ -58,7 +61,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
       final authVM = Provider.of<AuthViewModel>(context, listen: false);
       if (authVM.uid != null) {
         uid = authVM.uid!;
-        loadEmail(authVM.uid!);
+        loadEmailAndRole(authVM.uid!);
       }
     });
     txtStoreName.addListener(() {
@@ -80,7 +83,8 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
             if (isSuccess) {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => LoginPage()),
-              );            }
+              );
+            }
           }
         });
         return AlertDialog(
@@ -97,7 +101,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
 
   @override
   Widget build(BuildContext context) {
-    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+    final profileVM = Provider.of<Profile_ViewModel>(context, listen: true);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -152,7 +156,9 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                           child: ElevatedButton.icon(
                             onPressed: () {
                               Navigator.of(context).push(
-                                MaterialPageRoute(builder: (context) => GoogleMapScreenPage()),
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        GoogleMapScreenPage()),
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -230,43 +236,59 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
             child: SizedBox(
               width: double.infinity,
               height: 50,
-              child: profileVM.isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: () async {
-                        if(_selectedImage == null){
-                          showDialogMessage(context,"Vui lòng thêm ảnh của cửa hàng",isSuccess: false);
-                        }
-                        ProfileSeller profileSeller = ProfileSeller(
-                            uid,
-                            txtStoreName.text,
-                            "",
-                            txtFullName.text,
-                            txtPhone.text,
-                            txtAddress.text,
-                            txtBio.text);
-                        bool success = await profileVM.CreateProfileSeller(
-                            profileSeller, _selectedImage!);
-                        if (success) {
-                          showDialogMessage(context, "Tạo Profile thành công",
-                              isSuccess: true);
-                        } else {
-                          showDialogMessage(context,
-                              "Tạo Profile thất bại :${profileVM.errorMessage}",
-                              isSuccess: true);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_selectedImage == null) {
+                    showDialogMessage(context, "Vui lòng thêm ảnh của cửa hàng",
+                        isSuccess: false);
+                  }
+                  ProfileSeller profileSeller = ProfileSeller(
+                      uid,
+                      email!,
+                      role,
+                      txtStoreName.text,
+                      "",
+                      txtFullName.text,
+                      txtPhone.text,
+                      txtAddress.text,
+                      txtBio.text,
+                      status,
+                      createAt);
+                  bool success = await profileVM.CreateProfileSeller(
+                      profileSeller, _selectedImage!);
+                  if (success) {
+                    showDialogMessage(context, "Tạo Profile thành công",
+                        isSuccess: true);
+                  } else {
+                    showDialogMessage(context,
+                        "Tạo Profile thất bại :${profileVM.errorMessage}",
+                        isSuccess: true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: profileVM.isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
                         ),
-                      ),
-                      child: const Text(
+                      )
+                    : const Text(
                         "SUBMIT",
-                        style: TextStyle(color: Colors.white,fontFamily: "Poppins",fontWeight: FontWeight.bold, fontSize: 18),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
                       ),
-                    ),
+              ),
             ),
           ),
         ],

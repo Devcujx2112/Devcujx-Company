@@ -14,6 +14,7 @@ class Profile_ViewModel extends ChangeNotifier {
   String? _errorMessage;
   String? _uid;
   String? _email;
+  String? _role;
 
   bool get isLoading => _isLoading;
 
@@ -23,27 +24,42 @@ class Profile_ViewModel extends ChangeNotifier {
 
   String? get email => _email;
 
+  String? get role => _role;
+
   Future<bool> LoadEmailAccount(String uid) async {
     _errorMessage = null;
     notifyListeners();
 
     if (uid.isNotEmpty) {
-      _email = await profile_service.LoadEmailService(uid);
-      _isLoading = false;
-      return true;
+      _isLoading = true;
+      notifyListeners();
+
+      String? loaddata = await profile_service.loadEmailService(uid);
+
+      if (loaddata != null) {
+        _email = loaddata;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _SetError("Không tìm thấy thông tin tài khoản.");
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
     } else {
-      _SetError("Lỗi tài khoản vui lòng đăng nhập lại");
+      _SetError("Lỗi tài khoản, vui lòng đăng nhập lại.");
       return false;
     }
   }
 
   Future<bool> CreateProfileUserVM(
       ProfileUser profile, File? selectedImage) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
     try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
       if (selectedImage == null) {
         print("Không có ảnh được chọn, sử dụng ảnh mặc định.");
 
@@ -58,13 +74,18 @@ class Profile_ViewModel extends ChangeNotifier {
       profile = ProfileUser(
           uid: profile.uid,
           fullName: profile.fullName,
+          email: profile.email,
+          role: profile.role,
           image: "",
           phone: profile.phone,
           age: profile.age,
-          gender: profile.gender);
+          gender: profile.gender,
+          status: profile.status,
+          createAt: profile.createAt);
       bool success =
           await profile_service.CreateProfileUser(profile, selectedImage);
       if (success == false) {
+        _isLoading = false;
         print('KHông thể tạo profile');
         _SetError("Lỗi khi khởi tạo profile");
       }
@@ -98,12 +119,16 @@ class Profile_ViewModel extends ChangeNotifier {
 
       profileSeller = ProfileSeller(
           profileSeller.uid,
+          profileSeller.email,
+          profileSeller.role,
           profileSeller.storeName,
           profileSeller.image,
           profileSeller.ownerName,
           profileSeller.phone,
           profileSeller.address,
-          profileSeller.bio);
+          profileSeller.bio,
+          profileSeller.status,
+          profileSeller.createAt);
 
       bool queryRealtime = await profile_service.CreateProfileSeller(
           profileSeller, selectedImage);
@@ -166,6 +191,93 @@ class Profile_ViewModel extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _SetError("Lỗi khi lấy vị trí cửa hàng : $e");
+    }
+  }
+
+  Future<ProfileUser?> GetAllDataProfile(String uid) async {
+    try {
+      ProfileUser? user = await profile_service.GetProfileUser(uid);
+      if (user != null) {
+        return user;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      _SetError("Lỗi khi nhận dữ liệu từ database $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, int>> GetCountSellerUser() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      Map<String, int>? counts = await profile_service.getCountUserSeller();
+
+      if (counts != null) {
+        _isLoading = false;
+        notifyListeners();
+        return {
+          "User": counts["User"] ?? 0,
+          "Seller": counts["Seller"] ?? 0,
+        };
+      } else {
+        _isLoading = false;
+        _SetError("Dữ liệu trống!");
+        throw Exception("Dữ liệu trống!");
+      }
+    } catch (e) {
+      _SetError("Lỗi: $e");
+      _isLoading = false;
+      notifyListeners();
+      return {"User": 0, "Seller": 0};
+    }
+  }
+
+
+  Future<List<Map<String, dynamic>>?> LoadAllAccount() async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      List<Map<String, dynamic>> accounts = await profile_service.LoadAllAccount();
+      if(accounts == null){
+        _isLoading = false;
+        _SetError("Không có Account");
+        return null;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return accounts;
+
+    }catch(e){
+      _SetError('Lỗi khi lấy tài khoản $e');
+      return null;
+    }
+  }
+
+  Future<bool> UpdateStatusAccount(String uid, String status) async{
+    try{
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      bool success = await profile_service.UpdateStatusAccount(uid, status);
+      if(success == false){
+        _isLoading = false;
+        _SetError("Lỗi khi chỉnh sửa thông tin User");
+        return false;
+      }
+
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    }catch(e){
+      _SetError("Lỗi khi update status Account $e");
+      return false;
     }
   }
 

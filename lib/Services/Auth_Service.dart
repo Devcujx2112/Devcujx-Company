@@ -120,4 +120,32 @@ class AuthService {
       return false;
     }
   }
+
+  Future<List<Map<String, dynamic>>> LoadAllAccount() async {
+    try {
+      final response = await http.get(Uri.parse("$realTimeAPI.json"));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+
+        if (data == null) return [];
+
+        return data.entries
+            .where((entry) =>
+                (entry.value as Map<String, dynamic>)["role"]?.toString() !=
+                "Admin")
+            .map((entry) {
+          return {
+            "id": entry.key, // Lưu lại key làm ID
+            ...entry.value as Map<String, dynamic>, // Ép kiểu dữ liệu
+          };
+        }).toList();
+      } else {
+        throw Exception("Lỗi server: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Lỗi khi load tài khoản: $e");
+      return [];
+    }
+  }
 }

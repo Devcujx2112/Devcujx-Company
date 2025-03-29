@@ -31,6 +31,9 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
   String? email;
   String? fullName;
   late String uid;
+  String role = "User";
+  String createAt = DateTime.now().toIso8601String();
+  String status = "Active";
 
   Future<void> LoadEmail(String uid) async {
     if (uid.isNotEmpty) {
@@ -39,7 +42,6 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
         setState(() {
           email = profileViewModel.email!;
         });
-        print('Create profile user Email : $email');
       }
     }
   }
@@ -63,6 +65,9 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
       if (authVM.uid != null) {
         uid = authVM.uid!;
         LoadEmail(authVM.uid!);
+        print('User : Email $email');
+        print('User : Uid $uid');
+        print('User : Role $role');
       }
     });
     txtFullName.addListener(() {
@@ -102,7 +107,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
 
   @override
   Widget build(BuildContext context) {
-    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+    final profileVM = Provider.of<Profile_ViewModel>(context, listen: true);
 
     return Scaffold(
       body: Stack(
@@ -160,34 +165,45 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                 child: SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: profileVM.isLoading
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: () async {
-                            ProfileUser? profile = ProfileUser(
-                                uid: uid,
-                                fullName: fullName ?? "",
-                                image: "",
-                                phone: txtPhone?.text ?? "",
-                                age: txtAge?.text ?? "",
-                                gender: selectedGender);
-                            bool success = await profileVM.CreateProfileUserVM(
-                                profile, _selectedImage);
-                            if (success) {
-                              DialogMessage(context, "Tạo profile thành công",
-                                  isSuccess: true);
-                            } else {
-                              DialogMessage(context, "Tạo profile thất bại",
-                                  isSuccess: false);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      ProfileUser? profile = ProfileUser(
+                          uid: uid,
+                          email: email!,
+                          role: role,
+                          fullName: fullName ?? "",
+                          image: "",
+                          phone: txtPhone?.text ?? "",
+                          age: txtAge?.text ?? "",
+                          gender: selectedGender,
+                          status: status,
+                          createAt: createAt);
+                      bool success = await profileVM.CreateProfileUserVM(
+                          profile, _selectedImage);
+                      if (success) {
+                        DialogMessage(context, "Tạo profile thành công",
+                            isSuccess: true);
+                      } else {
+                        DialogMessage(context, "Tạo profile thất bại",
+                            isSuccess: false);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: profileVM.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white, // Đổi màu phù hợp với nút
                             ),
-                          ),
-                          child: const Text(
+                          )
+                        : const Text(
                             "SUBMIT",
                             style: TextStyle(
                               color: Colors.white,
@@ -195,7 +211,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
+                  ),
                 ),
               ),
             ],

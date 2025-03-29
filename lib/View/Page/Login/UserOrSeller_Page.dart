@@ -59,14 +59,23 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      "Bạn là người mua hàng?",
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.red,
-                          fontFamily: "Outfit"),
-                    ),
+                    child: authVM.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Bạn là người mua hàng?",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red,
+                                fontFamily: "Outfit"),
+                          ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -83,10 +92,10 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                       bool success =
                           authViewModel.UpdateRoleVM("Seller", widget.uid);
                       if (success) {
-                        Navigator.of(context, rootNavigator: true)
-                            .pushReplacement(MaterialPageRoute(
-                          builder: (context) => CreateProfileSeller(),
-                        ));
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => CreateProfileSeller()),
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -97,14 +106,23 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
-                      "Bạn là người bán hàng..?",
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontFamily: "Outfit",
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white),
-                    ),
+                    child: authVM.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            "Bạn là người bán hàng..?",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontFamily: "Outfit",
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white),
+                          ),
                   ),
                 ],
               ),

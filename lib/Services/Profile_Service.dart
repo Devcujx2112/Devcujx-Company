@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,23 +12,23 @@ class Profile_Service {
       "https://crud-firebase-7b852-default-rtdb.firebaseio.com";
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<String?> LoadEmailService(String uid) async {
+  Future<String?> loadEmailService(String uid) async {
     try {
       final String requestUrl =
           "$realTimeAPI/Account/${Uri.encodeComponent(uid)}.json";
-
       final response = await http.get(Uri.parse(requestUrl));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic>? data = jsonDecode(response.body);
+
         if (data != null && data.containsKey("Email")) {
           return data["Email"];
         } else {
-          print("Không tìm thấy email cho UID: $uid");
+          print("Không tìm thấy dữ liệu cho UID: $uid");
           return null;
         }
       } else {
-        print("Lỗi khi lấy email: ${response.body}");
+        print("Lỗi khi lấy dữ liệu: ${response.body}");
         return null;
       }
     } catch (e) {
@@ -38,8 +37,8 @@ class Profile_Service {
     }
   }
 
-  Future<bool> CreateProfileUser(
-      ProfileUser profile, File selectedImage) async {
+  Future<bool> CreateProfileUser(ProfileUser profile,
+      File selectedImage) async {
     try {
       //Firebase Storage
       String fileName = "Profile/User/${profile.uid}.jpg";
@@ -52,11 +51,15 @@ class Profile_Service {
       Uri url = Uri.parse("$realTimeAPI/Profile/${profile.uid}.json");
       Map<String, dynamic> userData = {
         "Uid": profile.uid,
+        "Email": profile.email,
+        "Role": profile.role,
         "FullName": profile.fullName,
         "Year": profile.age,
         "Phone": profile.phone,
         "Gender": profile.gender,
         "Avatar": profile.image,
+        "Status": profile.status,
+        "CreateAt": profile.createAt
       };
 
       final response = await http.put(
@@ -78,8 +81,8 @@ class Profile_Service {
     }
   }
 
-  Future<bool> CreateProfileSeller(
-      ProfileSeller profileSeller, File selectedImage) async {
+  Future<bool> CreateProfileSeller(ProfileSeller profileSeller,
+      File selectedImage) async {
     try {
       //Firebase Storage
       String fileName = "Profile/Seller/${profileSeller.uid}.jpg";
@@ -92,12 +95,16 @@ class Profile_Service {
       Uri url = Uri.parse("$realTimeAPI/Profile/${profileSeller.uid}.json");
       Map<String, dynamic> userData = {
         "Uid": profileSeller.uid,
+        "Email": profileSeller.email,
+        "Role": profileSeller.role,
         "Avatar": profileSeller.image,
         "StoreName": profileSeller.storeName,
         "OwnerName": profileSeller.ownerName,
         "Phone": profileSeller.phone,
         "Address": profileSeller.address,
-        "Bio": profileSeller.bio
+        "Bio": profileSeller.bio,
+        "Status": profileSeller.status,
+        "CreateAt": profileSeller.createAt
       };
 
       final response = await http.put(
@@ -119,8 +126,8 @@ class Profile_Service {
     }
   }
 
-  Future<bool> SaveLocationStore(
-      String uid, double latitude, double longitude) async {
+  Future<bool> SaveLocationStore(String uid, double latitude,
+      double longitude) async {
     try {
       await FirebaseFirestore.instance
           .collection('locations')
@@ -155,5 +162,111 @@ class Profile_Service {
     }
   }
 
+  Future<ProfileUser?> GetProfileUser(String uid) async {
+    try {
+      Uri url = Uri.parse("$realTimeAPI/Profile/$uid.json");
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
 
+        if (data != null) {
+          return ProfileUser.fromJson(uid, data);
+        } else {
+          print("Không tìm thấy thông tin người dùng!");
+          return null;
+        }
+      } else {
+        print("Lỗi khi lấy dữ liệu: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Lỗi truy vấn Firebase: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, int>> getCountUserSeller() async {
+    try {
+      Uri url = Uri.parse("$realTimeAPI/Profile.json");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        int userCount = 0;
+        int sellerCount = 0;
+
+        data.forEach((key, value) {
+          if (value["Role"] == "User") {
+            userCount++;
+          } else if (value["Role"] == "Seller") {
+            sellerCount++;
+          }
+        });
+        print('Account Vm u $userCount');
+        print('Account VM s $sellerCount');
+        return {
+          "User": userCount,
+          "Seller": sellerCount,
+        };
+      } else {
+        throw Exception("Failed to fetch data");
+      }
+    } catch (e) {
+      print("Error: $e");
+      return {
+        "User": 0,
+        "Seller": 0,
+      };
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> LoadAllAccount() async {
+    try {
+      final response = await http.get(Uri.parse("$realTimeAPI/Profile.json"));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+
+        if (data == null) return [];
+
+        return data.entries
+            .where((entry) =>
+        (entry.value as Map<String, dynamic>)["Role"]?.toString() !=
+            "Admin")
+            .map((entry) {
+          return {
+            "id": entry.key, // Lưu lại key làm ID
+            ...entry.value as Map<String, dynamic>, // Ép kiểu dữ liệu
+          };
+        }).toList();
+      } else {
+        throw Exception("Lỗi server: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Lỗi khi load tài khoản: $e");
+      return [];
+    }
+  }
+
+  Future<bool> UpdateStatusAccount(String uid, String status) async {
+    try{
+      final String requestUrl = "$realTimeAPI/Profile/$uid.json";
+      final String requestUrl2 = "$realTimeAPI/Account/$uid.json";
+      final response = await http.patch(Uri.parse(requestUrl),
+          body: jsonEncode({"Status": status}));
+      final response2 = await http.patch(Uri.parse(requestUrl2),
+          body: jsonEncode({"Status": status}));
+
+      if (response.statusCode == 200 && response2.statusCode == 200) {
+        print("Update role successfully!");
+        return true;
+      } else {
+        print("Failed to update role: ${response.body}");
+        return false;
+      }
+    }catch(e){
+      print(e);
+      return false;
+    }
+  }
 }

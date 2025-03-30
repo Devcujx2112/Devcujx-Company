@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:order_food/View/Page/Account/AccountManagement.dart';
-import 'package:order_food/View/Page/Category/CategoryManagement.dart';
-import 'package:order_food/View/Page/Order/OrderManagement.dart';
-import 'package:order_food/View/Page/Product/ProductManagement.dart';
 
 class DrawerUserScreen extends StatelessWidget {
   const DrawerUserScreen({super.key});

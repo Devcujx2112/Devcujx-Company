@@ -30,7 +30,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: IntrinsicHeight(
-            child: DialogMessageForm(message: message),
+            child: DialogMessageForm(message: message,intValue: Color(0xFFD05558),),
           ),
         );
       },

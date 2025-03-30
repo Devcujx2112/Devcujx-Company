@@ -85,7 +85,6 @@ class _AccountManagementState extends State<AccountManagement> {
     final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
     try {
       List<Map<String, dynamic>> updatedUsers = await profileVM.LoadAllAccount() ?? [];
-
       if (mounted) {
         setState(() {
           users = updatedUsers;

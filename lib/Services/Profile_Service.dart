@@ -40,12 +40,12 @@ class Profile_Service {
   Future<bool> CreateProfileUser(ProfileUser profile,
       File selectedImage) async {
     try {
-      //Firebase Storage
-      String fileName = "Profile/User/${profile.uid}.jpg";
-      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-      UploadTask uploadTask = storageRef.putFile(selectedImage);
-      TaskSnapshot snapshot = await uploadTask;
-      profile.image = await snapshot.ref.getDownloadURL();
+        //Firebase Storage
+        String fileName = "Profile/User/${profile.uid}.jpg";
+        Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+        UploadTask uploadTask = storageRef.putFile(selectedImage);
+        TaskSnapshot snapshot = await uploadTask;
+        profile.image = await snapshot.ref.getDownloadURL();
 
       //Realtime Database
       Uri url = Uri.parse("$realTimeAPI/Profile/${profile.uid}.json");

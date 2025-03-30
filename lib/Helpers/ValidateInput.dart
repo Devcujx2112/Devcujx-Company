@@ -26,4 +26,13 @@ class ValidateInput {
       return false;
     }
   }
+
+  bool InputCategoryInsert(String cateName){
+    if(cateName.trim().isEmpty){
+      return false;
+    }else{
+      return true;
+    }
+
+  }
 }

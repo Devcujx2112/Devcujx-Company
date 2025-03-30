@@ -43,7 +43,7 @@ class _ProfileSellerPageState extends State<ProfileSellerPage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: IntrinsicHeight(
-            child: DialogMessageForm(message: message),
+            child: DialogMessageForm(message: message,intValue: Colors.blueAccent,),
           ),
         );
       },
@@ -116,7 +116,7 @@ class _ProfileSellerPageState extends State<ProfileSellerPage> {
               ],
             ),
             _buildDropdownField("Trạng thái", widget.user['Status'],
-                statusOptions, Icons.toggle_on),
+                statusOptions, Icons.library_add_check),
 
             _buildReadOnlyTextField(
                 "Bio", widget.user['Bio'] ?? "", Icons.info_outline,
@@ -255,12 +255,6 @@ class _ProfileSellerPageState extends State<ProfileSellerPage> {
           child: const Icon(Icons.edit),
         ),
         const SizedBox(height: 10),
-        FloatingActionButton(
-          heroTag: "settings",
-          onPressed: () {},
-          backgroundColor: Colors.blue,
-          child: const Icon(Icons.settings),
-        ),
       ],
     );
   }

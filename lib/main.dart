@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:order_food/View/Page/Login/FirstPage_Page.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:order_food/ViewModels/Category_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 import 'Services/firebase_options.dart';
@@ -12,7 +13,8 @@ Future<void> main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AuthViewModel()),
-      ChangeNotifierProvider(create: (context) => Profile_ViewModel())
+      ChangeNotifierProvider(create: (context) => Profile_ViewModel()),
+      ChangeNotifierProvider(create: (context) => Category_ViewModel()),
     ],
     child: CompanyDev(),
   ));

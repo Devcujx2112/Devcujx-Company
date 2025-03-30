@@ -45,7 +45,7 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: IntrinsicHeight(
-            child: DialogMessageForm(message: message),
+            child: DialogMessageForm(message: message,intValue: Colors.blueAccent,),
           ),
         );
       },
@@ -255,12 +255,6 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
           child: const Icon(Icons.edit),
         ),
         const SizedBox(height: 10),
-        FloatingActionButton(
-          heroTag: "settings",
-          onPressed: () {},
-          backgroundColor: Colors.blue,
-          child: const Icon(Icons.settings),
-        ),
       ],
     );
   }

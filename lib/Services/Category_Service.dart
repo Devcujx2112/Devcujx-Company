@@ -64,9 +64,9 @@ class Category_Service {
           categories = categories
               .where((category) =>
                   category["CategoryName"]
-                      ?.toString()
+                      ?.toString().toLowerCase()
                       .trim()
-                      .contains(query.toString().trim()) ??
+                      .contains(query.toString().toLowerCase().trim()) ??
                   false)
               .toList();
         }
@@ -106,19 +106,20 @@ class Category_Service {
     }
   }
 
-  Future<bool> UpdateCategory(
-      String cateID, File? selectedImage, String cateName, String imageOld) async {
+  Future<bool> UpdateCategory(String cateID, File? selectedImage,
+      String cateName, String imageOld) async {
     try {
       String? imageUrl = imageOld;
       if (selectedImage != null) {
         try {
           if (imageOld.isNotEmpty) {
-            Reference oldImageRef = FirebaseStorage.instance.refFromURL(imageOld);
+            Reference oldImageRef =
+                FirebaseStorage.instance.refFromURL(imageOld);
             await oldImageRef.delete();
           }
 
-          Reference newImageRef = FirebaseStorage.instance.ref()
-              .child("Category/$cateID.jpg");
+          Reference newImageRef =
+              FirebaseStorage.instance.ref().child("Category/$cateID.jpg");
           UploadTask uploadTask = newImageRef.putFile(selectedImage);
           TaskSnapshot snapshot = await uploadTask;
           imageUrl = await snapshot.ref.getDownloadURL();

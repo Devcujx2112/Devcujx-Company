@@ -4,9 +4,9 @@ class Product{
   String _categoryName;
   String _productName;
   String _image;
-  String _price;
+  int _price;
   String _description;
-  String _rating;
+  double _rating;
   String _createAt;
 
   Product(
@@ -26,9 +26,9 @@ class Product{
     _createAt = value;
   }
 
-  String get rating => _rating;
+  double get rating => _rating;
 
-  set rating(String value) {
+  set rating(double value) {
     _rating = value;
   }
 
@@ -38,9 +38,9 @@ class Product{
     _description = value;
   }
 
-  String get price => _price;
+  int get price => _price;
 
-  set price(String value) {
+  set price(int value) {
     _price = value;
   }
 
@@ -56,9 +56,9 @@ class Product{
     _productName = value;
   }
 
-  String get categoryId => _categoryName;
+  String get categoryName => _categoryName;
 
-  set categoryId(String value) {
+  set categoryName(String value) {
     _categoryName = value;
   }
 

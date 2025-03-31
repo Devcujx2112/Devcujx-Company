@@ -27,12 +27,24 @@ class ValidateInput {
     }
   }
 
-  bool InputCategoryInsert(String cateName){
-    if(cateName.trim().isEmpty){
+  bool InputCategoryInsert(String cateName) {
+    if (cateName
+        .trim()
+        .isEmpty) {
       return false;
-    }else{
+    } else {
       return true;
     }
+  }
 
+  bool InputProduct(String uid,
+      String categoryName,
+      String productName,
+      int price,
+      String description){
+    if(uid.isEmpty || categoryName.isEmpty || productName.isEmpty || price == null || description.isEmpty){
+      return false;
+    }
+    return true;
   }
 }

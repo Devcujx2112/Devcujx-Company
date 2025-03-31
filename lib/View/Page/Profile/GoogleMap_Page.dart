@@ -21,32 +21,6 @@ class _GoogleMapScreenPageState extends State<GoogleMapScreenPage> {
   late String uid;
   List<double>? dataLocation;
 
-  void DialogMessage(BuildContext context, String message,
-      {bool isSuccess = false}) {
-    showCupertinoDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-            if (isSuccess) {
-              Navigator.pop(context);
-            }
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Colors.blueAccent,),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> LoadLocationStore() async {}
 
   @override
@@ -135,21 +109,19 @@ class _GoogleMapScreenPageState extends State<GoogleMapScreenPage> {
                 : FloatingActionButton(
                     onPressed: () async {
                       if (location == null) {
-                        DialogMessage(context, "Vui lòng chọn vị trí cửa hàng",
-                            isSuccess: false);
+                        showDialogMessage(context, "Vui lòng chọn vị trí cửa hàng",DialogType.warning);
                       } else {
                         bool success = await profileVM.SaveLocationStore(
                             uid,
                             location!.position.latitude,
                             location!.position.longitude);
                         if (success) {
-                          DialogMessage(
-                              context, "Lưu vị trí cửa hàng thành công",
-                              isSuccess: true);
+                          Navigator.pop(context);
+                          showDialogMessage(
+                              context, "Lưu vị trí cửa hàng thành công",DialogType.success);
                         } else {
-                          DialogMessage(context,
-                              "Lỗi khi lưu vị trí cửa hàng : ${profileVM.errorMessage}",
-                              isSuccess: false);
+                          showDialogMessage(context,
+                              "Lỗi khi lưu vị trí cửa hàng : ${profileVM.errorMessage}",DialogType.error);
                         }
                       }
                     },

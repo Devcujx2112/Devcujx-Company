@@ -37,10 +37,11 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
 
   Future<void> LoadEmail(String uid) async {
     if (uid.isNotEmpty) {
-      bool success = await profileViewModel.LoadEmailAccount(uid);
+      final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+      bool success = await profileVM.LoadEmailAccount(uid);
       if (success) {
         setState(() {
-          email = profileViewModel.email!;
+          email = profileVM.email!;
         });
       }
     }
@@ -65,9 +66,6 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
       if (authVM.uid != null) {
         uid = authVM.uid!;
         LoadEmail(authVM.uid!);
-        print('User : Email $email');
-        print('User : Uid $uid');
-        print('User : Role $role');
       }
     });
     txtFullName.addListener(() {
@@ -77,49 +75,19 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     });
   }
 
-  void DialogMessage(BuildContext context, String message,
-      {bool isSuccess = false}) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-            if (isSuccess) {
-              Navigator.of(context, rootNavigator: true).pushReplacement(
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
-            }
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Color(0xFFD05558),),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final profileVM = Provider.of<Profile_ViewModel>(context, listen: true);
-
     return Scaffold(
       body: Stack(
         children: [
           Column(
             children: [
-              // Phần xám trên cùng
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Container(
                   width: double.infinity,
-                  height: 180,
+                  height: 130,
                   decoration: BoxDecoration(
                     color: const Color(0xFFBFC5C5),
                     borderRadius: const BorderRadius.only(
@@ -129,7 +97,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                   ),
                 ),
               ),
-              const SizedBox(height: 120),
+              const SizedBox(height: 100),
 
               Expanded(
                 child: Padding(
@@ -161,10 +129,10 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
               // Nút Submit
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 40,
                   child: ElevatedButton(
                     onPressed: () async {
                       ProfileUser? profile = ProfileUser(
@@ -181,17 +149,20 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                       bool success = await profileVM.CreateProfileUserVM(
                           profile, _selectedImage);
                       if (success) {
-                        DialogMessage(context, "Tạo profile thành công",
-                            isSuccess: true);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
+                        showDialogMessage(context, "Tạo profile thành công",
+                            DialogType.success);
                       } else {
-                        DialogMessage(context, "Tạo profile thất bại",
-                            isSuccess: false);
+                        showDialogMessage(
+                            context, "Tạo profile thất bại", DialogType.error);
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: profileVM.isLoading
@@ -219,7 +190,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
 
           // Avatar + Tên
           Positioned(
-              top: 120,
+              top: 70,
               left: 0,
               right: 0,
               child: GestureDetector(
@@ -228,7 +199,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                   children: [
                     // Avatar
                     CircleAvatar(
-                      radius: 60,
+                      radius: 55,
                       backgroundColor: Colors.grey[300],
                       backgroundImage: _selectedImage != null
                           ? FileImage(_selectedImage!)
@@ -239,7 +210,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                     Text(
                       fullName?.isNotEmpty == true ? fullName! : "Your name",
                       style: const TextStyle(
-                        fontSize: 25,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
@@ -257,7 +228,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     return Text(
       text,
       style: const TextStyle(
-          fontSize: 14,
+          fontSize: 13,
           fontFamily: "Poppins",
           color: Colors.grey,
           fontWeight: FontWeight.bold),
@@ -270,19 +241,18 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
       bool isNumber = false,
       int? maxLength}) {
     return TextField(
-      style: const TextStyle(fontFamily: "Outfit", fontSize: 15),
+      style: const TextStyle(fontFamily: "Poppins", fontSize: 13),
       keyboardType: isNumber ? TextInputType.number : TextInputType.text,
       inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
       maxLength: maxLength,
       decoration: InputDecoration(
         counterText: "",
-        // Ẩn số ký tự nhập vào
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: Colors.grey[100],
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: Colors.grey),
         ),
       ),
@@ -294,14 +264,14 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
   Widget _buildReadOnlyTextField(String value) {
     return TextField(
       readOnly: true,
-      style: const TextStyle(fontFamily: "Outfit", fontSize: 15),
+      style: const TextStyle(fontFamily: "Poppins", fontSize: 13),
       decoration: InputDecoration(
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         filled: true,
-        fillColor: Colors.grey[200],
+        fillColor: Colors.grey[100],
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: Colors.grey),
         ),
       ),
@@ -315,7 +285,7 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
       width: 150,
       child: DropdownButtonFormField<String>(
         style: const TextStyle(
-            fontFamily: "Outfit", color: Colors.black, fontSize: 16),
+            fontFamily: "Outfit", color: Colors.black, fontSize: 14),
         value: selectedGender,
         items: ["Male", "Female"].map((String gender) {
           return DropdownMenuItem<String>(
@@ -330,11 +300,11 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
         },
         decoration: InputDecoration(
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           filled: true,
-          fillColor: Colors.grey[200],
+          fillColor: Colors.grey[100],
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
             borderSide: const BorderSide(color: Colors.grey),
           ),
         ),

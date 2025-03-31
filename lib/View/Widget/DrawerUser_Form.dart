@@ -19,11 +19,11 @@ class DrawerUserScreen extends StatelessWidget {
             accountName: Text(
               fullName,
               style:
-              GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 18),
+              GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             accountEmail: Text(
               email,
-              style: GoogleFonts.roboto(),
+              style: GoogleFonts.roboto(fontSize: 13),
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
@@ -58,13 +58,6 @@ class DrawerUserScreen extends StatelessWidget {
                 bottomRight: Radius.circular(20),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          const Divider(
-            thickness: 2,
-            indent: 15,
-            endIndent: 15,
-            color: Colors.green,
           ),
           _buildDrawerItem(Icons.logout_outlined, "Đăng xuất", () async
               {await FirebaseAuth.instance.signOut();

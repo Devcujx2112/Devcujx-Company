@@ -15,28 +15,6 @@ class ForgotPasswordForm extends StatefulWidget {
 class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
   TextEditingController txt_email = TextEditingController();
 
-  void DialogMessage(BuildContext context, message,) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 1), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        });
-        return AlertDialog(
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Color(0xFFD05558),),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authVM = Provider.of<AuthViewModel>(context);
@@ -60,22 +38,23 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
               fontFamily: "Poppins",
               color: Colors.black87,
               fontWeight: FontWeight.w500,
-              fontSize: 14),
+              fontSize: 13),
         ),
         const SizedBox(height: 10),
         TextField(
           controller: txt_email,
+          style: TextStyle(fontSize: 13, color: Colors.black),
           decoration: InputDecoration(
             hintText: "Enter your email",
             hintStyle: const TextStyle(color: Colors.grey),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
             ),
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           ),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -88,27 +67,35 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFFD05558),
-                        fontSize: 14),
+                        fontSize: 13),
                   ),
                 )),
             authVM.isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: () async{
-                      bool success = await authVM.ForgotPassword(txt_email.text);
-                      if(success){
-                        DialogMessage(context,"Vui lòng kiểm tra Email của bạn");
-                      }
-                      else{
-                        DialogMessage(context,authVM.errorMessage);
+                    onPressed: () async {
+                      bool success =
+                          await authVM.ForgotPassword(txt_email.text);
+                      if (success) {
+                        Navigator.pop(context);
+                        showDialogMessage(
+                            context,
+                            "Vui lòng kiểm tra Email của bạn",
+                            DialogType.success);
+                      } else {
+                        showDialogMessage(context, "${authVM.errorMessage}",
+                            DialogType.warning);
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB02700),
+                    ),
                     child: Text(
                       "Gửi yêu cầu",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFD05558),
-                          fontSize: 14),
+                          color: Colors.white,
+                          fontSize: 13),
                     ),
                   ),
           ],

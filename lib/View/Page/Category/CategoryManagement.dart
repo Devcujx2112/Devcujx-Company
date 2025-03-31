@@ -23,7 +23,7 @@ class _CategoryManagementState extends State<CategoryManagement> {
     super.initState();
     Future.microtask(() async {
       final categoryVM =
-          Provider.of<Category_ViewModel>(context, listen: false);
+      Provider.of<Category_ViewModel>(context, listen: false);
       List<Map<String, dynamic>>? fetchedUsers =
           await categoryVM.ShowAllCategory(_searchController.text) ?? [];
       setState(() {
@@ -69,7 +69,7 @@ class _CategoryManagementState extends State<CategoryManagement> {
             category: user,
           );
         });
-    if (shouldReload == true){
+    if (shouldReload == true) {
       SearchCategories();
     }
   }
@@ -82,7 +82,7 @@ class _CategoryManagementState extends State<CategoryManagement> {
         title: Text(
           "Quản lý danh mục",
           style: GoogleFonts.montserrat(
-            fontSize: 20,
+            fontSize: 17,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -97,131 +97,148 @@ class _CategoryManagementState extends State<CategoryManagement> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              style: TextStyle(fontSize: 13, color: Color(0xFF003366)),
+              controller: _searchController,
+              onChanged: (value) => SearchCategories(),
+              decoration: InputDecoration(
+                hintText: "Tìm kiếm danh mục...",
+                hintStyle: GoogleFonts.montserrat(fontSize: 13),
+                prefixIcon:
+                const Icon(Icons.search, color: Color(0xFF003366)),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 8, horizontal: 12),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF003366).withOpacity(0.6),
+                    Color(0xFF003366)
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFF003366).withOpacity(0.8),
+                    blurRadius: 8,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
               child: Column(
                 children: [
-                  TextField(
-                    controller: _searchController,
-                    onChanged: (value) => SearchCategories(),
-                    decoration: InputDecoration(
-                      hintText: "Tìm kiếm danh mục...",
-                      hintStyle: GoogleFonts.montserrat(fontSize: 14),
-                      prefixIcon:
-                          const Icon(Icons.search, color: Color(0xFF003366)),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none),
-                      filled: true,
-                      fillColor: Colors.white,
+                  Text(
+                    "Tổng số loại sản phẩm",
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF003366),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Tổng số loại sản phẩm",
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          catelogyCount.toString(),
-                          style: GoogleFonts.montserrat(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      const Expanded(
-                          child: Divider(
-                              thickness: 2,
-                              color: Colors.blueAccent,
-                              endIndent: 10)),
-                      Text(
-                        "Danh sách danh mục",
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF003366),
-                        ),
-                      ),
-                      const Expanded(
-                          child: Divider(
-                              thickness: 2,
-                              color: Colors.blueAccent,
-                              indent: 10)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: GridView.builder(
-                      itemCount: allCategories?.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemBuilder: (context, index) {
-                        final category = allCategories?[index];
-                        return Card(
-                          elevation: 5,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          child: InkWell(
-                            onTap: () {
-                              OnClickItemCategories(allCategories![index]);
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.network(
-                                      category?["Image"]!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  category?["CategoryName"]!,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                  const SizedBox(height: 8),
+                  Text(
+                    catelogyCount.toString(),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Expanded(
+                    child: Divider(
+                        thickness: 2,
+                        color: Colors.blueAccent,
+                        endIndent: 10)),
+                Text(
+                  "Danh sách danh mục",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF003366),
+                  ),
+                ),
+                const Expanded(
+                    child: Divider(
+                        thickness: 2,
+                        color: Colors.blueAccent,
+                        indent: 10)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: GridView.builder(
+                itemCount: allCategories?.length,
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemBuilder: (context, index) {
+                  final category = allCategories?[index];
+                  return Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                    child: InkWell(
+                      onTap: () {
+                        OnClickItemCategories(allCategories![index]);
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.network(
+                                category?["Image"]!,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            category?["CategoryName"]!,
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: addCategory,
         backgroundColor: const Color(0xFF003366),

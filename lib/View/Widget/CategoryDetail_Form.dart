@@ -43,36 +43,11 @@ class _CategoryDetailState extends State<CategoryDetail> {
     }
   }
 
-  void showDialogMessage(BuildContext context, String message) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(
-              message: message,
-              intValue: Colors.blueAccent,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final categoryVM = Provider.of<Category_ViewModel>(context, listen: true);
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.75,
         padding: const EdgeInsets.all(24),
@@ -94,14 +69,13 @@ class _CategoryDetailState extends State<CategoryDetail> {
             Text(
               _data ? "Chỉnh Sửa Danh Mục" : "Thêm Danh Mục",
               style: GoogleFonts.montserrat(
-                fontSize: 22,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF003366),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
-            /// Ảnh danh mục
             GestureDetector(
               onTap: _pickImage,
               child: Container(
@@ -109,7 +83,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
                 width: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF003366), width: 2),
+                  border: Border.all(color: const Color(0xFF003366), width: 1.5),
                   color: Colors.grey[200],
                 ),
                 child: ClipOval(
@@ -119,31 +93,31 @@ class _CategoryDetailState extends State<CategoryDetail> {
                               widget.category!['Image'] != null)
                           ? Image.network(widget.category!['Image'],
                               fit: BoxFit.cover)
-                          : Icon(Icons.image, size: 50, color: Colors.grey),
+                          : Icon(Icons.camera_alt, size: 50, color: Colors.grey),
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 10),
 
             TextField(
               controller: txt_cateName,
-              style: GoogleFonts.montserrat(fontSize: 16),
+              style: GoogleFonts.montserrat(fontSize: 13),
               decoration: InputDecoration(
                 hintText: "Nhập tên danh mục...",
-                hintStyle: GoogleFonts.montserrat(fontSize: 15),
+                hintStyle: GoogleFonts.montserrat(fontSize: 13),
                 prefixIcon: const Icon(Icons.category_outlined,
                     color: Color(0xFF003366)),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.grey[200],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
                 ),
                 contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             Row(
               children: [
@@ -156,10 +130,10 @@ class _CategoryDetailState extends State<CategoryDetail> {
                         print("UI ${widget.category?["CategoryID"]}");
                         if (isSuccess) {
                           Navigator.pop(context, true);
-                          showDialogMessage(context, "Xóa sản phẩm thành công");
+                          showDialogMessage(context, "Xóa sản phẩm thành công",DialogType.success);
                         } else {
                           showDialogMessage(
-                              context, "${categoryVM.errorMessage}");
+                              context, "${categoryVM.errorMessage}",DialogType.error);
                         }
                       } else {
                         Navigator.pop(context);
@@ -167,7 +141,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
                     ),
@@ -185,7 +159,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
                             _data ? "Xóa" : "Hủy",
                             style: GoogleFonts.montserrat(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
                   ),
@@ -206,14 +180,14 @@ class _CategoryDetailState extends State<CategoryDetail> {
                           if (isSuccess) {
                             Navigator.pop(context, true);
                             showDialogMessage(
-                                context, "Sửa danh mục sản phẩm thành công");
+                                context, "Sửa danh mục sản phẩm thành công",DialogType.success);
                           } else {
                             showDialogMessage(context,
-                                "Sửa danh mục sản phẩm thất bại (UI) ${categoryVM.errorMessage}");
+                                "Sửa danh mục sản phẩm thất bại (UI) ${categoryVM.errorMessage}",DialogType.error);
                           }
                         } else {
                           showDialogMessage(context,
-                              "Vui lòng thêm ảnh của danh mục sản phẩm (UI)");
+                              "Vui lòng thêm ảnh của danh mục sản phẩm (UI)",DialogType.warning);
                         }
                       } else {
                         if (_selectedImage != null) {
@@ -222,20 +196,20 @@ class _CategoryDetailState extends State<CategoryDetail> {
                           if (isSuccess) {
                             Navigator.pop(context, true);
                             showDialogMessage(
-                                context, "Thêm danh mục sản phẩm thành công");
+                                context, "Thêm danh mục sản phẩm thành công",DialogType.success);
                           } else {
                             showDialogMessage(context,
-                                "Thêm danh mục sản phẩm thất bại (UI) ${categoryVM.errorMessage}");
+                                "Thêm danh mục sản phẩm thất bại (UI) ${categoryVM.errorMessage}",DialogType.error);
                           }
                         } else {
                           showDialogMessage(context,
-                              "Vui lòng thêm ảnh của danh mục sản phẩm (UI)");
+                              "Vui lòng thêm ảnh của danh mục sản phẩm (UI)",DialogType.error);
                         }
                       }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF003366),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
                     ),
@@ -253,7 +227,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
                             _data ? "Lưu" : "Thêm",
                             style: GoogleFonts.montserrat(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
                   ),

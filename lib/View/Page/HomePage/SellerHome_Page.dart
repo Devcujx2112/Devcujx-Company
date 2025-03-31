@@ -39,23 +39,23 @@ class _SellerHomePageState extends State<SellerHomePage> {
         backgroundColor: Colors.transparent,
         color: Colors.white,
         buttonBackgroundColor: const Color(0xFF4CAF50),
-        height: 60,
+        height: 50,
         index: _selectedIndex,
         items: [
           Icon(Icons.home,
-              size: 28,
+              size: 25,
               color:
               _selectedIndex == 0 ? Colors.white : const Color(0xFF4CAF50)),
           Icon(Icons.receipt_long,
-              size: 28,
+              size: 25,
               color:
               _selectedIndex == 1 ? Colors.white : const Color(0xFF4CAF50)),
           Icon(Icons.insert_chart_outlined,
-              size: 28,
+              size: 25,
               color:
               _selectedIndex == 2 ? Colors.white : const Color(0xFF4CAF50)),
           Icon(Icons.person,
-              size: 28,
+              size: 25,
               color:
               _selectedIndex == 3 ? Colors.white : const Color(0xFF4CAF50)),
         ],

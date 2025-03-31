@@ -48,7 +48,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   RegisterForm(),
-                  const SizedBox(height: 15),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -56,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         "Already have an account?",
                         style: TextStyle(
                             fontFamily: "Outfit",
-                            fontSize: 15,
+                            fontSize: 12,
                             color: Colors.grey),
                       ),
                       TextButton(
@@ -67,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           "Login",
                           style: TextStyle(
                               color: Colors.red,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontFamily: "Outfit"),
                         ),
                       ),

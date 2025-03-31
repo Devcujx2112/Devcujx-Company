@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:order_food/View/Page/Profile/ProfileUser_Page.dart';
+import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 
-import '../Profile/ProfileSeller_Page.dart';
+import '../Profile/ProfileSeller_Detail.dart';
 
 class AccountManagement extends StatefulWidget {
   const AccountManagement({super.key});
@@ -62,7 +62,7 @@ class _AccountManagementState extends State<AccountManagement> {
       final bool? shouldReload = await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProfileUserPage(user: user),
+          builder: (context) => ProfileDetailUser(user: user),
         ),
       );
       if (shouldReload == true) reloadDataList();
@@ -73,7 +73,7 @@ class _AccountManagementState extends State<AccountManagement> {
     final bool? shouldReload = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ProfileSellerPage(user: user),
+        builder: (context) => ProfileDetailSeller(user: user),
       ),
     );
     if (shouldReload == true) reloadDataList();
@@ -106,9 +106,8 @@ class _AccountManagementState extends State<AccountManagement> {
           'Quản lý tài khoản',
           style: TextStyle(
             color: Colors.white,
-            fontFamily: "Poppins",
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 18,
           ),
         ),
         leading: IconButton(
@@ -132,7 +131,6 @@ class _AccountManagementState extends State<AccountManagement> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
                   Row(
                     children: const [
                       Expanded(
@@ -143,7 +141,7 @@ class _AccountManagementState extends State<AccountManagement> {
                       Text(
                         "Danh sách tài khoản",
                         style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.bold,
                             fontFamily: "Poppins",
                             color: Color(0xFF3D3A62)),
@@ -178,16 +176,16 @@ class _AccountManagementState extends State<AccountManagement> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color.withOpacity(0.9), color],
+            colors: [color.withOpacity(0.7), color],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.4),
+              color: color.withOpacity(0.7),
               blurRadius: 8,
-              offset: const Offset(0, 4),
+              offset: const Offset(0,4),
             ),
           ],
         ),
@@ -219,36 +217,48 @@ class _AccountManagementState extends State<AccountManagement> {
   Widget _buildUserTile(Map<String, dynamic> user) {
     return InkWell(
       onTap: () {
-       user["Role"] == "Seller" ? OnClickItemSeller(user) : OneClickItemUser(user);
+        user["Role"] == "Seller"
+            ? OnClickItemSeller(user)
+            : OneClickItemUser(user);
       },
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: Card(
         elevation: 3,
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage: NetworkImage(user['Avatar']),
-                radius: 36,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10), // Bo góc ảnh vuông
+                child: Image.network(
+                  user['Avatar'],
+                  width: 70,
+                  height: 70,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'asset/images/avatar_default.jpg',
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow(
-                        Icons.person, user['OwnerName'] ?? user['FullName'],
+                    _buildInfoRow(Icons.person,
+                        user['OwnerName'] ?? user['FullName'],
                         bold: true),
-                    if (user['StoreName'] != null)
-                      _buildInfoRow(Icons.store, user['StoreName']),
                     _buildInfoRow(Icons.email, user['Email']),
-                    _buildInfoRow(
-                        Icons.access_time_filled_outlined, formatDate(user['CreateAt']),
+                    _buildInfoRow(Icons.access_time_filled_outlined,
+                        formatDate(user['CreateAt']),
                         fontSize: 12),
                   ],
                 ),
@@ -281,7 +291,7 @@ class _AccountManagementState extends State<AccountManagement> {
 
   Widget _buildTag(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
@@ -289,13 +299,13 @@ class _AccountManagementState extends State<AccountManagement> {
       child: Text(
         text,
         style: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
       ),
     );
   }
 
   Widget _buildInfoRow(IconData icon, String text,
-      {bool bold = false, double fontSize = 14, Color? color}) {
+      {bool bold = false, double fontSize = 13, Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(

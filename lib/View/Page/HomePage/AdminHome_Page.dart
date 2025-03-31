@@ -12,7 +12,6 @@ import '../../Screen/HomeUser_Screen.dart';
 import '../../Widget/DrawerAdmin_Form.dart';
 import 'package:provider/provider.dart';
 
-
 class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
@@ -57,45 +56,51 @@ class _AdminHomePageState extends State<AdminHomePage> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: _buildAppBar(),
-      drawer: role == "Admin" ? DrawerAdminScreen(
-        email: email, fullName: fullName, image: avatar,) : DrawerUserScreen(
-        email: email, fullName: fullName, avatar: avatar,),
-      body: (fullName == "Loading..." || role == "Unknow" || avatar == "" || email == "")
+      drawer: role == "Admin"
+          ? DrawerAdminScreen(
+              email: email,
+              fullName: fullName,
+              image: avatar,
+            )
+          : null,
+      body: (fullName == "Loading..." ||
+              role == "Unknow" ||
+              avatar == "" ||
+              email == "")
           ? Center(child: CircularProgressIndicator())
           : _screens[_selectedIndex],
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
         color: Colors.white,
         buttonBackgroundColor: const Color(0xFF4CAF50),
-        height: 60,
+        height: 50,
         index: _selectedIndex,
         items: [
           Icon(Icons.home,
-              size: 28,
+              size: 25,
               color:
-              _selectedIndex == 0 ? Colors.white : const Color(0xFF4CAF50)),
-          Icon(Icons.list_alt,
-              size: 28,
+                  _selectedIndex == 0 ? Colors.white : const Color(0xFF4CAF50)),
+          Icon(Icons.favorite_outlined,
+              size: 25,
               color:
-              _selectedIndex == 1 ? Colors.white : const Color(0xFF4CAF50)),
+                  _selectedIndex == 1 ? Colors.white : const Color(0xFF4CAF50)),
           Icon(Icons.shopping_cart,
-              size: 28,
+              size: 25,
               color:
-              _selectedIndex == 2 ? Colors.white : const Color(0xFF4CAF50)),
-          Icon(Icons.bar_chart,
-              size: 28,
+                  _selectedIndex == 2 ? Colors.white : const Color(0xFF4CAF50)),
+          Icon(Icons.list_alt,
+              size: 25,
               color:
-              _selectedIndex == 3 ? Colors.white : const Color(0xFF4CAF50)),
+                  _selectedIndex == 3 ? Colors.white : const Color(0xFF4CAF50)),
           Icon(Icons.person,
-              size: 28,
+              size: 25,
               color:
-              _selectedIndex == 4 ? Colors.white : const Color(0xFF4CAF50)),
+                  _selectedIndex == 4 ? Colors.white : const Color(0xFF4CAF50)),
         ],
         onTap: (index) {
           setState(() {
@@ -120,21 +125,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
             child: ClipOval(
               child: avatar.isNotEmpty
                   ? Image.network(
-                avatar,
-                fit: BoxFit.cover,
-                width: 48,
-                height: 48,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset('asset/images/avatar_default.jpg',
-                      fit: BoxFit.cover, width: 48, height: 48);
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(child: CircularProgressIndicator());
-                },
-              )
+                      avatar,
+                      fit: BoxFit.cover,
+                      width: 48,
+                      height: 48,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset('asset/images/avatar_default.jpg',
+                            fit: BoxFit.cover, width: 48, height: 48);
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(child: CircularProgressIndicator());
+                      },
+                    )
                   : Image.asset('asset/images/avatar_default.jpg',
-                  fit: BoxFit.cover, width: 48, height: 48),
+                      fit: BoxFit.cover, width: 48, height: 48),
             ),
           ),
           const SizedBox(width: 12),
@@ -142,24 +147,28 @@ class _AdminHomePageState extends State<AdminHomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("Welcome",
-                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  style: TextStyle(fontSize: 11, color: Colors.grey)),
               Text(fullName,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Color(0xFF4CAF50))),
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4CAF50))),
             ],
           ),
         ],
       ),
       actions: [
-        Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.menu, color: Colors.green, size: 28),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
+        if (role == "Admin")
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.green, size: 25),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:order_food/Services/Auth_Service.dart';
 import 'package:order_food/View/Page/Profile/CreateProfileUser_Page.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -43,7 +44,7 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                   OutlinedButton(
                     onPressed: () {
                       bool success =
-                          authViewModel.UpdateRoleVM("User", widget.uid);
+                          authVM.UpdateRoleVM("User", widget.uid);
                       if (success) {
                         Navigator.of(context, rootNavigator: true)
                             .pushReplacement(MaterialPageRoute(
@@ -53,10 +54,10 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                     },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 40),
+                          vertical: 10, horizontal: 40),
                       side: const BorderSide(color: Colors.red, width: 3),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: authVM.isLoading
@@ -71,39 +72,41 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                         : const Text(
                             "Bạn là người mua hàng?",
                             style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.red,
                                 fontFamily: "Outfit"),
                           ),
                   ),
-                  const SizedBox(height: 10),
                   const Text(
                     "or",
                     style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 20,
                         color: Colors.black,
                         fontWeight: FontWeight.w500,
                         fontFamily: "Outfit"),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   ElevatedButton(
                     onPressed: () {
                       bool success =
-                          authViewModel.UpdateRoleVM("Seller", widget.uid);
+                          authVM.UpdateRoleVM("Seller", widget.uid);
                       if (success) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                               builder: (context) => CreateProfileSeller()),
                         );
                       }
+                      else{
+                        showDialogMessage(context, "Chọn vai trò thất bại${authVM.errorMessage}",DialogType.error);
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red[900],
                       padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 40),
+                          vertical: 10, horizontal: 30),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: authVM.isLoading
@@ -118,7 +121,7 @@ class _UserOrSellerPageState extends State<UserOrSellerPage> {
                         : const Text(
                             "Bạn là người bán hàng..?",
                             style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 16,
                                 fontFamily: "Outfit",
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white),

@@ -6,16 +6,16 @@ import 'package:provider/provider.dart';
 import '../../../ViewModels/Profile_ViewModel.dart';
 import '../../Widget/DialogMessage_Form.dart';
 
-class ProfileUserPage extends StatefulWidget {
+class ProfileDetailUser extends StatefulWidget {
   final Map<String, dynamic> user;
 
-  const ProfileUserPage({super.key, required this.user});
+  const ProfileDetailUser({super.key, required this.user});
 
   @override
-  State<ProfileUserPage> createState() => _ProfileUserPageState();
+  State<ProfileDetailUser> createState() => _ProfileDetailUserState();
 }
 
-class _ProfileUserPageState extends State<ProfileUserPage> {
+class _ProfileDetailUserState extends State<ProfileDetailUser> {
   final List<String> statusOptions = ["Active", "Ban"];
 
   String formatDate(String isoString) {
@@ -25,31 +25,6 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
     } catch (e) {
       return "Không xác định";
     }
-  }
-
-  void showDialogMessage(
-    BuildContext context,
-    String message,
-  ) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Colors.blueAccent,),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -217,10 +192,10 @@ class _ProfileUserPageState extends State<ProfileUserPage> {
           bool success = await profileVM.UpdateStatusAccount(
               widget.user["Uid"], widget.user["Status"]);
           if (success) {
-            showDialogMessage(context, "Chỉnh sửa thông tin User thành công");
+            showDialogMessage(context, "Chỉnh sửa thông tin User thành công",DialogType.success);
           } else {
             showDialogMessage(context,
-                "Chỉnh sửa thông tin User thất bại ${profileVM.errorMessage}");
+                "Chỉnh sửa thông tin User thất bại ${profileVM.errorMessage}",DialogType.error);
           }
         },
         style: ElevatedButton.styleFrom(

@@ -13,7 +13,10 @@ class DrawerAdminScreen extends StatelessWidget {
   String image;
 
   DrawerAdminScreen(
-      {super.key, required this.fullName, required this.email, required this.image});
+      {super.key,
+      required this.fullName,
+      required this.email,
+      required this.image});
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +27,11 @@ class DrawerAdminScreen extends StatelessWidget {
             accountName: Text(
               fullName,
               style:
-              GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 18),
+                  GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             accountEmail: Text(
               email,
-              style: GoogleFonts.roboto(),
+              style: GoogleFonts.roboto(fontSize: 13),
             ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
@@ -37,26 +40,25 @@ class DrawerAdminScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(50),
                 child: image.isNotEmpty
                     ? Image.network(
-                  image,
-                  fit: BoxFit.cover,
-                  width: 70,
-                  height: 70,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                        'asset/images/avatar_default.jpg', fit: BoxFit.cover);
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  },
-                )
-                    : Image.asset(
-                    'asset/images/avatar_default.jpg', fit: BoxFit.cover),
+                        image,
+                        fit: BoxFit.cover,
+                        width: 70,
+                        height: 70,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset('asset/images/avatar_default.jpg',
+                              fit: BoxFit.cover);
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                      )
+                    : Image.asset('asset/images/avatar_default.jpg',
+                        fit: BoxFit.cover),
               ),
             ),
-
             decoration: BoxDecoration(
               color: Colors.green.shade700,
               borderRadius: const BorderRadius.only(
@@ -65,13 +67,12 @@ class DrawerAdminScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
           _buildDrawerItem(Icons.manage_accounts_rounded, "Quản lý tài khoản",
-                  () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => AccountManagement()),
-                );
-              }),
+              () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => AccountManagement()),
+            );
+          }),
           _buildDrawerItem(Icons.dashboard, "Danh mục sản phẩm", () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => CategoryManagement()),
@@ -97,11 +98,9 @@ class DrawerAdminScreen extends StatelessWidget {
             await FirebaseAuth.instance.signOut();
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => LoginPage()),
-                  (route) => false,
+              (route) => false,
             );
           }),
-
-
         ],
       ),
     );
@@ -110,11 +109,11 @@ class DrawerAdminScreen extends StatelessWidget {
   /// Widget cho từng mục trong Drawer
   Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: Colors.green.shade700, size: 26),
+      leading: Icon(icon, color: Colors.green.shade700, size: 25),
       title: Text(
         title,
         style: GoogleFonts.roboto(
-            fontSize: 16, fontWeight: FontWeight.w500, color: Colors.green),
+            fontSize: 15, fontWeight: FontWeight.w500, color: Colors.green),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       onTap: onTap,

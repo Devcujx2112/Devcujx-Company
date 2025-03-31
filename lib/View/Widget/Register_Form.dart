@@ -22,37 +22,6 @@ class _RegisterFormState extends State<RegisterForm> {
   bool _hidePassword = true;
   bool _hidePasswordAgain = true;
 
-  void DialogMessage(BuildContext context, message, uid,
-      {bool isSuccess = false}) {
-    showCupertinoDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-            if (isSuccess) {
-              Navigator.of(context, rootNavigator: true).pushReplacement(
-                MaterialPageRoute(
-                    builder: (context) => UserOrSellerPage(
-                          uid: uid,
-                        )),
-              );
-            }
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Color(0xFFD05558),),
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final authVM = Provider.of<AuthViewModel>(context);
@@ -76,7 +45,7 @@ class _RegisterFormState extends State<RegisterForm> {
           const Text(
             "Sign Up",
             style: TextStyle(
-              fontSize: 50,
+              fontSize: 40,
               fontFamily: "Outfit",
               fontWeight: FontWeight.bold,
               color: Color(0xFFD05558),
@@ -84,24 +53,26 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 20),
           TextField(
-            style: TextStyle(fontSize: 14,color: Colors.black),
+            style: TextStyle(fontSize: 13, color: Colors.black),
             controller: email,
             decoration: InputDecoration(
-              label: Text(
-                "Email",
-                style: TextStyle(
-                    fontFamily: "Outfit",
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+                label: Text(
+                  "Email",
+                  style: TextStyle(
+                      fontFamily: "Outfit",
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 12)),
           ),
           const SizedBox(height: 15),
           TextField(
-            style: TextStyle(fontSize: 14,color: Colors.black),
+            style: TextStyle(fontSize: 13, color: Colors.black),
             controller: password,
             obscureText: _hidePassword,
             decoration: InputDecoration(
@@ -110,7 +81,8 @@ class _RegisterFormState extends State<RegisterForm> {
                 style: TextStyle(
                     fontFamily: "Outfit",
                     color: Colors.grey,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
               suffixIcon: IconButton(
                   icon: Icon(
@@ -118,6 +90,7 @@ class _RegisterFormState extends State<RegisterForm> {
                         ? Icons.visibility_off_rounded
                         : Icons.visibility,
                     color: Colors.black87,
+                    size: 22,
                   ),
                   onPressed: () {
                     setState(() {
@@ -125,13 +98,15 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   }),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
               ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           TextField(
-            style: TextStyle(fontSize: 14,color: Colors.black),
+            style: TextStyle(fontSize: 13, color: Colors.black),
             controller: againPass,
             obscureText: _hidePasswordAgain,
             decoration: InputDecoration(
@@ -140,14 +115,15 @@ class _RegisterFormState extends State<RegisterForm> {
                 style: TextStyle(
                     fontFamily: "Outfit",
                     color: Colors.grey,
-                    fontWeight: FontWeight.bold),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13),
               ),
               suffixIcon: IconButton(
                   icon: Icon(
                     _hidePasswordAgain
                         ? Icons.visibility_off_rounded
                         : Icons.visibility,
-                    color: Colors.black87,
+                    color: Colors.black87,size: 22,
                   ),
                   onPressed: () {
                     setState(() {
@@ -155,38 +131,48 @@ class _RegisterFormState extends State<RegisterForm> {
                     });
                   }),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
               ),
+                contentPadding:
+                const EdgeInsets.symmetric(vertical: 8, horizontal: 12)
             ),
           ),
           const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.only(top: 20),
+            padding: const EdgeInsets.only(top: 10),
             child: authVM.isLoading
-                ? const CircularProgressIndicator()
+                ? const SizedBox(
+              height: 30,
+              width: 30,
+              child:
+              CircularProgressIndicator(color: const Color(0xFFB02700)),
+            )
                 : ElevatedButton(
                     onPressed: () async {
                       bool success = await authVM.RegisterVM(
                           email.text, password.text, againPass.text);
                       String uidAccount = authVM.uid.toString();
-                      print('uid form $uidAccount');
                       if (success) {
-                        DialogMessage(
-                            context,
-                            "Đăng kí thành công",
-                            isSuccess: true,
-                            uidAccount);
+                        Navigator.of(context, rootNavigator: true)
+                            .pushReplacement(
+                          MaterialPageRoute(
+                              builder: (context) => UserOrSellerPage(
+                                uid: uidAccount,
+                              )),
+                        );
+                        showDialogMessage(
+                            context, "Đăng kí thành công", DialogType.success);
                       } else {
-                        DialogMessage(context, authVM.errorMessage, uidAccount,
-                            isSuccess: false);
+                        showDialogMessage(context, "${authVM.errorMessage}",
+                            DialogType.error);
                       }
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFB02700),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        minimumSize: const Size(double.infinity, 50),
+                        minimumSize: const Size(double.infinity, 10),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
+                            borderRadius: BorderRadius.circular(20))),
                     child: const Text(
                       "Comfirm",
                       style: TextStyle(

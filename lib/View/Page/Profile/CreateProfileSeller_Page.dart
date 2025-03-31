@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:order_food/Models/ProfileSeller.dart';
-import 'package:order_food/Services/Profile_Service.dart';
 import 'package:order_food/View/Page/Login/Login_Page.dart';
 import 'package:order_food/View/Page/Profile/GoogleMap_Page.dart';
 import 'package:provider/provider.dart';
@@ -64,45 +63,11 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
         loadEmailAndRole(authVM.uid!);
       }
     });
-    txtStoreName.addListener(() {
-      setState(() {
-        storeName = txtStoreName.text;
-      });
-    });
-  }
-
-  void showDialogMessage(BuildContext context, String message,
-      {bool isSuccess = false}) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-            if (isSuccess) {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
-            }
-          }
-        });
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Colors.blueAccent,),
-          ),
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final profileVM = Provider.of<Profile_ViewModel>(context, listen: true);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -112,7 +77,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
               // Header background
               Container(
                 width: double.infinity,
-                height: 200,
+                height: 120,
                 decoration: const BoxDecoration(
                   color: Color(0xFF007BFF),
                   borderRadius: BorderRadius.only(
@@ -124,28 +89,29 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
               const SizedBox(height: 50),
 
               Expanded(
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: ListView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildLabel("Email"),
                       _buildReadOnlyTextField(email ?? "Loading..."),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       _buildLabel("Store Name"),
                       _buildTextField(controller: txtStoreName),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       _buildLabel("Owner Name"),
                       _buildTextField(controller: txtFullName),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       _buildLabel("Phone Number"),
                       _buildTextField(controller: txtPhone, isNumber: true),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       _buildLabel("Address"),
                       _buildTextField(controller: txtAddress),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       _buildLabel("Bio"),
                       _buildTextField(controller: txtBio, lenght: 3),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       // Store Location Button
                       Align(
@@ -176,14 +142,18 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                           ),
                         ),
                       ),
+
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
             ],
           ),
+
+          // Ảnh đại diện và tên cửa hàng
           Positioned(
-            top: 120,
+            top: 60,
             left: 0,
             right: 0,
             child: GestureDetector(
@@ -193,10 +163,10 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                   Stack(
                     children: [
                       CircleAvatar(
-                        radius: 60,
+                        radius: 51,
                         backgroundColor: Colors.white,
                         child: CircleAvatar(
-                          radius: 58,
+                          radius: 50,
                           backgroundImage: _selectedImage != null
                               ? FileImage(_selectedImage!)
                               : const AssetImage(
@@ -208,39 +178,33 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                         bottom: 5,
                         right: 5,
                         child: CircleAvatar(
-                          radius: 18,
+                          radius: 14,
                           backgroundColor: Colors.white,
                           child:
-                              const Icon(Icons.camera_alt, color: Colors.blue),
+                              const Icon(Icons.camera_alt, color: Colors.blue,size: 18,),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    storeName?.isNotEmpty == true ? storeName! : "",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
+
           Positioned(
             bottom: 20,
-            left: 20,
-            right: 20,
+            left: 40,
+            right: 40,
             child: SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 40,
               child: ElevatedButton(
                 onPressed: () async {
                   if (_selectedImage == null) {
                     showDialogMessage(context, "Vui lòng thêm ảnh của cửa hàng",
-                        isSuccess: false);
+                        DialogType.warning);
+                    return;
                   }
                   ProfileSeller profileSeller = ProfileSeller(
                       uid,
@@ -257,18 +221,23 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                   bool success = await profileVM.CreateProfileSeller(
                       profileSeller, _selectedImage!);
                   if (success) {
-                    showDialogMessage(context, "Tạo Profile thành công",
-                        isSuccess: true);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LoginPage()),
+                    );
+                    showDialogMessage(
+                        context, "Tạo Profile thành công", DialogType.success);
+
                   } else {
-                    showDialogMessage(context,
+                    showDialogMessage(
+                        context,
                         "Tạo Profile thất bại :${profileVM.errorMessage}",
-                        isSuccess: true);
+                        DialogType.error);
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: profileVM.isLoading
@@ -286,7 +255,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                             color: Colors.white,
                             fontFamily: "Poppins",
                             fontWeight: FontWeight.bold,
-                            fontSize: 18),
+                            fontSize: 15),
                       ),
               ),
             ),
@@ -295,56 +264,56 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
       ),
     );
   }
+}
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        fontFamily: "Poppins",
-        fontWeight: FontWeight.bold,
-        color: Colors.black54,
-      ),
-    );
-  }
+Widget _buildLabel(String text) {
+  return Text(
+    text,
+    style: const TextStyle(
+      fontSize: 13,
+      fontFamily: "Poppins",
+      fontWeight: FontWeight.bold,
+      color: Colors.black54,
+    ),
+  );
+}
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      bool isNumber = false,
-      int lenght = 1}) {
-    return TextField(
-      maxLines: lenght,
-      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-      inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.grey[200],
-        hintText: isNumber ? "Enter your phone number" : "Enter details",
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+Widget _buildTextField(
+    {required TextEditingController controller,
+    bool isNumber = false,
+    int lenght = 1}) {
+  return TextField(
+    maxLines: lenght,
+    style: TextStyle(fontSize: 13,color: Colors.black,fontFamily: "Poppins"),
+    keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+    inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.grey[100],
+      hintText: isNumber ? "Enter your phone number" : "Enter details",
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide.none,
       ),
-      controller: controller,
-    );
-  }
+      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+    ),
+    controller: controller,
+  );
+}
 
-  Widget _buildReadOnlyTextField(String value) {
-    return TextField(
-      readOnly: true,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.grey[200],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+Widget _buildReadOnlyTextField(String value) {
+  return TextField(
+    readOnly: true,
+    style: TextStyle(fontSize: 13,fontFamily: "Poppins",color: Colors.black) ,
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.grey[200],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(20),
+        borderSide: BorderSide.none,
       ),
-      controller: TextEditingController(text: value),
-    );
-  }
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+    ),
+    controller: TextEditingController(text: value),
+  );
 }

@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   LoginForm(),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                         "Don't have an account?",
                         style: TextStyle(
                             fontFamily: "Outfit",
-                            fontSize: 15,
+                            fontSize: 12,
                             color: Colors.grey),
                       ),
                       TextButton(
@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
                           "Sign Up",
                           style: TextStyle(
                               color: Colors.red,
-                              fontSize: 15,
+                              fontSize: 13,
                               fontFamily: "Outfit"),
                         ),
                       ),

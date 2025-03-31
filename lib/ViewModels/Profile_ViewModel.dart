@@ -27,28 +27,31 @@ class Profile_ViewModel extends ChangeNotifier {
   String? get role => _role;
 
   Future<bool> LoadEmailAccount(String uid) async {
+    _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
-    if (uid.isNotEmpty) {
-      _isLoading = true;
-      notifyListeners();
-
-      String? loaddata = await profile_service.loadEmailService(uid);
-
-      if (loaddata != null) {
-        _email = loaddata;
+    try{
+      if(uid.isEmpty){
         _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        _SetError("Không tìm thấy thông tin tài khoản.");
-        _isLoading = false;
-        notifyListeners();
+        _SetError("Không tìm thấy uid của tài khoản (Vm)");
         return false;
       }
-    } else {
-      _SetError("Lỗi tài khoản, vui lòng đăng nhập lại.");
+      String? loadData = await profile_service.loadEmailService(uid);
+      if(loadData == null){
+        _isLoading = false;
+        _SetError("Không lấy được Email");
+        return false;
+      }
+      _email = loadData;
+      print('VM $_email');
+      _isLoading = false;
+      notifyListeners();
+      return true;
+
+    }catch(e){
+      _isLoading = false;
+      _SetError("Lỗi khi load Email (VM) $e");
       return false;
     }
   }

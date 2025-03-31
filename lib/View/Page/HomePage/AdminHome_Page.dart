@@ -23,7 +23,7 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   int _selectedIndex = 0;
   late String uid;
-  late String email;
+  String email = "";
   String role = "Unknow";
   String fullName = "Loading...";
   String avatar = "";
@@ -44,7 +44,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       final authVM = Provider.of<AuthViewModel>(context, listen: false);
 
       if (authVM.uid != null) {
-        ProfileUser? user = await profileVM.GetAllDataProfile(authVM.uid!);
+        ProfileUser? user = await profileVM.GetAllDataProfileUser(authVM.uid!);
         if (user != null && mounted) {
           setState(() {
             email = user.email;
@@ -64,8 +64,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: _buildAppBar(),
       drawer: role == "Admin" ? DrawerAdminScreen(
-        email: email, fullName: fullName, image: avatar,) : DrawerUserScreen(),
-      body: (fullName == "Loading..." || role == "Unknow" || avatar == "")
+        email: email, fullName: fullName, image: avatar,) : DrawerUserScreen(
+        email: email, fullName: fullName, avatar: avatar,),
+      body: (fullName == "Loading..." || role == "Unknow" || avatar == "" || email == "")
           ? Center(child: CircularProgressIndicator())
           : _screens[_selectedIndex],
       bottomNavigationBar: CurvedNavigationBar(
@@ -143,7 +144,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               const Text("Welcome",
                   style: TextStyle(fontSize: 12, color: Colors.grey)),
               Text(fullName,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,color: Color(0xFF4CAF50))),
             ],
           ),
         ],

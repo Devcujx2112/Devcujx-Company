@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:order_food/View/Widget/CategoryDetail_Form.dart';
 import 'package:provider/provider.dart';
-
 import '../../../ViewModels/Category_ViewModel.dart';
 import '../../Widget/DialogMessage_Form.dart';
 
@@ -16,9 +14,7 @@ class CategoryManagement extends StatefulWidget {
 
 class _CategoryManagementState extends State<CategoryManagement> {
   List<Map<String, dynamic>>? allCategories = [];
-
   final TextEditingController _searchController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
   int? catelogyCount;
   bool _isLoading = true;
 
@@ -55,49 +51,44 @@ class _CategoryManagementState extends State<CategoryManagement> {
     final result = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
-        return CategoryDetail();
+        return CategoryDetail(
+          category: null,
+        );
       },
     );
-
     if (result == true) {
       SearchCategories();
     }
   }
 
-  void showDialogMessage(BuildContext context, String message) {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (BuildContext context) {
-        Future.delayed(const Duration(seconds: 2), () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
+  void OnClickItemCategories(Map<String, dynamic> user) async {
+    final shouldReload = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return CategoryDetail(
+            category: user,
+          );
         });
-        return AlertDialog(
-
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          contentPadding: const EdgeInsets.all(20),
-          content: IntrinsicHeight(
-            child: DialogMessageForm(
-              message: message,
-              intValue: Colors.blueAccent,
-            ),
-          ),
-        );
-      },
-    );
+    if (shouldReload == true){
+      SearchCategories();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
-        title: const Text("Quản lý danh mục",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(
+          "Quản lý danh mục",
+          style: GoogleFonts.montserrat(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: const Color(0xFF003366),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -108,19 +99,18 @@ class _CategoryManagementState extends State<CategoryManagement> {
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
                     controller: _searchController,
-                    onChanged: (value){
-                      SearchCategories();
-                    },
+                    onChanged: (value) => SearchCategories(),
                     decoration: InputDecoration(
                       hintText: "Tìm kiếm danh mục...",
+                      hintStyle: GoogleFonts.montserrat(fontSize: 14),
                       prefixIcon:
-                          const Icon(Icons.search, color: Colors.blueAccent),
+                          const Icon(Icons.search, color: Color(0xFF003366)),
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none),
                       filled: true,
                       fillColor: Colors.white,
                     ),
@@ -130,48 +120,51 @@ class _CategoryManagementState extends State<CategoryManagement> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent,
+                      color: const Color(0xFF003366),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
-                        const Text(
+                        Text(
                           "Tổng số loại sản phẩm",
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           catelogyCount.toString(),
-                          style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   Row(
-                    children: const [
-                      Expanded(
+                    children: [
+                      const Expanded(
                           child: Divider(
                               thickness: 2,
                               color: Colors.blueAccent,
                               endIndent: 10)),
                       Text(
                         "Danh sách danh mục",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF3D3A62)),
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF003366),
+                        ),
                       ),
-                      Expanded(
+                      const Expanded(
                           child: Divider(
                               thickness: 2,
-                              color: Colors.deepPurple,
+                              color: Colors.blueAccent,
                               indent: 10)),
                     ],
                   ),
@@ -189,22 +182,36 @@ class _CategoryManagementState extends State<CategoryManagement> {
                       itemBuilder: (context, index) {
                         final category = allCategories?[index];
                         return Card(
-                          elevation: 3,
+                          elevation: 5,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           child: InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              OnClickItemCategories(allCategories![index]);
+                            },
                             borderRadius: BorderRadius.circular(12),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Expanded(
-                                    child: Image.network(category?["Image"]!)),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      category?["Image"]!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
-                                Text(category?["CategoryName"]!,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16)),
+                                Text(
+                                  category?["CategoryName"]!,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.montserrat(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: Colors.black87,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -217,8 +224,9 @@ class _CategoryManagementState extends State<CategoryManagement> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: addCategory,
-        backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: const Color(0xFF003366),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }

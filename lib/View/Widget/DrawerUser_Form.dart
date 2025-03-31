@@ -1,8 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../Page/Login/Login_Page.dart';
+
 class DrawerUserScreen extends StatelessWidget {
-  const DrawerUserScreen({super.key});
+  String email, avatar, fullName;
+
+  DrawerUserScreen(
+      {super.key, required this.email, required this.fullName, required this.avatar});
 
   @override
   Widget build(BuildContext context) {
@@ -11,12 +17,12 @@ class DrawerUserScreen extends StatelessWidget {
         children: [
           UserAccountsDrawerHeader(
             accountName: Text(
-              "Your Name",
+              fullName,
               style:
               GoogleFonts.roboto(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             accountEmail: Text(
-              "your.email@example.com",
+              email,
               style: GoogleFonts.roboto(),
             ),
             currentAccountPicture: CircleAvatar(
@@ -24,8 +30,25 @@ class DrawerUserScreen extends StatelessWidget {
               radius: 35,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(50),
-                child: Image.asset('asset/images/avatar_default.jpg',
-                    fit: BoxFit.cover),
+                child: avatar.isNotEmpty
+                    ? Image.network(
+                  avatar ,
+                  fit: BoxFit.cover,
+                  width: 70,
+                  height: 70,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                        'asset/images/avatar_default.jpg', fit: BoxFit.cover);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                )
+                    : Image.asset(
+                    'asset/images/avatar_default.jpg', fit: BoxFit.cover),
               ),
             ),
             decoration: BoxDecoration(
@@ -43,7 +66,12 @@ class DrawerUserScreen extends StatelessWidget {
             endIndent: 15,
             color: Colors.green,
           ),
-          _buildDrawerItem(Icons.logout_outlined, "Đăng xuất", () {}),
+          _buildDrawerItem(Icons.logout_outlined, "Đăng xuất", () async
+              {await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => LoginPage()),
+              (route) => false,
+              );}),
         ],
       ),
     );

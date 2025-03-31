@@ -80,5 +80,10 @@ class ProfileSeller {
   set createAt(String value) {
     _createAt = value;
   }
+
+  @override
+  String toString() {
+    return 'ProfileSeller{_uid: $_uid, _email: $_email, _role: $_role, _storeName: $_storeName, _image: $_image, _ownerName: $_ownerName, _phone: $_phone, _address: $_address, _bio: $_bio, _status: $_status, _createAt: $_createAt}';
+  }
 }
 

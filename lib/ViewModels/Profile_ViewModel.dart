@@ -194,15 +194,43 @@ class Profile_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<ProfileUser?> GetAllDataProfile(String uid) async {
+  Future<ProfileUser?> GetAllDataProfileUser(String uid) async {
     try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
       ProfileUser? user = await profile_service.GetProfileUser(uid);
       if (user != null) {
         return user;
       } else {
+        _isLoading = false;
+        _SetError("Không tìm thấy dữ liệu người dùng");
         return null;
       }
     } catch (e) {
+      _SetError("Lỗi khi nhận dữ liệu từ database $e");
+      return null;
+    }
+  }
+
+  Future<ProfileSeller?> GetAllDataProfileSeller(String uid) async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      ProfileSeller? user = await profile_service.GetProfileSeller(uid);
+      if (user != null) {
+        return user;
+      } else {
+        _isLoading = false;
+        print('VM Không tìm thấy dữ liệu cửa hàng');
+        _SetError("Không tìm thấy dữ liệu cửa hàng");
+        return null;
+      }
+    } catch (e) {
+      print('Vm Lỗi khi nhận dữ liệu từ database $e');
       _SetError("Lỗi khi nhận dữ liệu từ database $e");
       return null;
     }

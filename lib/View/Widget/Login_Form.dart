@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:order_food/View/Page/HomePage/AdminHome_Page.dart';
 import 'package:order_food/View/Page/HomePage/SellerHome_Page.dart';
-import 'package:order_food/View/Page/HomePage/UserHome_Page.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/View/Widget/ForgotPassword_Form.dart';
 import 'package:provider/provider.dart';
@@ -51,7 +50,7 @@ class _LoginFormState extends State<LoginForm> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: ConstrainedBox(
             constraints: BoxConstraints(
@@ -87,7 +86,7 @@ class _LoginFormState extends State<LoginForm> {
               } else if (role.toString() == "User") {
                 Navigator.of(context, rootNavigator: true)
                     .pushReplacement(MaterialPageRoute(
-                  builder: (context) => UserHomePage(),
+                  builder: (context) => AdminHomePage(),
                 ));
               }
             }
@@ -95,10 +94,11 @@ class _LoginFormState extends State<LoginForm> {
         });
         return AlertDialog(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           contentPadding: const EdgeInsets.all(20),
           content: IntrinsicHeight(
-            child: DialogMessageForm(message: message,intValue: Color(0xFFD05558),),
+            child: DialogMessageForm(
+              message: message, intValue: Color(0xFFD05558),),
           ),
         );
       },
@@ -185,7 +185,7 @@ class _LoginFormState extends State<LoginForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
+              Padding(padding: EdgeInsets.zero, child: Row(
                 children: [
                   Checkbox(
                     value: _valueAccount,
@@ -200,10 +200,10 @@ class _LoginFormState extends State<LoginForm> {
                   const Text(
                     "Remember me",
                     style: TextStyle(
-                        fontFamily: "Outfit", fontSize: 15, color: Colors.grey),
+                        fontFamily: "Outfit", fontSize: 13, color: Colors.grey),
                   ),
                 ],
-              ),
+              )),
               TextButton(
                 onPressed: () {
                   ForgotPassword(context);
@@ -211,7 +211,7 @@ class _LoginFormState extends State<LoginForm> {
                 child: const Text(
                   "Forgot Password ?",
                   style: TextStyle(
-                      color: Colors.red, fontFamily: "Outfit", fontSize: 15),
+                      color: Colors.red, fontFamily: "Outfit", fontSize: 13),
                 ),
               ),
             ],
@@ -220,31 +220,31 @@ class _LoginFormState extends State<LoginForm> {
           authVM.isLoading
               ? CircularProgressIndicator()
               : ElevatedButton(
-                  onPressed: () async {
-                    bool success =
-                        await authVM.LoginVM(txt_email.text, txt_pasword.text);
-                    if (success) {
-                      DialogMessage(
-                        context,
-                        "Đăng nhập thành công",
-                        authVM.role ?? "Unknown",
-                        isSuccess: true,
-                      );
-                    } else {
-                      DialogMessage(context, authVM.errorMessage, "Unknown",
-                          isSuccess: false);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFB02700),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text(
-                    "Log In",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+            onPressed: () async {
+              bool success =
+              await authVM.LoginVM(txt_email.text, txt_pasword.text);
+              if (success) {
+                DialogMessage(
+                  context,
+                  "Đăng nhập thành công",
+                  authVM.role ?? "Unknown",
+                  isSuccess: true,
+                );
+              } else {
+                DialogMessage(context, authVM.errorMessage, "Unknown",
+                    isSuccess: false);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFB02700),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            child: const Text(
+              "Log In",
+              style: TextStyle(fontSize: 18, color: Colors.white),
+            ),
+          ),
         ],
       ),
     );

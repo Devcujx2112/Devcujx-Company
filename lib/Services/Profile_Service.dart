@@ -185,6 +185,42 @@ class Profile_Service {
     }
   }
 
+  Future<ProfileSeller?> GetProfileSeller(String uid) async {
+    try {
+      Uri url = Uri.parse("$realTimeAPI/Profile/$uid.json");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if (data != null) {
+          ProfileSeller? profileSeller = ProfileSeller(
+            uid,
+            data["Email"] ?? "",
+            data["Role"] ?? "",
+            data["StoreName"] ?? "",
+            data["Avatar"] ?? "",
+            data["OwnerName"] ?? "",
+            data["Phone"] ?? "",
+            data["Address"] ?? "",
+            data["Bio"] ?? "",
+            data["Status"] ?? "",
+            data["CreateAt"] ?? "",
+          );
+          return profileSeller;
+        } else {
+          print("Không tìm thấy thông tin người dùng!");
+          return null;
+        }
+      } else {
+        print("Lỗi khi lấy dữ liệu: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Lỗi truy vấn Firebase: $e");
+      return null;
+    }
+  }
+
   Future<Map<String, int>> getCountUserSeller() async {
     try {
       Uri url = Uri.parse("$realTimeAPI/Profile.json");

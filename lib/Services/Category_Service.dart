@@ -60,11 +60,14 @@ class Category_Service {
           };
         }).toList();
 
-        // Lọc danh mục nếu có `query`
         if (query.isNotEmpty) {
           categories = categories
               .where((category) =>
-          category["CategoryName"]?.toString().trim().contains(query.toString().trim()) ?? false)
+                  category["CategoryName"]
+                      ?.toString()
+                      .trim()
+                      .contains(query.toString().trim()) ??
+                  false)
               .toList();
         }
 
@@ -76,6 +79,70 @@ class Category_Service {
     return [];
   }
 
+  Future<bool> DeleteCategory(String cateID) async {
+    try {
+      final imageURL = await http.get(Uri.parse("$realTimeAPI/$cateID.json"));
+      if (imageURL.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(imageURL.body);
+        if (data != null && data.containsKey("Image")) {
+          String image = data["Image"];
+          try {
+            Reference storageRef = FirebaseStorage.instance.refFromURL(image);
+            await storageRef.delete();
+          } catch (e) {
+            print("Lỗi khi xóa ảnh: $e");
+          }
+        }
+      }
+      final response =
+          await http.delete(Uri.parse("$realTimeAPI/$cateID.json"));
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 
+  Future<bool> UpdateCategory(
+      String cateID, File? selectedImage, String cateName, String imageOld) async {
+    try {
+      String? imageUrl = imageOld;
+      if (selectedImage != null) {
+        try {
+          if (imageOld.isNotEmpty) {
+            Reference oldImageRef = FirebaseStorage.instance.refFromURL(imageOld);
+            await oldImageRef.delete();
+          }
 
+          Reference newImageRef = FirebaseStorage.instance.ref()
+              .child("Category/$cateID.jpg");
+          UploadTask uploadTask = newImageRef.putFile(selectedImage);
+          TaskSnapshot snapshot = await uploadTask;
+          imageUrl = await snapshot.ref.getDownloadURL();
+        } catch (e) {
+          print("Lỗi khi upload ảnh: $e");
+          return false;
+        }
+      }
+      Map<String, dynamic> categoryData = {
+        "CategoryID": cateID,
+        "CategoryName": cateName,
+        "Image": imageUrl,
+      };
+
+      final response = await http.patch(
+        Uri.parse("$realTimeAPI/$cateID.json"),
+        body: jsonEncode(categoryData),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("Lỗi khi cập nhật danh mục: $e");
+      return false;
+    }
+  }
 }

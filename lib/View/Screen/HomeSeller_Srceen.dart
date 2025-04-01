@@ -44,8 +44,8 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
             ownerName = seller.ownerName;
             avatar = seller.image;
             role = seller.role;
-            _isLoading = false;
             ReloadData();
+            _isLoading = false;
           });
         }
       }
@@ -188,7 +188,7 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                           Text(
                             "Sản phẩm của cửa hàng",
                             style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF4CAF50)),
                           ),
@@ -202,13 +202,12 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                       const SizedBox(height: 6),
                       Expanded(
                         child: GridView.builder(
-                          itemCount: allProduct?.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
+                          itemCount: allProduct?.length ?? 0,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            childAspectRatio: 0.75,
+                            crossAxisSpacing: 6,
+                            mainAxisSpacing: 6,
+                            childAspectRatio: 0.82,
                           ),
                           itemBuilder: (context, index) {
                             final productList = allProduct?[index];
@@ -218,9 +217,9 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                               },
                               child: Card(
                                 color: Colors.white,
-                                elevation: 3,
+                                elevation: 6,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,82 +228,80 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                       children: [
                                         ClipRRect(
                                           borderRadius: const BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15)),
+                                            topLeft: Radius.circular(12),
+                                            topRight: Radius.circular(12),
+                                          ),
                                           child: Image.network(
                                             productList?["Image"],
-                                            height: 104,
+                                            height: 105,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
                                         Positioned(
-                                          top: 8,
-                                          left: 8,
+                                          top: 6,
+                                          left: 6,
                                           child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2.5),
+                                            padding:
+                                            const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                             decoration: BoxDecoration(
                                               color: Colors.green,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
+                                              borderRadius: BorderRadius.circular(10),
                                             ),
                                             child: Text(
-                                              productList?["CategoryName"],
+                                              productList?["CategoryName"] ?? "",
                                               style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: "Poppins"),
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                fontFamily: "Poppins",
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
                                     const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 0),
+                                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                                       child: Divider(
                                         color: Color(0xFF4CAF50),
                                         thickness: 1.5,
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            productList?["ProductName"],
+                                            productList?["ProductName"] ?? "",
                                             style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold),
+                                              fontSize: 13,
+                                              fontFamily: "Poppins",
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          const SizedBox(height: 2),
                                           Row(
                                             children: [
-                                              const Icon(Icons.star,
-                                                  color: Colors.amber,
-                                                  size: 12),
+                                              const Icon(Icons.star, color: Colors.amber, size: 12),
                                               const SizedBox(width: 3),
                                               Text(
-                                                  productList!["Rating"]
-                                                      .toString(),
-                                                  style: const TextStyle(
-                                                      fontSize: 11,
-                                                      color: Colors.grey)),
+                                                productList?["Rating"]?.toString() ?? "0",
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
                                             ],
                                           ),
+                                          const SizedBox(height: 2),
                                           Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
-                                                "${NumberFormat("#,###").format(productList["Price"])} VNĐ",
+                                                "${NumberFormat("#,###").format(productList?["Price"] ?? 0)} VNĐ",
                                                 style: const TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.bold,
@@ -312,19 +309,15 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                                   fontFamily: "Poppins",
                                                 ),
                                               ),
-                                              SizedBox(
-                                                height: 40,
-                                                child: role != "Seller"
-                                                    ? IconButton(
-                                                        icon: const Icon(
-                                                            Icons
-                                                                .favorite_border,
-                                                            color: Colors.red,
-                                                            size: 18),
-                                                        onPressed: () {},
-                                                      )
-                                                    : const SizedBox.shrink(),
-                                              ),
+                                              if (role != "Seller")
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.favorite_border,
+                                                    color: Colors.red,
+                                                    size: 18,
+                                                  ),
+                                                  onPressed: () {},
+                                                ),
                                             ],
                                           ),
                                         ],

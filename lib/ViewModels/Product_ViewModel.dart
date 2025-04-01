@@ -62,14 +62,16 @@ class Product_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> ShowAllProduct(String query, String uid) async{
+  Future<List<Map<String, dynamic>>?> ShowAllProduct(
+      String query, String uid) async {
     try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
-      List<Map<String, dynamic>> productData = await product_service.ShowAllProduct(query,uid);
-      if(productData == null){
+      List<Map<String, dynamic>> productData =
+          await product_service.ShowAllProduct(query, uid);
+      if (productData == null) {
         _isLoading = false;
         _SetError("Không tìm thấy sản phẩm nào");
         return null;
@@ -77,26 +79,25 @@ class Product_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return productData;
-
-    }catch(e){
+    } catch (e) {
       _SetError('Lỗi khi lấy thông tin sản phẩm $e');
       return null;
     }
   }
 
-  Future<bool> DeleteProduct(String productId) async{
-    try{
+  Future<bool> DeleteProduct(String productId) async {
+    try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
-      if(productId == null){
+      if (productId == null) {
         _isLoading = false;
         _SetError("Không tìm thấy id của sản phẩm");
         return false;
       }
       bool isSuccess = await product_service.DeleteProduct(productId);
-      if(isSuccess == false){
+      if (isSuccess == false) {
         _isLoading = false;
         _SetError("Xóa sản phẩm thất bại (VM)");
         return false;
@@ -104,9 +105,39 @@ class Product_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
-    }catch(e){
+    } catch (e) {
       _isLoading = false;
       _SetError("Lỗi khi xóa sản phẩm (VM)");
+      return false;
+    }
+  }
+
+  Future<bool> UpdateProduct(
+      String productId,
+      String productName,
+      String categoryName,
+      String description,
+      int price,
+      String imageOld,
+      File? newImage) async {
+    try {
+      _isLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      bool isSuccess = await product_service.UpdateProduct(productId,
+          productName, categoryName, description, price, imageOld, newImage);
+      if (isSuccess == false) {
+        _isLoading = false;
+        _SetError("Update sản phẩm thất bại");
+        return false;
+      }
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      _SetError("Lỗi khi update sản phẩm $e");
       return false;
     }
   }

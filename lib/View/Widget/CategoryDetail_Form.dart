@@ -175,7 +175,7 @@ class _CategoryDetailState extends State<CategoryDetail> {
                           bool isSuccess = await categoryVM.UpdateCategory(
                               widget.category?["CategoryID"],
                               txt_cateName.text,
-                              null,
+                              _selectedImage,
                               widget.category?["Image"]);
                           if (isSuccess) {
                             Navigator.pop(context, true);

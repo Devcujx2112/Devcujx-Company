@@ -37,7 +37,7 @@ class _FirstPageState extends State<FirstPage> {
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 50),
+                            vertical: 8, horizontal: 40),
                         side: const BorderSide(color: Color(0xFFB02700), width: 3),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -45,14 +45,13 @@ class _FirstPageState extends State<FirstPage> {
                       child: const Text(
                         "Login",
                         style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontFamily: "Outfit",
                             fontWeight: FontWeight.w500,
                             color: Color(0xFFB02700)),
                       ),
                     ),
 
-                    const SizedBox(height: 10),
 
                     const Text(
                       "or",
@@ -63,7 +62,7 @@ class _FirstPageState extends State<FirstPage> {
                           color: Colors.black),
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
 
                     ElevatedButton(
                       onPressed: () {
@@ -71,7 +70,7 @@ class _FirstPageState extends State<FirstPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 30),
+                            vertical: 8, horizontal: 20),
                         backgroundColor: const Color(0xFFB02700),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -79,7 +78,7 @@ class _FirstPageState extends State<FirstPage> {
                       child: const Text(
                         "Create an account",
                         style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             fontFamily: "Outfit",
                             color: Colors.white),

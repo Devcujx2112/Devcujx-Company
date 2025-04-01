@@ -6,13 +6,13 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:order_food/Models/Product.dart';
 
-class Product_Service{
+class Product_Service {
   static const String realTimeAPI =
       "https://crud-firebase-7b852-default-rtdb.firebaseio.com/Product";
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   Future<bool> InsertProduct(Product product, File selectedImage) async {
-    try{
+    try {
       String fileName = "Product/${product.productId}.jpg";
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       UploadTask uploadTask = storageRef.putFile(selectedImage);
@@ -22,14 +22,14 @@ class Product_Service{
       Uri url = Uri.parse("$realTimeAPI/${product.productId}.json");
 
       Map<String, dynamic> productData = {
-        "ProductId" : product.productId,
-        "Uid" : product.uid,
-        "CategoryName" : product.categoryName,
+        "ProductId": product.productId,
+        "Uid": product.uid,
+        "CategoryName": product.categoryName,
         "ProductName": product.productName,
-        "Image" : imageUrl,
-        "Price" : product.price,
-        "Description" : product.description,
-        "Rating" : product.rating,
+        "Image": imageUrl,
+        "Price": product.price,
+        "Description": product.description,
+        "Rating": product.rating,
         "CreateAt": product.createAt
       };
       final response = await http.put(
@@ -42,14 +42,14 @@ class Product_Service{
       } else {
         return false;
       }
-
-    }catch(e){
+    } catch (e) {
       print('$e');
       return false;
     }
   }
 
-  Future<List<Map<String, dynamic>>> ShowAllProduct(String query, String uid) async {
+  Future<List<Map<String, dynamic>>> ShowAllProduct(
+      String query, String uid) async {
     try {
       final response = await http.get(Uri.parse("$realTimeAPI.json"));
       if (response.statusCode == 200) {
@@ -58,19 +58,20 @@ class Product_Service{
 
         List<Map<String, dynamic>> productData = data.entries
             .map((entry) => {
-          "ProductId": entry.key,
-          ...entry.value as Map<String, dynamic>,
-        })
+                  "ProductId": entry.key,
+                  ...entry.value as Map<String, dynamic>,
+                })
             .where((product) => product["Uid"] == uid)
             .toList();
 
         if (query.isNotEmpty) {
           productData = productData
               .where((product) =>
-          product["ProductName"]
-              ?.toString()
-              .toLowerCase()
-              .contains(query.toLowerCase().trim()) ?? false)
+                  product["ProductName"]
+                      ?.toString()
+                      .toLowerCase()
+                      .contains(query.toLowerCase().trim()) ??
+                  false)
               .toList();
         }
 
@@ -82,10 +83,10 @@ class Product_Service{
     return [];
   }
 
-
   Future<bool> DeleteProduct(String productId) async {
     try {
-      final imageURL = await http.get(Uri.parse("$realTimeAPI/$productId.json"));
+      final imageURL =
+          await http.get(Uri.parse("$realTimeAPI/$productId.json"));
       if (imageURL.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(imageURL.body);
         if (data != null && data.containsKey("Image")) {
@@ -99,12 +100,55 @@ class Product_Service{
         }
       }
       final response =
-      await http.delete(Uri.parse("$realTimeAPI/$productId.json"));
+          await http.delete(Uri.parse("$realTimeAPI/$productId.json"));
       if (response.statusCode == 200) {
         return true;
       }
       return false;
     } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> UpdateProduct(
+      String productId, String productName, String categoryName, String description,
+      int price, String imageOld, File? newImage) async {
+    try{
+      String imageUrl = imageOld;
+      if(newImage != null){
+        try{
+          if(imageOld.isNotEmpty){
+            print("Service $imageOld");
+            Reference oldImageRef = FirebaseStorage.instance.refFromURL(imageOld);
+            await oldImageRef.delete();
+          }
+          Reference newImageRef = FirebaseStorage.instance.ref().child("Product/$productId.jpg");
+          UploadTask uploadTask = newImageRef.putFile(newImage);
+          TaskSnapshot snapshot = await uploadTask;
+          imageUrl = await snapshot.ref.getDownloadURL();
+
+        }catch(e){
+          print("Lỗi khi upload ảnh $e");
+          return false;
+        }
+      }
+      Map<String, dynamic> productData = {
+        "ProductName" : productName,
+        "CategoryName" : categoryName,
+        "Price" : price,
+        "Description": description,
+        "Image" : imageUrl
+      };
+      final response = await http.patch(
+        Uri.parse("$realTimeAPI/$productId.json"),
+        body: jsonEncode(productData ),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+
+    }catch(e){
       print(e);
       return false;
     }

@@ -5,9 +5,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:order_food/Models/ProfileSeller.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Category_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
+import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 
 import '../../Widget/DialogMessage_Form.dart';
@@ -28,6 +30,7 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
   String? _selectedCategory;
   File? _image;
   String uid = "";
+  String storeName = "";
   late List<String> _categories = [];
   bool _isDataOld = false;
   bool _isLoading = true;
@@ -76,10 +79,20 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
             txt_name.text = widget.productData!["ProductName"];
             txt_desc.text = widget.productData!["Description"];
           }
+          LoadStoreName(authVM.uid!);
           _isLoading = false;
         }
       });
     });
+  }
+
+  Future<void> LoadStoreName(String uid) async{
+    final profile = Provider.of<Profile_ViewModel>(context,listen: false);
+    ProfileSeller? profileSeller = await profile.GetAllDataProfileSeller(uid);
+    if(profileSeller != null){
+      storeName = profileSeller.storeName;
+      print("UI StoreName : $storeName");
+    }
   }
 
   @override
@@ -279,6 +292,7 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
                               txt_price.text.replaceAll('.', ''));
                           bool isSuccess = await productVM.InsertProduct(
                               uid,
+                              storeName,
                               _selectedCategory!,
                               txt_name.text,
                               price,

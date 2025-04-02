@@ -24,6 +24,7 @@ class Product_Service {
       Map<String, dynamic> productData = {
         "ProductId": product.productId,
         "Uid": product.uid,
+        "StoreName": product.storeName,
         "CategoryName": product.categoryName,
         "ProductName": product.productName,
         "Image": imageUrl,
@@ -59,10 +60,14 @@ class Product_Service {
         List<Map<String, dynamic>> productData = data.entries
             .map((entry) => {
                   "ProductId": entry.key,
-                  ...entry.value as Map<String, dynamic>,
+                  ...(entry.value as Map<String, dynamic>),
                 })
-            .where((product) => product["Uid"] == uid)
             .toList();
+
+        if (uid.isNotEmpty) {
+          productData =
+              productData.where((product) => product["Uid"] == uid).toList();
+        }
 
         if (query.isNotEmpty) {
           productData = productData
@@ -74,13 +79,14 @@ class Product_Service {
                   false)
               .toList();
         }
-
         return productData;
+      } else {
+        throw Exception('Failed to load products: ${response.statusCode}');
       }
     } catch (e) {
       print('Lỗi show all Product: $e');
+      return [];
     }
-    return [];
   }
 
   Future<bool> DeleteProduct(String productId) async {
@@ -112,45 +118,72 @@ class Product_Service {
   }
 
   Future<bool> UpdateProduct(
-      String productId, String productName, String categoryName, String description,
-      int price, String imageOld, File? newImage) async {
-    try{
+      String productId,
+      String productName,
+      String categoryName,
+      String description,
+      int price,
+      String imageOld,
+      File? newImage) async {
+    try {
       String imageUrl = imageOld;
-      if(newImage != null){
-        try{
-          if(imageOld.isNotEmpty){
+      if (newImage != null) {
+        try {
+          if (imageOld.isNotEmpty) {
             print("Service $imageOld");
-            Reference oldImageRef = FirebaseStorage.instance.refFromURL(imageOld);
+            Reference oldImageRef =
+                FirebaseStorage.instance.refFromURL(imageOld);
             await oldImageRef.delete();
           }
-          Reference newImageRef = FirebaseStorage.instance.ref().child("Product/$productId.jpg");
+          Reference newImageRef =
+              FirebaseStorage.instance.ref().child("Product/$productId.jpg");
           UploadTask uploadTask = newImageRef.putFile(newImage);
           TaskSnapshot snapshot = await uploadTask;
           imageUrl = await snapshot.ref.getDownloadURL();
-
-        }catch(e){
+        } catch (e) {
           print("Lỗi khi upload ảnh $e");
           return false;
         }
       }
       Map<String, dynamic> productData = {
-        "ProductName" : productName,
-        "CategoryName" : categoryName,
-        "Price" : price,
+        "ProductName": productName,
+        "CategoryName": categoryName,
+        "Price": price,
         "Description": description,
-        "Image" : imageUrl
+        "Image": imageUrl
       };
       final response = await http.patch(
         Uri.parse("$realTimeAPI/$productId.json"),
-        body: jsonEncode(productData ),
+        body: jsonEncode(productData),
         headers: {"Content-Type": "application/json"},
       );
 
       return response.statusCode == 200;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> SearchProductFormCategory(String categoryName) async {
+    try{
+      final response = await http.get(Uri.parse("$realTimeAPI.json"));
+      if(response.statusCode == 200){
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if(data == null) return [];
+
+        List<Map<String, dynamic>> productData = data.entries.map((entry) => {
+          "ProductId" : entry.key, ...(entry.value as Map<String, dynamic>),
+        }).toList();
+
+        productData = productData.where((product) => product["CategoryName"] == categoryName).toList();
+
+        return productData;
+      }
 
     }catch(e){
       print(e);
-      return false;
+      return null;
     }
   }
 }

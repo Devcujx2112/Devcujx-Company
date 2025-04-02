@@ -23,6 +23,7 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
   List<Map<String, dynamic>>? allProduct = [];
   bool _isLoading = true;
   late String uid;
+  bool _isNull = false;
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
       if (authVM.uid != null) {
         uid = authVM.uid!;
         List<Map<String, dynamic>>? data =
-            await productVM.ShowAllProduct(_searchController.text,uid) ?? [];
+            await productVM.ShowAllProduct(_searchController.text, uid) ?? [];
         ProfileSeller? seller =
             await profileVM.GetAllDataProfileSeller(authVM.uid!);
         if (seller != null && data != null && mounted) {
@@ -44,9 +45,13 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
             ownerName = seller.ownerName;
             avatar = seller.image;
             role = seller.role;
-            ReloadData();
             _isLoading = false;
+            _isNull = false;
           });
+        }
+        if (data.isEmpty){
+          _isNull = true;
+          _isLoading = false;
         }
       }
     });
@@ -67,11 +72,18 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
   void ReloadData() async {
     final productVM = Provider.of<Product_ViewModel>(context, listen: false);
     List<Map<String, dynamic>>? fetchedCategories =
-        await productVM.ShowAllProduct(_searchController.text,uid) ?? [];
-    setState(() {
-      allProduct = fetchedCategories;
-      _isLoading = false;
-    });
+        await productVM.ShowAllProduct(_searchController.text, uid) ?? [];
+    if(fetchedCategories == null){
+      setState(() {
+        _isNull = true;
+      });
+    }else {
+      setState(() {
+        allProduct = fetchedCategories;
+        _isLoading = false;
+        _isNull = false;
+      });
+    }
   }
 
   void OneClickProduct(Map<String, dynamic>? productData) async {
@@ -83,7 +95,6 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
         ),
       ),
     );
-
     if (reloadData == true) {
       ReloadData();
     }
@@ -93,7 +104,8 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
   Widget build(BuildContext context) {
     return ModalProgressHUD(
         inAsyncCall: _isLoading,
-        progressIndicator: LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
+        progressIndicator:
+            LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
         child: Scaffold(
           backgroundColor: Colors.grey[100],
           appBar: AppBar(
@@ -138,7 +150,12 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
               ),
             ],
           ),
-          body: Padding(
+          body: _isNull
+              ? Center(
+                  child: Text("Chưa có sản phẩm nào trong cửa hàng",
+                      style: TextStyle(color: Colors.green,fontFamily: "Poppins",fontSize: 16)),
+                )
+              : Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
                   child: Column(
                     children: [
@@ -158,7 +175,9 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                         child: TextField(
                           controller: _searchController,
                           onChanged: (value) => ReloadData(),
-                          style: TextStyle(fontSize: 14, fontFamily: "Poppins"),
+                          style: TextStyle(
+                            fontSize: 13,
+                          ),
                           decoration: InputDecoration(
                             isDense: true,
                             hintText: "Tìm kiếm sản phẩm...",
@@ -179,20 +198,20 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                       ),
                       const SizedBox(height: 14),
                       Row(
-                        children: const [
-                          Expanded(
+                        children: [
+                          const Expanded(
                               child: Divider(
                                   thickness: 1.5,
                                   color: Color(0xFF4CAF50),
                                   endIndent: 8)),
                           Text(
                             "Sản phẩm của cửa hàng",
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFF4CAF50)),
                           ),
-                          Expanded(
+                          const Expanded(
                               child: Divider(
                                   thickness: 1.5,
                                   color: Color(0xFF4CAF50),
@@ -203,7 +222,8 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                       Expanded(
                         child: GridView.builder(
                           itemCount: allProduct?.length ?? 0,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 6,
                             mainAxisSpacing: 6,
@@ -242,14 +262,16 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                           top: 6,
                                           left: 6,
                                           child: Container(
-                                            padding:
-                                            const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 6, vertical: 1),
                                             decoration: BoxDecoration(
                                               color: Colors.green,
-                                              borderRadius: BorderRadius.circular(10),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Text(
-                                              productList?["CategoryName"] ?? "",
+                                              productList?["CategoryName"] ??
+                                                  "",
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 10,
@@ -262,16 +284,19 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                       ],
                                     ),
                                     const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 5, vertical: 2),
                                       child: Divider(
                                         color: Color(0xFF4CAF50),
                                         thickness: 1.5,
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 1),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             productList?["ProductName"] ?? "",
@@ -285,10 +310,14 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                           ),
                                           Row(
                                             children: [
-                                              const Icon(Icons.star, color: Colors.amber, size: 12),
+                                              const Icon(Icons.star,
+                                                  color: Colors.amber,
+                                                  size: 12),
                                               const SizedBox(width: 3),
                                               Text(
-                                                productList?["Rating"]?.toString() ?? "0",
+                                                productList?["Rating"]
+                                                        ?.toString() ??
+                                                    "0",
                                                 style: const TextStyle(
                                                   fontSize: 11,
                                                   color: Colors.grey,
@@ -298,7 +327,8 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                           ),
                                           const SizedBox(height: 2),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Text(
                                                 "${NumberFormat("#,###").format(productList?["Price"] ?? 0)} VNĐ",

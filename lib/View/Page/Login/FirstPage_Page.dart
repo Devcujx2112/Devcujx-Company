@@ -51,8 +51,6 @@ class _FirstPageState extends State<FirstPage> {
                             color: Color(0xFFB02700)),
                       ),
                     ),
-
-
                     const Text(
                       "or",
                       style: TextStyle(

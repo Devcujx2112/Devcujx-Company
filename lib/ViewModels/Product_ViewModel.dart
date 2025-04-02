@@ -23,6 +23,7 @@ class Product_ViewModel extends ChangeNotifier {
 
   Future<bool> InsertProduct(
       String uid,
+      String storeName,
       String categoryName,
       String productName,
       int price,
@@ -43,8 +44,8 @@ class Product_ViewModel extends ChangeNotifier {
       String productId = const Uuid().v4();
       String createAt = DateTime.now().toString();
       double rating = 5;
-      Product product = Product(productId, uid, categoryName, productName, "",
-          price, description, rating, createAt);
+      Product product = Product(productId, uid, storeName, categoryName,
+          productName, "", price, description, rating, createAt);
       bool isSuccess =
           await product_service.InsertProduct(product, selectedImage);
       if (isSuccess == false) {
@@ -146,5 +147,26 @@ class Product_ViewModel extends ChangeNotifier {
     _isLoading = false;
     _errorMessage = message;
     notifyListeners();
+  }
+
+  Future<List<Map<String, dynamic>>?> SearchProductFormCategory(
+      String categoryName) async {
+    try {
+      _errorMessage = null;
+      notifyListeners();
+
+      List<Map<String, dynamic>>? productData =
+          await product_service.SearchProductFormCategory(categoryName);
+      if (productData == null) {
+        _SetError("Không tìm thấy sản phẩm cho danh mục $categoryName");
+        return null;
+      }
+
+      notifyListeners();
+      return productData;
+    } catch (e) {
+      _SetError("Lỗi khi tìm sản phẩm $e");
+      return null;
+    }
   }
 }

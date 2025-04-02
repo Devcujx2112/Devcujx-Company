@@ -1,6 +1,7 @@
 class Product{
   String _productId;
   String _uid;
+  String _storeName;
   String _categoryName;
   String _productName;
   String _image;
@@ -12,6 +13,7 @@ class Product{
   Product(
       this._productId,
       this._uid,
+      this._storeName,
       this._categoryName,
       this._productName,
       this._image,
@@ -62,6 +64,12 @@ class Product{
     _categoryName = value;
   }
 
+  String get storeName => _storeName;
+
+  set storeName(String value) {
+    _storeName = value;
+  }
+
   String get uid => _uid;
 
   set uid(String value) {
@@ -76,6 +84,6 @@ class Product{
 
   @override
   String toString() {
-    return 'Product{_productId: $_productId, _uid: $_uid, _categoryName: $_categoryName, _productName: $_productName, _image: $_image, _price: $_price, _description: $_description, _rating: $_rating, _createAt: $_createAt}';
+    return 'Product{_productId: $_productId, _uid: $_uid, _storeName: $_storeName, _categoryName: $_categoryName, _productName: $_productName, _image: $_image, _price: $_price, _description: $_description, _rating: $_rating, _createAt: $_createAt}';
   }
 }

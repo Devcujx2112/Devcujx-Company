@@ -194,6 +194,7 @@ class Profile_ViewModel extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _SetError("Lỗi khi lấy vị trí cửa hàng : $e");
+      return null;
     }
   }
 

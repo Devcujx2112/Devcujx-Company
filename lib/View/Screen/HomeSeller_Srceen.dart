@@ -28,33 +28,35 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() async {
-      final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
-      final authVM = Provider.of<AuthViewModel>(context, listen: false);
-      final productVM = Provider.of<Product_ViewModel>(context, listen: false);
+    ShowAllData();
+  }
 
-      if (authVM.uid != null) {
-        uid = authVM.uid!;
-        List<Map<String, dynamic>>? data =
-            await productVM.ShowAllProduct(_searchController.text, uid) ?? [];
-        ProfileSeller? seller =
-            await profileVM.GetAllDataProfileSeller(authVM.uid!);
-        if (seller != null && data != null && mounted) {
-          setState(() {
-            allProduct = data;
-            ownerName = seller.ownerName;
-            avatar = seller.image;
-            role = seller.role;
-            _isLoading = false;
-            _isNull = false;
-          });
-        }
-        if (data.isEmpty){
-          _isNull = true;
+  void ShowAllData() async{
+    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    final productVM = Provider.of<Product_ViewModel>(context, listen: false);
+
+    if (authVM.uid != null) {
+      uid = authVM.uid!;
+      List<Map<String, dynamic>>? data =
+          await productVM.ShowAllProduct(_searchController.text, uid) ?? [];
+      ProfileSeller? seller =
+      await profileVM.GetAllDataProfileSeller(authVM.uid!);
+      if (seller != null && data != null && mounted) {
+        setState(() {
+          allProduct = data;
+          ownerName = seller.ownerName;
+          avatar = seller.image;
+          role = seller.role;
           _isLoading = false;
-        }
+          _isNull = false;
+        });
       }
-    });
+      if (data.isEmpty){
+        _isNull = true;
+        _isLoading = false;
+      }
+    }
   }
 
   void AddProduct() async {
@@ -339,15 +341,6 @@ class _HomeSellerScreenState extends State<HomeSellerScreen> {
                                                   fontFamily: "Poppins",
                                                 ),
                                               ),
-                                              if (role != "Seller")
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.favorite_border,
-                                                    color: Colors.red,
-                                                    size: 18,
-                                                  ),
-                                                  onPressed: () {},
-                                                ),
                                             ],
                                           ),
                                         ],

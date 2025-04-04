@@ -16,11 +16,6 @@ class SellerHomePage extends StatefulWidget {
 
 class _SellerHomePageState extends State<SellerHomePage> {
   int _selectedIndex = 0;
-  late String uid;
-  String email = "";
-  String role = "Unknow";
-  String fullName = "Loading...";
-  String avatar = "";
 
   final List<Widget> _screens = [
     HomeSellerScreen(),

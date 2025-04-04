@@ -1,10 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:order_food/Models/ProfileUser.dart';
-import 'package:order_food/View/Screen/OrderUser_Screen.dart';
+import 'package:order_food/View/Screen/FavoriteUser_Screen.dart';
 import 'package:order_food/View/Screen/ProfileUser_Screen.dart';
 import 'package:order_food/View/Screen/StatisticalUser_Screen.dart';
-import 'package:order_food/View/Widget/DrawerUser_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import '../../../ViewModels/Profile_ViewModel.dart';
 import '../../Screen/CartUser_Screen.dart';
@@ -29,7 +28,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   final List<Widget> _screens = [
     HomeUserScreen(),
-    OrderUserScreen(),
+    FavoriteUserScreen(),
     CartUserScreen(),
     StatisticaluserScreen(),
     ProfileUserScreen()
@@ -111,7 +110,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  AppBar _buildAppBar() {
+  AppBar? _buildAppBar() {
+    if (_selectedIndex != 0) return null;
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,

@@ -4,11 +4,12 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:order_food/Models/Favorite.dart';
 import 'package:order_food/Models/Product.dart';
 
 class Product_Service {
   static const String realTimeAPI =
-      "https://crud-firebase-7b852-default-rtdb.firebaseio.com/Product";
+      "https://test-login-lyasob-default-rtdb.firebaseio.com/Product";
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   Future<bool> InsertProduct(Product product, File selectedImage) async {
@@ -165,25 +166,146 @@ class Product_Service {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> SearchProductFormCategory(String categoryName) async {
-    try{
+  Future<List<Map<String, dynamic>>?> SearchProductFormCategory(
+      String categoryName) async {
+    try {
       final response = await http.get(Uri.parse("$realTimeAPI.json"));
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         final Map<String, dynamic>? data = jsonDecode(response.body);
-        if(data == null) return [];
+        if (data == null) return [];
 
-        List<Map<String, dynamic>> productData = data.entries.map((entry) => {
-          "ProductId" : entry.key, ...(entry.value as Map<String, dynamic>),
-        }).toList();
+        List<Map<String, dynamic>> productData = data.entries
+            .map((entry) => {
+                  "ProductId": entry.key,
+                  ...(entry.value as Map<String, dynamic>),
+                })
+            .toList();
 
-        productData = productData.where((product) => product["CategoryName"] == categoryName).toList();
+        productData = productData
+            .where((product) => product["CategoryName"] == categoryName)
+            .toList();
 
         return productData;
       }
-
-    }catch(e){
+    } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  Future<bool> InsertFavoriteProduct(Favorite favorite) async {
+    try {
+      Uri url = Uri.parse(
+          "https://test-login-lyasob-default-rtdb.firebaseio.com/Favorite/${favorite.favoriteId}.json");
+
+      Map<String, dynamic> favoriteData = {
+        "FavoriteId": favorite.favoriteId,
+        "Uid": favorite.uid,
+        "ProductId": favorite.productId,
+      };
+      final response = await http.put(
+        url,
+        body: jsonEncode(favoriteData),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> ShowAllFavoriteProduct(String uid) async {
+    try {
+      final response = await http.get(Uri.parse(
+          "https://test-login-lyasob-default-rtdb.firebaseio.com/Favorite.json"));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if (data == null) return [];
+        List<Map<String, dynamic>> favoriteData = data.entries
+            .map((entry) => {
+                  "FavoriteId": entry.key,
+                  ...(entry.value as Map<String, dynamic>),
+                })
+            .toList();
+        favoriteData =
+            favoriteData.where((favorite) => favorite["Uid"] == uid).toList();
+        return favoriteData;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> SearchProductFormProductId(
+      String productId) async {
+    try {
+      final response = await http.get(Uri.parse("$realTimeAPI.json"));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if (data == null) return [];
+
+        List<Map<String, dynamic>> productData = data.entries
+            .map((entry) => {
+                  "ProductId": entry.key,
+                  ...(entry.value as Map<String, dynamic>),
+                })
+            .toList();
+
+        productData = productData
+            .where((product) => product["ProductId"] == productId)
+            .toList();
+
+        return productData;
+      }
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> GetAllProductById(
+      List<String> productIds) async {
+    try {
+      if (productIds.isEmpty) return [];
+
+      final response = await http.get(Uri.parse("$realTimeAPI.json"));
+      if (response.statusCode != 200) return [];
+
+      final Map<String, dynamic>? data = jsonDecode(response.body);
+      if (data == null) return [];
+
+      return data.entries
+          .where((entry) => productIds.contains(entry.key))
+          .map((entry) => {
+                "ProductId": entry.key,
+                ...(entry.value as Map<String, dynamic>),
+              })
+          .toList();
+    } catch (e) {
+      print('Error in GetAllProductById: $e');
+      return [];
+    }
+  }
+
+  Future<bool> DeleteFavoriteProduct(String favoriteId) async {
+    try {
+      Uri url = Uri.parse(
+          "https://test-login-lyasob-default-rtdb.firebaseio.com/Favorite/$favoriteId.json");
+      final response = await http.delete(url);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

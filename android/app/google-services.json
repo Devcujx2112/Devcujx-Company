@@ -1,14 +1,33 @@
 {
   "project_info": {
-    "project_number": "82366284949",
-    "firebase_url": "https://crud-firebase-7b852-default-rtdb.firebaseio.com",
-    "project_id": "crud-firebase-7b852",
-    "storage_bucket": "crud-firebase-7b852.appspot.com"
+    "project_number": "251709212452",
+    "firebase_url": "https://test-login-lyasob-default-rtdb.firebaseio.com",
+    "project_id": "test-login-lyasob",
+    "storage_bucket": "test-login-lyasob.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82366284949:android:33569289b34b249b94479c",
+        "mobilesdk_app_id": "1:251709212452:android:b041fb1c9ecb400683d5b1",
+        "android_client_info": {
+          "package_name": "com.example.login"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3KOcwrqEZVOJoECk7eb3PHps6fP3dOis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251709212452:android:6e5334730eaf093383d5b1",
         "android_client_info": {
           "package_name": "com.example.order_food"
         }
@@ -16,7 +35,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBm7_74rxl3YZSxbX_jP2vZIVPe0iQwKM0"
+          "current_key": "AIzaSyC3KOcwrqEZVOJoECk7eb3PHps6fP3dOis"
         }
       ],
       "services": {
@@ -27,34 +46,15 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:82366284949:android:0b0bbde5920554dc94479c",
+        "mobilesdk_app_id": "1:251709212452:android:b2bc5b988e5d84fc83d5b1",
         "android_client_info": {
-          "package_name": "com.tungduong.crud_firebase"
+          "package_name": "com.mycompany.testlogin"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBm7_74rxl3YZSxbX_jP2vZIVPe0iQwKM0"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:82366284949:android:cb7007b5420a4ed294479c",
-        "android_client_info": {
-          "package_name": "com.tungduong.orderfood"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBm7_74rxl3YZSxbX_jP2vZIVPe0iQwKM0"
+          "current_key": "AIzaSyC3KOcwrqEZVOJoECk7eb3PHps6fP3dOis"
         }
       ],
       "services": {

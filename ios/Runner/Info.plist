@@ -8,6 +8,8 @@
 <string>Ứng dụng cần quyền truy cập camera để chụp ảnh.</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>Ứng dụng cần quyền truy cập thư viện ảnh để tải ảnh lên.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Ứng dụng cần truy cập vị trí của bạn</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

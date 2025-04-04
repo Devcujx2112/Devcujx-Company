@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:order_food/View/Page/Account/AccountManagement.dart';
 import 'package:order_food/View/Page/Category/CategoryManagement.dart';
+import 'package:order_food/View/Page/GoogleMap/GoogleMapManagement.dart';
 import 'package:order_food/View/Page/Login/Login_Page.dart';
 import 'package:order_food/View/Page/Order/OrderManagement.dart';
 import 'package:order_food/View/Page/Product/ProductManagement.dart';
@@ -81,6 +83,11 @@ class DrawerAdminScreen extends StatelessWidget {
           _buildDrawerItem(Icons.shopping_cart, "Quản lý sản phẩm", () {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => ProductManagement()),
+            );
+          }),
+          _buildDrawerItem(Icons.store_sharp, "Vị trí cửa hàng", () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => GoogleMapManagement()),
             );
           }),
           _buildDrawerItem(Icons.receipt_long, "Quản lý đơn hàng", () {

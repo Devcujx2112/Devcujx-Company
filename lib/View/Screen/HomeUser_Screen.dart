@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:order_food/View/Page/HomePage/NearestStore.dart';
+import 'package:order_food/View/Page/Product/ProductDetailUser.dart';
+import 'package:order_food/View/Page/HomePage/ViewAllProduct.dart';
 import 'package:order_food/View/Widget/ProductFormCategory.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Category_ViewModel.dart';
 import 'package:provider/provider.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
 import 'dart:async';
 
 class HomeUserScreen extends StatefulWidget {
+  const HomeUserScreen({super.key});
+
   @override
   State<HomeUserScreen> createState() => _HomeUserScreenState();
 }
@@ -16,7 +22,7 @@ class HomeUserScreen extends StatefulWidget {
 class _HomeUserScreenState extends State<HomeUserScreen> {
   final PageController _bannerController =
       PageController(viewportFraction: 0.85);
-  TextEditingController _searchProduct = TextEditingController();
+  final TextEditingController _searchProduct = TextEditingController();
   int _currentBanner = 0;
   Timer? _timer;
   final List<String> _bannerImages = [
@@ -26,8 +32,10 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   ];
   List<Map<String, dynamic>> productList = [];
   List<Map<String, dynamic>> categoryList = [];
+  Map<String, bool> favoriteStatus = {};
   bool _isLoading = true;
-  bool isFavorite = false;
+  int? selectedItems;
+  String uid = "";
 
   @override
   void initState() {
@@ -62,19 +70,68 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   void ShowAllData() async {
     final productVM = Provider.of<Product_ViewModel>(context, listen: false);
     final categoryVm = Provider.of<Category_ViewModel>(context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
     List<Map<String, dynamic>>? fetchedCategories =
-        await categoryVm.ShowAllCategory(_searchProduct.text) ?? [];
+        await categoryVm.ShowAllCategory("") ?? [];
     List<Map<String, dynamic>>? fetchedProduct =
         await productVM.ShowAllProduct(_searchProduct.text, "") ?? [];
     setState(() {
       categoryList = fetchedCategories;
+      productList = fetchedProduct;
+      uid = authVM.uid!;
+      _isLoading = false;
+    });
+  }
+
+  void showAllProductFromLowToHigh() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final productVM = Provider.of<Product_ViewModel>(context, listen: false);
+    List<Map<String, dynamic>>? fetchedProduct =
+        await productVM.ShowAllProduct(_searchProduct.text, "") ?? [];
+
+    if (fetchedProduct.isNotEmpty) {
+      fetchedProduct.sort((a, b) {
+        final priceA = a['Price'] ?? 0;
+        final priceB = b['Price'] ?? 0;
+        return priceA.compareTo(priceB);
+      });
+    }
+    setState(() {
+      productList = fetchedProduct;
+      _isLoading = false;
+    });
+  }
+
+  void showALlProductFormHighToLow() async {
+    setState(() {
+      _isLoading = true;
+    });
+    final productVM = Provider.of<Product_ViewModel>(context, listen: false);
+    List<Map<String, dynamic>>? fetchedProduct =
+        await productVM.ShowAllProduct(_searchProduct.text, "") ?? [];
+
+    if (fetchedProduct.isNotEmpty) {
+      fetchedProduct.sort((a, b) {
+        final priceA = a['Price'] ?? 0;
+        final priceB = b['Price'] ?? 0;
+        return priceB.compareTo(priceA);
+      });
+    }
+    setState(() {
       productList = fetchedProduct;
       _isLoading = false;
     });
   }
 
   void OneClickProductItems(Map<String, dynamic> product) {
-    // Xử lý khi click vào sản phẩm
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => ProductDetailUser(
+                  product: product,
+                )));
   }
 
   void OneClickCategoryItems(Map<String, dynamic> category) {
@@ -82,7 +139,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         context,
         MaterialPageRoute(
             builder: (_) => ProductFormCategory(
-                  categoryName: category,
+                  productData: category,
                 )));
   }
 
@@ -102,7 +159,6 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
             _buildSpecialOfferBanner(),
             const SizedBox(height: 16),
             _buildSectionTitleWithSeeAll("Danh mục đồ ăn", true),
-            const SizedBox(height: 0),
             _buildCategorySection(),
             const SizedBox(height: 5),
             _buildSectionTitleWithSeeAll("Danh sách sản phẩm", false),
@@ -133,7 +189,10 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
               : InkWell(
                   splashColor: Colors.grey.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
-                  onTap: () => print('Xem tất cả $title'),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => ViewAllProduct()));
+                  },
                   child: const Padding(
                     padding: EdgeInsets.all(4.0),
                     child: Text(
@@ -151,20 +210,126 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   }
 
   Widget _buildSearchBar() {
-    return TextField(
-      controller: _searchProduct,
-      decoration: InputDecoration(
-          hintText: "Bạn đang tìm kiếm gì?",
-          prefixIcon: const Icon(Icons.search, color: Colors.green, size: 28),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: BorderSide.none,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _searchProduct,
+            style: TextStyle(fontSize: 13, fontFamily: "Poppins"),
+            onChanged: (value) => ShowAllData(),
+            decoration: InputDecoration(
+              hintText: "Bạn đang tìm kiếm gì?",
+              hintStyle: TextStyle(fontSize: 13, fontFamily: "Poppins"),
+              prefixIcon:
+                  const Icon(Icons.search, color: Colors.green, size: 28),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            ),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 8, horizontal: 12)),
+        ),
+        IconButton(
+          icon: const Icon(Icons.filter_list, color: Colors.green),
+          onPressed: _showFilterDialog,
+        ),
+      ],
     );
+  }
+
+  void _showFilterDialog() {
+    showModalBottomSheet(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Bộ lọc sản phẩm",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.green,
+                        size: 25,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+
+                const Divider(
+                  height: 20,
+                  thickness: 2,
+                ),
+
+                ListTile(
+                  leading: Icon(Icons.location_on, color: Colors.green),
+                  title: Text(
+                    "Cửa hàng gần tôi nhất",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => NearestStore()));
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(Icons.arrow_upward, color: Colors.green),
+                  title: Text(
+                    "Giá: Từ thấp đến cao",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  trailing: selectedItems == 1
+                      ? Icon(Icons.check, color: Colors.green)
+                      : null,
+                  onTap: () {
+                    setState(() => selectedItems = 1);
+                    showAllProductFromLowToHigh();
+                    Navigator.pop(context);
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(Icons.arrow_downward, color: Colors.green),
+                  title: Text(
+                    "Giá: Từ cao đến thấp",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  trailing: selectedItems == 2
+                      ? Icon(Icons.check, color: Colors.green)
+                      : null,
+                  onTap: () {
+                    setState(() => selectedItems = 2);
+                    showALlProductFormHighToLow();
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+        context: context,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ));
   }
 
   Widget _buildSpecialOfferBanner() {
@@ -279,7 +444,9 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () => print('One Click Product ${product["ProductName"]}'),
+        onTap: () {
+          OneClickProductItems(product);
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -317,31 +484,6 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
                           fontSize: 10,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                // Thêm icon trái tim ở góc phải
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () {
-                      // Thay đổi trạng thái khi bấm
-                      isFavorite = !isFavorite;
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isFavorite
-                            ? Icons.favorite_outlined
-                            : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                        size: 20,
-                      ),
                     ),
                   ),
                 ),

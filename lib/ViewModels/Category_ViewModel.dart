@@ -53,7 +53,6 @@ class Category_ViewModel extends ChangeNotifier{
     try {
       _isLoading = true;
       _errorMessage = null;
-      notifyListeners();
 
       List<Map<String, dynamic>> category = await category_service.ShowAllCategory(query);
       if(category == null){

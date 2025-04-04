@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:order_food/Models/ProfileSeller.dart';
@@ -31,14 +32,14 @@ class Profile_ViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    try{
-      if(uid.isEmpty){
+    try {
+      if (uid.isEmpty) {
         _isLoading = false;
         _SetError("Không tìm thấy uid của tài khoản (Vm)");
         return false;
       }
       String? loadData = await profile_service.loadEmailService(uid);
-      if(loadData == null){
+      if (loadData == null) {
         _isLoading = false;
         _SetError("Không lấy được Email");
         return false;
@@ -48,16 +49,15 @@ class Profile_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
-
-    }catch(e){
+    } catch (e) {
       _isLoading = false;
       _SetError("Lỗi khi load Email (VM) $e");
       return false;
     }
   }
 
-  Future<bool> CreateProfileUserVM(
-      ProfileUser profile, File? selectedImage) async {
+  Future<bool> CreateProfileUserVM(ProfileUser profile,
+      File? selectedImage) async {
     try {
       _isLoading = true;
       _errorMessage = null;
@@ -67,7 +67,7 @@ class Profile_ViewModel extends ChangeNotifier {
         print("Không có ảnh được chọn, sử dụng ảnh mặc định.");
 
         ByteData byteData =
-            await rootBundle.load("asset/images/avatar_default.jpg");
+        await rootBundle.load("asset/images/avatar_default.jpg");
         Uint8List imageData = byteData.buffer.asUint8List();
         File tempFile = File("${Directory.systemTemp.path}/avatar_default.jpg");
         await tempFile.writeAsBytes(imageData);
@@ -86,7 +86,7 @@ class Profile_ViewModel extends ChangeNotifier {
           status: profile.status,
           createAt: profile.createAt);
       bool success =
-          await profile_service.CreateProfileUser(profile, selectedImage);
+      await profile_service.CreateProfileUser(profile, selectedImage);
       if (success == false) {
         _isLoading = false;
         print('KHông thể tạo profile');
@@ -105,8 +105,8 @@ class Profile_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> CreateProfileSeller(
-      ProfileSeller profileSeller, File selectedImage) async {
+  Future<bool> CreateProfileSeller(ProfileSeller profileSeller,
+      File selectedImage) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -154,15 +154,15 @@ class Profile_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> SaveLocationStore(
-      String uid, double latitude, double longitude) async {
+  Future<bool> SaveLocationStore(String uid, double latitude,
+      double longitude) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       bool success =
-          await profile_service.SaveLocationStore(uid, latitude, longitude);
+      await profile_service.SaveLocationStore(uid, latitude, longitude);
       if (success == false) {
         _isLoading = false;
         _SetError("Lưu vị trí cửa hàng thất bại");
@@ -172,6 +172,7 @@ class Profile_ViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       print(e);
+      notifyListeners();
       return false;
     }
   }
@@ -194,6 +195,7 @@ class Profile_ViewModel extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _SetError("Lỗi khi lấy vị trí cửa hàng : $e");
+      notifyListeners();
       return null;
     }
   }
@@ -214,6 +216,7 @@ class Profile_ViewModel extends ChangeNotifier {
       }
     } catch (e) {
       _SetError("Lỗi khi nhận dữ liệu từ database $e");
+      notifyListeners();
       return null;
     }
   }
@@ -229,13 +232,12 @@ class Profile_ViewModel extends ChangeNotifier {
         return user;
       } else {
         _isLoading = false;
-        print('VM Không tìm thấy dữ liệu cửa hàng');
         _SetError("Không tìm thấy dữ liệu cửa hàng");
         return null;
       }
     } catch (e) {
-      print('Vm Lỗi khi nhận dữ liệu từ database $e');
       _SetError("Lỗi khi nhận dữ liệu từ database $e");
+      notifyListeners();
       return null;
     }
   }
@@ -275,8 +277,9 @@ class Profile_ViewModel extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      List<Map<String, dynamic>> accounts = await profile_service.LoadAllAccount();
-      if(accounts == null){
+      List<Map<String, dynamic>> accounts = await profile_service
+          .LoadAllAccount();
+      if (accounts == null) {
         _isLoading = false;
         _SetError("Không có Account");
         return null;
@@ -284,21 +287,21 @@ class Profile_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return accounts;
-
-    }catch(e){
+    } catch (e) {
       _SetError('Lỗi khi lấy tài khoản $e');
+      notifyListeners();
       return null;
     }
   }
 
-  Future<bool> UpdateStatusAccount(String uid, String status) async{
-    try{
+  Future<bool> UpdateStatusAccount(String uid, String status) async {
+    try {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
 
       bool success = await profile_service.UpdateStatusAccount(uid, status);
-      if(success == false){
+      if (success == false) {
         _isLoading = false;
         _SetError("Lỗi khi chỉnh sửa thông tin User");
         return false;
@@ -307,10 +310,81 @@ class Profile_ViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return true;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi update status Account $e");
+      notifyListeners();
       return false;
     }
+  }
+
+  Future<List<Map<String, dynamic>>?> ShowAllLocationStore() async {
+    try {
+      List<Map<String, dynamic>> dataLocation = await profile_service
+          .ShowAllLocationStore();
+      if (dataLocation == null) {
+        _SetError("Không tìm thấy vị trí của cửa hàng");
+        return null;
+      }
+
+      notifyListeners();
+      return dataLocation;
+    } catch (e) {
+      _SetError("Lỗi khi tải vị trí của cửa hàng");
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> ShowStoreNear(
+      double latitudeUser,
+      double longitudeUser,
+      ) async {
+    try {
+      List<Map<String, dynamic>>? dataStore = await profile_service.ShowAllLocationStore();
+
+      if (dataStore == null || dataStore.isEmpty) {
+        _SetError("Không tìm thấy cửa hàng nào");
+        return null;
+      }
+
+      for (var store in dataStore) {
+        final lat = store['latitude'] as double? ?? 0;
+        final lng = store['longitude'] as double? ?? 0;
+        final distance = _calculateDistance(latitudeUser, longitudeUser, lat, lng);
+        store['distance_km'] = double.parse(distance.toStringAsFixed(2));
+      }
+
+      dataStore.sort((a, b) => (a['distance_km'] as double).compareTo(b['distance_km'] as double));
+
+      final nearestStores = dataStore.take(2).toList();
+
+      return nearestStores.map((store) {
+        store['distance_text'] = '${store['distance_km']} km';
+        return store;
+      }).toList();
+
+    } catch (e) {
+      _SetError("Lỗi khi tìm cửa hàng: ${e.toString()}");
+      return null;
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2,
+      double lon2) {
+    const R = 6371.0;
+    final dLat = _toRadians(lat2 - lat1);
+    final dLon = _toRadians(lon2 - lon1);
+
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2);
+
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return R * c;
+  }
+
+  double _toRadians(double degree) {
+    return degree * pi / 180;
   }
 
   void _SetError(String message) {

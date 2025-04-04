@@ -9,7 +9,7 @@ import 'package:order_food/Models/ProfileUser.dart';
 
 class Profile_Service {
   static const String realTimeAPI =
-      "https://crud-firebase-7b852-default-rtdb.firebaseio.com";
+      "https://test-login-lyasob-default-rtdb.firebaseio.com";
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   Future<String?> loadEmailService(String uid) async {
@@ -303,6 +303,25 @@ class Profile_Service {
     }catch(e){
       print(e);
       return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> ShowAllLocationStore() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('locations')
+          .get();
+
+      List<Map<String, dynamic>> locations = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
+      return locations;
+    } catch (e) {
+      print("Lỗi khi lấy dữ liệu locations: $e");
+      throw e;
     }
   }
 }

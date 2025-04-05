@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Enum đại diện cho 3 trạng thái của thông báo
 enum DialogType { warning, success, error }
 
 void showDialogMessage(BuildContext context, String message, DialogType type) {
@@ -30,7 +29,6 @@ class DialogMessageForm extends StatelessWidget {
 
   const DialogMessageForm({super.key, required this.message, required this.type});
 
-  /// Hàm lấy màu sắc dựa vào trạng thái
   Color get _color {
     switch (type) {
       case DialogType.warning:
@@ -42,7 +40,6 @@ class DialogMessageForm extends StatelessWidget {
     }
   }
 
-  /// Hàm lấy icon tương ứng với trạng thái
   IconData get _icon {
     switch (type) {
       case DialogType.warning:
@@ -54,7 +51,6 @@ class DialogMessageForm extends StatelessWidget {
     }
   }
 
-  /// Hàm lấy tiêu đề tương ứng với trạng thái
   String get _title {
     switch (type) {
       case DialogType.warning:

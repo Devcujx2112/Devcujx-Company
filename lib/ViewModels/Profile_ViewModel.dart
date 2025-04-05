@@ -204,7 +204,6 @@ class Profile_ViewModel extends ChangeNotifier {
     try {
       _isLoading = true;
       _errorMessage = null;
-      notifyListeners();
 
       ProfileUser? user = await profile_service.GetProfileUser(uid);
       if (user != null) {
@@ -385,6 +384,23 @@ class Profile_ViewModel extends ChangeNotifier {
 
   double _toRadians(double degree) {
     return degree * pi / 180;
+  }
+
+  Future<bool> UpdateProfile(String uid, String fullName, String phone,
+      String age, String gender, String imageOld, File? newImage) async{
+    try{
+      _errorMessage = null;
+      bool isSuccess = await profile_service.UpdateProfileUser(uid, fullName, phone, age, gender, imageOld, newImage);
+      if(isSuccess == false){
+        _SetError("Sửa thông tin cá nhân thất bại");
+        return false;
+      }
+      return true;
+
+    }catch(e){
+      print(e);
+      return false;
+    }
   }
 
   void _SetError(String message) {

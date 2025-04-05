@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
+import 'package:order_food/View/Page/Profile/ProfileUserAdmin_Detail.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 
-import '../Profile/ProfileSeller_Detail.dart';
+import '../Profile/ProfileSellerAdmin_Detail.dart';
 
 class AccountManagement extends StatefulWidget {
   const AccountManagement({super.key});

@@ -76,6 +76,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
         progressIndicator:
             LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
         child: Scaffold(
+          backgroundColor: Colors.grey[100],
           appBar: AppBar(
             automaticallyImplyLeading: false,
             backgroundColor: Colors.green,

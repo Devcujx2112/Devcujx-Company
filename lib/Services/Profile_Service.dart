@@ -37,15 +37,15 @@ class Profile_Service {
     }
   }
 
-  Future<bool> CreateProfileUser(ProfileUser profile,
-      File selectedImage) async {
+  Future<bool> CreateProfileUser(
+      ProfileUser profile, File selectedImage) async {
     try {
-        //Firebase Storage
-        String fileName = "Profile/User/${profile.uid}.jpg";
-        Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-        UploadTask uploadTask = storageRef.putFile(selectedImage);
-        TaskSnapshot snapshot = await uploadTask;
-        profile.image = await snapshot.ref.getDownloadURL();
+      //Firebase Storage
+      String fileName = "Profile/User/${profile.uid}.jpg";
+      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+      UploadTask uploadTask = storageRef.putFile(selectedImage);
+      TaskSnapshot snapshot = await uploadTask;
+      profile.image = await snapshot.ref.getDownloadURL();
 
       //Realtime Database
       Uri url = Uri.parse("$realTimeAPI/Profile/${profile.uid}.json");
@@ -81,8 +81,8 @@ class Profile_Service {
     }
   }
 
-  Future<bool> CreateProfileSeller(ProfileSeller profileSeller,
-      File selectedImage) async {
+  Future<bool> CreateProfileSeller(
+      ProfileSeller profileSeller, File selectedImage) async {
     try {
       //Firebase Storage
       String fileName = "Profile/Seller/${profileSeller.uid}.jpg";
@@ -126,8 +126,8 @@ class Profile_Service {
     }
   }
 
-  Future<bool> SaveLocationStore(String uid, double latitude,
-      double longitude) async {
+  Future<bool> SaveLocationStore(
+      String uid, double latitude, double longitude) async {
     try {
       await FirebaseFirestore.instance
           .collection('locations')
@@ -267,8 +267,8 @@ class Profile_Service {
 
         return data.entries
             .where((entry) =>
-        (entry.value as Map<String, dynamic>)["Role"]?.toString() !=
-            "Admin")
+                (entry.value as Map<String, dynamic>)["Role"]?.toString() !=
+                "Admin")
             .map((entry) {
           return {
             "id": entry.key, // Lưu lại key làm ID
@@ -285,7 +285,7 @@ class Profile_Service {
   }
 
   Future<bool> UpdateStatusAccount(String uid, String status) async {
-    try{
+    try {
       final String requestUrl = "$realTimeAPI/Profile/$uid.json";
       final String requestUrl2 = "$realTimeAPI/Account/$uid.json";
       final response = await http.patch(Uri.parse(requestUrl),
@@ -300,7 +300,7 @@ class Profile_Service {
         print("Failed to update role: ${response.body}");
         return false;
       }
-    }catch(e){
+    } catch (e) {
       print(e);
       return false;
     }
@@ -308,9 +308,8 @@ class Profile_Service {
 
   Future<List<Map<String, dynamic>>> ShowAllLocationStore() async {
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('locations')
-          .get();
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('locations').get();
 
       List<Map<String, dynamic>> locations = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -322,6 +321,47 @@ class Profile_Service {
     } catch (e) {
       print("Lỗi khi lấy dữ liệu locations: $e");
       throw e;
+    }
+  }
+
+  Future<bool> UpdateProfileUser(String uid, String fullName, String phone,
+      String age, String gender, String imageOld, File? newImage) async {
+    try {
+      String imageUrl = imageOld;
+      if (newImage != null) {
+        try {
+          if (imageOld.isNotEmpty) {
+            Reference oldImageRef =
+                FirebaseStorage.instance.refFromURL(imageOld);
+            await oldImageRef.delete();
+          }
+          Reference newImageRef =
+              FirebaseStorage.instance.ref().child("Profile/User/$uid.jpg");
+          UploadTask uploadTask = newImageRef.putFile(newImage);
+          TaskSnapshot snapshot = await uploadTask;
+          imageUrl = await snapshot.ref.getDownloadURL();
+        } catch (e) {
+          print("Lỗi khi upload ảnh $e");
+          return false;
+        }
+      }
+      Map<String, dynamic> profileData = {
+        "FullName": fullName,
+        "Phone": phone,
+        "Year": age,
+        "Gender": gender,
+        "Image": imageUrl
+      };
+      final response = await http.patch(
+        Uri.parse("$realTimeAPI/Profile/$uid.json"),
+        body: jsonEncode(profileData),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

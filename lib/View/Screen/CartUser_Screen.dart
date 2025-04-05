@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:order_food/View/Widget/Checkout_Form.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:order_food/ViewModels/ShoppingCart_ViewModel.dart';
+import 'package:provider/provider.dart';
 
 class CartUserScreen extends StatefulWidget {
   const CartUserScreen({super.key});
@@ -10,217 +15,172 @@ class CartUserScreen extends StatefulWidget {
 }
 
 class _CartUserScreenState extends State<CartUserScreen> {
-  bool _isLoading = false;
-  double _totalPrice = 0.0;
-
-  // Danh sách sản phẩm giả lập
-  List<Map<String, dynamic>> _cartItems = [
-    {
-      'id': '1',
-      'name': 'Bánh mì thịt nướng',
-      'price': 25000.0,
-      'quantity': 2,
-      'image': 'https://via.placeholder.com/150',
-    },
-    {
-      'id': '2',
-      'name': 'Cà phê sữa đá',
-      'price': 20000.0,
-      'quantity': 1,
-      'image': 'https://via.placeholder.com/150',
-    },
-    {
-      'id': '3',
-      'name': 'Phở bò',
-      'price': 45000.0,
-      'quantity': 3,
-      'image': 'https://via.placeholder.com/150',
-    },
-  ];
+  bool _isLoading = true;
+  double _totalPrice = 0;
+  List<Map<String, dynamic>> _cartItems = [];
+  String uid = "";
 
   @override
   void initState() {
     super.initState();
-    _calculateTotal();
+    LoadAllData();
   }
 
-  void _calculateTotal() {
-    _totalPrice = 0.0;
-    for (var item in _cartItems) {
-      _totalPrice += (item['price'] * item['quantity']);
-    }
-    setState(() {});
-  }
-
-  void _removeItem(String id) {
-    setState(() {
-      _cartItems.removeWhere((item) => item['id'] == id);
-      _calculateTotal();
-    });
-  }
-
-  void _updateQuantity(String id, int newQuantity) {
-    setState(() {
-      final index = _cartItems.indexWhere((item) => item['id'] == id);
-      if (index != -1) {
-        _cartItems[index]['quantity'] = newQuantity;
+  void LoadAllData() async {
+    final shoppingCartVM =
+        Provider.of<ShoppingCart_ViewModel>(context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    List<Map<String, dynamic>>? data =
+        await shoppingCartVM.ShowAllProductFormShoppingCart(authVM.uid!);
+    if (data!.isNotEmpty) {
+      setState(() {
+        _cartItems = data;
+        uid = authVM.uid!;
         _calculateTotal();
-      }
-    });
-  }
-
-  void _checkout() {
-    setState(() => _isLoading = true);
-    // Giả lập quá trình thanh toán
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Thanh toán thành công!')),
-      );
-    });
+        _isLoading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
-      inAsyncCall: _isLoading,
-      progressIndicator:
-          LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          centerTitle: true,
-          title: Text(
-            "Giỏ hàng",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          backgroundColor: Colors.green,
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: _cartItems.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.shopping_cart_outlined,
-                              size: 60, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text(
-                            'Giỏ hàng trống',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+        inAsyncCall: _isLoading,
+        progressIndicator:
+            LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
+        child: Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: _buildAppBar(),
+          body: Column(
+            children: [
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => _buildCartItem(_cartItems[index]),
+                        childCount: _cartItems.length,
                       ),
-                    )
-                  : ListView.builder(
-                      padding: EdgeInsets.all(16),
-                      itemCount: _cartItems.length,
-                      itemBuilder: (context, index) {
-                        final item = _cartItems[index];
-                        return _buildCartItem(item);
-                      },
                     ),
-            ),
-            if (_cartItems.isNotEmpty) _buildCheckoutSection(),
-          ],
-        ),
-      ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  ],
+                ),
+              ),
+              _buildCheckoutPanel(),
+            ],
+          ),
+        ));
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.green,
+      title: Text('Giỏ hàng',
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white)),
+      centerTitle: true,
+      automaticallyImplyLeading: false,
     );
   }
 
   Widget _buildCartItem(Map<String, dynamic> item) {
-    return Card(
-      margin: EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+    return Dismissible(
+      key: Key(item['CartId']),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: Icon(Icons.delete, color: Colors.white),
       ),
-      child: Padding(
-        padding: EdgeInsets.all(12),
-        child: Row(
+      onDismissed: (direction) => _removeItem(item['CartId']),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Column(
           children: [
-            // Hình ảnh sản phẩm
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                item['image'],
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: 80,
-                  height: 80,
-                  color: Colors.grey[200],
-                  child: Icon(Icons.fastfood, color: Colors.grey),
-                ),
-              ),
-            ),
-            SizedBox(width: 12),
-            // Thông tin sản phẩm
-            Expanded(
-              child: Column(
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item['name'],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  // Hình ảnh
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      item['Image'],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (_, child, progress) => progress == null
+                          ? child
+                          : _buildShimmerEffect(80, 80),
+                      errorBuilder: (_, __, ___) => _buildPlaceholder(80, 80),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    '${item['price'].toStringAsFixed(0).replaceAllMapped(
-                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                          (Match m) => '${m[1]},',
-                        )}đ',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
+                  const SizedBox(width: 12),
+                  // Thông tin
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['ProductName'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.store,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              item["StoreName"],
+                              style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${_formatPrice(item['Price'])}đ',
+                              style: TextStyle(
+                                color: Colors.green[700],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            _buildQuantityControl(item),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-            // Điều chỉnh số lượng
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () {
-                    if (item['quantity'] > 1) {
-                      _updateQuantity(item['id'], item['quantity'] - 1);
-                    }
-                  },
-                ),
-                Text(
-                  item['quantity'].toString(),
-                  style: TextStyle(fontSize: 16),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    _updateQuantity(item['id'], item['quantity'] + 1);
-                  },
-                ),
-              ],
-            ),
-            // Nút xóa
-            IconButton(
-              icon: Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () => _removeItem(item['id']),
             ),
           ],
         ),
@@ -228,61 +188,230 @@ class _CartUserScreenState extends State<CartUserScreen> {
     );
   }
 
-  Widget _buildCheckoutSection() {
+  Widget _buildQuantityControl(Map<String, dynamic> item) {
     return Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),),
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.remove,
+              size: 25,
+              color: Colors.green,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(minWidth: 36),
+            onPressed: () =>
+                _updateQuantity(item['CartId'], item['Quantity'] - 1),
+          ),
+          Text(item['Quantity'].toString(),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.grey[700])),
+          IconButton(
+            icon: Icon(
+              Icons.add,
+              size: 25,
+              color: Colors.green,
+            ),
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints(minWidth: 36),
+            onPressed: () =>
+                _updateQuantity(item['CartId'], item['Quantity'] + 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCheckoutPanel() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          )
+        ],
+      ),
       child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Tổng cộng:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '${_totalPrice.toStringAsFixed(0).replaceAllMapped(
-                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                          (Match m) => '${m[1]},',
-                        )}đ',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: _checkout,
-                  child: Text(
-                    'THANH TOÁN',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+              Text('Tạm tính', style: TextStyle(color: Colors.grey[700])),
+              Text(_formatPrice(_totalPrice),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Tổng cộng',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                '${_formatPrice(_totalPrice)}đ',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green[700],
                 ),
               ),
             ],
           ),
-        );
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              onPressed: _checkout,
+              child: Text(
+                'THANH TOÁN',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _removeItem(String id) async {
+    final shoppingCartVM =
+        Provider.of<ShoppingCart_ViewModel>(context, listen: false);
+
+    if (id.isEmpty) {
+      showDialogMessage(context,
+          "Không tìm thấy id của sản phẩm trong giỏ hàng", DialogType.warning);
+    } else {
+      bool isSuccess = await shoppingCartVM.DeleteProductFormCart(id);
+      if (isSuccess) {
+        setState(() {
+          _cartItems.removeWhere((item) => item['CartId'] == id);
+          _calculateTotal();
+        });
+        showDialogMessage(
+            context, "Đã xóa sản phẩm khỏi giỏ hàng", DialogType.success);
+      } else {
+        showDialogMessage(
+            context, "Lỗi: ${shoppingCartVM.errorMessage}", DialogType.error);
+      }
+    }
+  }
+
+  void _updateQuantity(String id, int newQuantity) async {
+    final shoppingCartVM =
+        Provider.of<ShoppingCart_ViewModel>(context, listen: false);
+
+    if (newQuantity < 1) {
+      if (id.isEmpty) {
+        showDialogMessage(
+            context,
+            "Không tìm thấy id của sản phẩm trong giỏ hàng",
+            DialogType.warning);
+      } else {
+        bool isSuccess = await shoppingCartVM.DeleteProductFormCart(id);
+        if (isSuccess) {
+          setState(() {
+            _cartItems.removeWhere((item) => item['CartId'] == id);
+            _calculateTotal();
+          });
+          showDialogMessage(
+              context, "Đã xóa sản phẩm khỏi giỏ hàng", DialogType.success);
+        } else {
+          showDialogMessage(
+              context, "Lỗi: ${shoppingCartVM.errorMessage}", DialogType.error);
+        }
+      }
+    }
+    else{
+      if (id.isEmpty) {
+        showDialogMessage(
+            context,
+            "Không tìm thấy id của sản phẩm trong giỏ hàng",
+            DialogType.warning);
+      }
+      else{
+        bool isSuccess = await shoppingCartVM.UpdateQuantity(id, newQuantity);
+        if (isSuccess) {
+          setState(() {
+            final index = _cartItems.indexWhere((item) => item['CartId'] == id);
+            if (index != -1) {
+              _cartItems[index]['Quantity'] = newQuantity;
+              _calculateTotal();
+            }
+          });
+        } else {
+          showDialogMessage(
+              context, "Lỗi: ${shoppingCartVM.errorMessage}", DialogType.error);
+        }
+      }
+    }
+  }
+
+  void _calculateTotal() {
+    _totalPrice = _cartItems.fold(
+        0, (sum, item) => sum + (item['Price'] * item['Quantity']));
+  }
+
+  void _checkout() {
+    setState(() => _isLoading = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() => _isLoading = false);
+    });
+    showDialog(
+        context: context,
+        builder: (context) => CheckoutForm(
+              totalAmount: 25000,
+            ));
+  }
+
+  String _formatPrice(dynamic price) {
+    if (price is int || price is double) {
+      return price.toStringAsFixed(0).replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]},',
+          );
+    }
+    return '0';
+  }
+
+  Widget _buildShimmerEffect(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.red,
+    );
+  }
+
+  Widget _buildPlaceholder(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey[200],
+      child: Icon(Icons.fastfood, color: Colors.grey[400]),
+    );
   }
 }

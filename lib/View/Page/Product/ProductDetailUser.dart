@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
+import 'package:order_food/ViewModels/ShoppingCart_ViewModel.dart';
 import 'package:provider/provider.dart';
 
 class ProductDetailUser extends StatefulWidget {
@@ -31,9 +32,9 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
     List<Map<String, dynamic>>? productListId =
         await productVM.ShowAllFavoriteProduct(authVM.uid!) ?? [];
     List<String> productId =
-        productListId.map((key) => key["ProductId"].toString()).toList();
+    productListId.map((key) => key["ProductId"].toString()).toList();
     bool isFavorite =
-        productId.contains(widget.product["ProductId"].toString());
+    productId.contains(widget.product["ProductId"].toString());
     String? fav = await productVM.GetFavoriteId(
         productListId, widget.product["ProductId"], authVM.uid!);
     if (isFavorite) {
@@ -41,7 +42,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
         _isFavorite = true;
       });
     }
-    if (fav!.isNotEmpty) {
+    if (fav != null) {
       favoriteId = fav;
     }
   }
@@ -66,16 +67,18 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.green,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child:
+                    placeholder: (context, url) =>
+                        Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.green,
+                          ),
+                        ),
+                    errorWidget: (context, url, error) =>
+                        Container(
+                          color: Colors.grey[200],
+                          child:
                           Icon(Icons.image_not_supported, color: Colors.grey),
-                    ),
+                        ),
                   ),
                   Positioned(
                     bottom: 10,
@@ -159,7 +162,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                       SizedBox(width: 10),
                       Container(
                         padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.green[50],
                           borderRadius: BorderRadius.circular(12),
@@ -204,7 +207,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                             children: [
                               TextSpan(
                                 text:
-                                    _formatPrice(widget.product['Price'] ?? 0),
+                                _formatPrice(widget.product['Price'] ?? 0),
                                 style: TextStyle(
                                   fontSize: 24,
                                   color: Colors.green,
@@ -289,8 +292,10 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                     size: 22,
                     color: Colors.green,
                   ),
-                  onPressed: () => setState(
-                      () => _quantity = _quantity > 1 ? _quantity - 1 : 1),
+                  onPressed: () =>
+                      setState(
+                              () =>
+                          _quantity = _quantity > 1 ? _quantity - 1 : 1),
                 ),
                 Text('$_quantity',
                     style: TextStyle(
@@ -357,7 +362,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                     DialogType.warning);
               } else {
                 bool isSuccess =
-                    await productVm.DeleteFavoritProduct(favoriteId);
+                await productVm.DeleteFavoritProduct(favoriteId);
                 if (isSuccess) {
                   _isFavorite = false;
                   Navigator.pop(context, true);
@@ -395,25 +400,36 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
   String _formatPrice(dynamic price) {
     if (price is int || price is double) {
       return price.toStringAsFixed(0).replaceAllMapped(
-            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
             (Match m) => '${m[1]},',
-          );
+      );
     }
     return '0';
   }
 
-  void _addToCart() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Đã thêm ${widget.product['ProductName']} vào giỏ hàng',
-          style: TextStyle(fontFamily: 'Poppins'),
-        ),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
+  void _addToCart() async {
+    final shoppingVM = Provider.of<ShoppingCart_ViewModel>(
+        context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context,listen: false);
+    if (widget.product.isEmpty && authVM.uid!.isEmpty) {
+      showDialogMessage(
+          context, "Thông tin sản phẩm không đầy đủ", DialogType.warning);
+    }
+    else {
+      bool isSuccess = await shoppingVM.InsertProductShoppingCart(
+          widget.product["ProductName"],
+          widget.product["StoreName"],
+          _quantity,
+          widget.product["Price"],
+          widget.product["Image"],
+          authVM.uid!,
+          widget.product["ProductId"]);
+      if(isSuccess){
+        Navigator.pop(context,true);
+        showDialogMessage(context, "Thêm sản phẩm vào giỏ hàng thành công", DialogType.success);
+      }else{
+        showDialogMessage(context, "Lỗi: ${shoppingVM.errorMessage}", DialogType.error);
+      }
+    }
   }
 }

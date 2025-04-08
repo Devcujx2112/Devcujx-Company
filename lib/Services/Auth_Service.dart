@@ -136,8 +136,8 @@ class AuthService {
                 "Admin")
             .map((entry) {
           return {
-            "id": entry.key, // Lưu lại key làm ID
-            ...entry.value as Map<String, dynamic>, // Ép kiểu dữ liệu
+            "id": entry.key,
+            ...entry.value as Map<String, dynamic>,
           };
         }).toList();
       } else {
@@ -148,4 +148,29 @@ class AuthService {
       return [];
     }
   }
+
+  Future<bool> ChangePassword(
+      String email, String oldPassword, String newPassword) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        return false;
+      }
+      try {
+        await user.reauthenticateWithCredential(
+          EmailAuthProvider.credential(email: email, password: oldPassword),
+        );
+
+        await user.updatePassword(newPassword);
+        return true;
+      } catch (e) {
+        print("Lỗi khi xác thực lại hoặc cập nhật mật khẩu: $e");
+        return false;
+      }
+    } catch (e) {
+      print("Lỗi không xác định: $e");
+      return false;
+    }
+  }
+
 }

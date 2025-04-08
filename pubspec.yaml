@@ -53,6 +53,8 @@ dependencies:
   modal_progress_hud_nsn: ^0.5.1
   cached_network_image: ^3.4.1
   geolocator: ^13.0.4
+  url_launcher: ^6.3.1
+  flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
   flutter_test:

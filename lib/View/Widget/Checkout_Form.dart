@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class CheckoutForm extends StatefulWidget {
   final double totalAmount;
@@ -21,7 +22,6 @@ class _CheckoutFormState extends State<CheckoutForm> {
   String _paymentMethod = 'cod';
   final _deliveryFee = 15000;
 
-  // FocusNodes để quản lý trạng thái focus của các TextField
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _phoneFocusNode = FocusNode();
   final FocusNode _addressFocusNode = FocusNode();
@@ -398,7 +398,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
         'deliveryFee': _deliveryFee,
         'total': widget.totalAmount + _deliveryFee,
       };
-      Navigator.of(context).pop(orderInfo);
+      // Navigator.of(context).pop(orderInfo);
     }
   }
 }

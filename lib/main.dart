@@ -18,7 +18,7 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => Profile_ViewModel()),
       ChangeNotifierProvider(create: (context) => Category_ViewModel()),
       ChangeNotifierProvider(create: (context) => Product_ViewModel()),
-      ChangeNotifierProvider(create: (contex) => ShoppingCart_ViewModel())
+      ChangeNotifierProvider(create: (contex) => ShoppingCart_ViewModel()),
     ],
     child: CompanyDev(),
   ));

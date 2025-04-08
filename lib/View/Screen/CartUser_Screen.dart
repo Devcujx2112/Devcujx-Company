@@ -19,6 +19,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
   double _totalPrice = 0;
   List<Map<String, dynamic>> _cartItems = [];
   String uid = "";
+  bool _isNull = false;
 
   @override
   void initState() {
@@ -40,6 +41,12 @@ class _CartUserScreenState extends State<CartUserScreen> {
         _isLoading = false;
       });
     }
+    if(data.isEmpty){
+      setState(() {
+        _isNull = true;
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -51,7 +58,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
         child: Scaffold(
           backgroundColor: Colors.grey[50],
           appBar: _buildAppBar(),
-          body: Column(
+          body: _isNull ? Center(child: Text("Không có sản phẩm nào trong giỏ hàng"),) : Column(
             children: [
               Expanded(
                 child: CustomScrollView(

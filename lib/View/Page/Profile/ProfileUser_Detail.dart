@@ -83,7 +83,7 @@ class _ProfileUserDetailState extends State<ProfileUserDetail> {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context,true),
             ),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
@@ -333,7 +333,7 @@ class _ProfileUserDetailState extends State<ProfileUserDetail> {
             setState(() {
               _isLoading = true;
             });
-            bool isSuccess = await profileVM.UpdateProfile(
+            bool isSuccess = await profileVM.UpdateProfileUser(
                 widget.profileUser.uid,
                 _fullNameController.text,
                 _phoneController.text,

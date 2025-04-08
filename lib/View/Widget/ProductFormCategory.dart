@@ -155,34 +155,6 @@ class _ProductFormCategoryState extends State<ProductFormCategory> {
                                         ),
                                       ),
                                     ),
-                                    // Thêm icon trái tim ở góc phải
-                                    Positioned(
-                                      top: 8,
-                                      right: 8,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // Thay đổi trạng thái khi bấm
-                                          isFavorite = !isFavorite;
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(3),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                Colors.white.withOpacity(0.5),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            isFavorite
-                                                ? Icons.favorite_outlined
-                                                : Icons.favorite_border,
-                                            color: isFavorite
-                                                ? Colors.red
-                                                : Colors.grey,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                                 Padding(

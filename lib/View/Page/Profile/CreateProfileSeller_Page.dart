@@ -104,7 +104,7 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
                       _buildTextField(controller: txtFullName),
                       const SizedBox(height: 10),
                       _buildLabel("Phone Number"),
-                      _buildTextField(controller: txtPhone, isNumber: true),
+                      _buildTextField(controller: txtPhone, isNumber: true,maxlenght: 10),
                       const SizedBox(height: 10),
                       _buildLabel("Address"),
                       _buildTextField(controller: txtAddress),
@@ -281,13 +281,16 @@ Widget _buildLabel(String text) {
 Widget _buildTextField(
     {required TextEditingController controller,
     bool isNumber = false,
-    int lenght = 1}) {
+    int lenght = 1,
+    int? maxlenght}) {
   return TextField(
     maxLines: lenght,
     style: TextStyle(fontSize: 13,color: Colors.black,fontFamily: "Poppins"),
     keyboardType: isNumber ? TextInputType.number : TextInputType.text,
     inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
+    maxLength: maxlenght,
     decoration: InputDecoration(
+      counterText: "",
       filled: true,
       fillColor: Colors.grey[100],
       hintText: isNumber ? "Enter your phone number" : "Enter details",

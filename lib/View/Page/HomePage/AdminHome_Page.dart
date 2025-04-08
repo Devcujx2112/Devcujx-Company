@@ -92,7 +92,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
               size: 25,
               color:
                   _selectedIndex == 2 ? Colors.white : const Color(0xFF4CAF50)),
-          Icon(Icons.list_alt,
+          Icon(Icons.assignment,
               size: 25,
               color:
                   _selectedIndex == 3 ? Colors.white : const Color(0xFF4CAF50)),

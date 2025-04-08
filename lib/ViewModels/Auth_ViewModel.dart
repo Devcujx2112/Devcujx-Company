@@ -22,9 +22,8 @@ class AuthViewModel extends ChangeNotifier {
 
   String? get role => _role;
 
-
-  Future<bool> RegisterVM(String email, String password,
-      String againPassword) async {
+  Future<bool> RegisterVM(
+      String email, String password, String againPassword) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -138,9 +137,11 @@ class AuthViewModel extends ChangeNotifier {
       _uid = user.uid;
 
       final roleAccount = await _authService.getUserDataService(_uid!);
-      if (roleAccount != null && roleAccount.containsKey("Role") && roleAccount.containsKey("Status")) {
+      if (roleAccount != null &&
+          roleAccount.containsKey("Role") &&
+          roleAccount.containsKey("Status")) {
         _role = roleAccount["Role"];
-        if(roleAccount["Status"] == "Ban"){
+        if (roleAccount["Status"] == "Ban") {
           _isLoading = false;
           _SetError("Tài khoản của bạn đã bị khóa");
           return false;
@@ -185,6 +186,30 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> ChangePassword(String oldPassword, String newPassword,String uid) async {
+    try {
+      _errorMessage = null;
+      notifyListeners();
+
+      String email = "";
+      final data = await _authService.getUserDataService(uid);
+      if (data != null && data.containsKey("Email")) {
+        email = data["Email"];
+      }
+      bool isSuccess =
+          await _authService.ChangePassword(email, oldPassword, newPassword);
+      if (isSuccess == false) {
+        _SetError("Mật khẩu không chính xác");
+        return false;
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _SetError("Lỗi không xác định khi đổi mật khẩu $e");
+      return false;
+    }
+  }
+
   void _SetError(String message) {
     _isLoading = false;
     _errorMessage = message;
@@ -195,5 +220,4 @@ class AuthViewModel extends ChangeNotifier {
     _uid = newUid;
     notifyListeners();
   }
-
 }

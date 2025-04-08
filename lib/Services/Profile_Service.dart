@@ -350,7 +350,7 @@ class Profile_Service {
         "Phone": phone,
         "Year": age,
         "Gender": gender,
-        "Image": imageUrl
+        "Avatar": imageUrl
       };
       final response = await http.patch(
         Uri.parse("$realTimeAPI/Profile/$uid.json"),
@@ -364,4 +364,47 @@ class Profile_Service {
       return false;
     }
   }
+  Future<bool> UpdateProfileSeller(String uid, String oldImage, String storeName,
+      String ownerName, String phone, String address, String bio, File? newImage) async {
+    try{
+      String imageUrl = oldImage;
+      if (newImage != null) {
+        try {
+          if (oldImage.isNotEmpty) {
+            Reference oldImageRef =
+            FirebaseStorage.instance.refFromURL(oldImage);
+            await oldImageRef.delete();
+          }
+          Reference newImageRef =
+          FirebaseStorage.instance.ref().child("Profile/Seller/$uid.jpg");
+          UploadTask uploadTask = newImageRef.putFile(newImage!);
+          TaskSnapshot snapshot = await uploadTask;
+          imageUrl = await snapshot.ref.getDownloadURL();
+        } catch (e) {
+          print("Lỗi khi upload ảnh $e");
+          return false;
+        }
+      }
+      Map<String, dynamic> profileData = {
+        "StoreName": storeName,
+        "OwnerName": ownerName ,
+        "Phone": phone,
+        "Address": address,
+        "bio": bio,
+        "Avatar": imageUrl
+      };
+      final response = await http.patch(
+        Uri.parse("$realTimeAPI/Profile/$uid.json"),
+        body: jsonEncode(profileData),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      return response.statusCode == 200;
+    }catch(e){
+      print(e);
+      return false;
+    }
+  }
 }
+
+

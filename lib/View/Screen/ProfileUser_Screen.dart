@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:order_food/Models/ProfileUser.dart';
+import 'package:order_food/View/Page/Profile/Contact.dart';
 import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
+import 'package:order_food/View/Page/Profile/PurchasePolicy.dart';
+import 'package:order_food/View/Widget/DialogChangePassword.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +33,21 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
   void initState() {
     super.initState();
     ShowAllData();
+  }
+
+  void OneClickProfileDetail() async {
+    final bool? reloadData = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileUserDetail(
+          profileUser: profileUser,
+        ),
+      ),
+    );
+
+    if (reloadData == true) {
+      ShowAllData();
+    }
   }
 
   void ShowAllData() async {
@@ -102,15 +120,16 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
                     width: 2,
                   ),
                 ),
-                child: (avatarUrl.isNotEmpty && Uri.tryParse(avatarUrl)?.hasAbsolutePath == true)
+                child: (avatarUrl.isNotEmpty &&
+                        Uri.tryParse(avatarUrl)?.hasAbsolutePath == true)
                     ? CircleAvatar(
-                  radius: 48,
-                  backgroundImage: NetworkImage(avatarUrl),
-                )
+                        radius: 48,
+                        backgroundImage: NetworkImage(avatarUrl),
+                      )
                     : CircleAvatar(
-                  radius: 48,
-                  child: Icon(Icons.person, size: 48),
-                ),
+                        radius: 48,
+                        child: Icon(Icons.person, size: 48),
+                      ),
               ),
               Container(
                 padding: const EdgeInsets.all(6),
@@ -170,13 +189,15 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
       ),
     );
   }
+
   Widget _buildFeatureList() {
     return Card(
+      elevation: 6,
+      shadowColor: Colors.grey.withOpacity(0.7),
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      elevation: 1,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.green),
-        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(17),
       ),
       child: Column(
         children: [
@@ -185,33 +206,101 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
             title: "Chỉnh sửa trang cá nhân",
             color: Colors.blue,
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                    builder: (context) =>
-                        ProfileUserDetail(profileUser: profileUser)),
-              );
+              OneClickProfileDetail();
             },
           ),
-          const Divider(height: 1, indent: 16),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
           _buildFeatureTile(
             icon: Icons.bar_chart,
             title: "Thống kê chi tiêu",
             color: Colors.green,
             onTap: () {},
           ),
-          const Divider(height: 1, indent: 16),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
           _buildFeatureTile(
             icon: Icons.history,
             title: "Lịch sử mua hàng",
             color: Colors.orange,
             onTap: () {},
           ),
-          const Divider(height: 1, indent: 16),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
           _buildFeatureTile(
             icon: Icons.policy,
             title: "Chính sách mua hàng",
             color: Colors.purple,
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => PurchasePolicy(roleAccount: profileUser.role,)),
+              );
+            },
+          ),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
+          _buildFeatureTile(
+            icon: Icons.perm_contact_calendar_outlined,
+            title: "Liên hệ",
+            color: Colors.green,
+            onTap: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => Contact()));
+            },
+          ),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
+          _buildFeatureTile(
+            icon: Icons.change_circle_rounded,
+            title: "Đổi mật khẩu",
+            color: Colors.indigoAccent,
+            onTap: () {
+              showDialog(context: context, builder:(context) => DialogChangePassword());
+            },
+          ),
+          const Divider(
+            height: 5,
+            indent: 16,
+            color: Colors.grey,
+            endIndent: 16,
+            thickness: 1.5,
+          ),
+          _buildFeatureTile(
+            icon: Icons.logout,
+            title: "Đăng xuất",
+            color: Colors.red,
+            onTap: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (route) => false,
+              );
+            },
           ),
         ],
       ),
@@ -233,7 +322,9 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
         ),
         child: Icon(icon, color: color, size: 22),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+      title: Text(title,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, color: Colors.green, fontSize: 15)),
       trailing: Icon(Icons.chevron_right, color: Colors.green),
       onTap: onTap,
     );
@@ -255,28 +346,6 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 12),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.green,
-              textStyle: TextStyle(fontWeight: FontWeight.bold),
-              backgroundColor: Colors.white,
-              elevation: 1,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: Colors.green),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => LoginPage()),
-                (route) => false,
-              );
-            },
-            child: const Text("Đăng xuất"),
-          ),
-          const SizedBox(height: 8),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               foregroundColor: Colors.red,

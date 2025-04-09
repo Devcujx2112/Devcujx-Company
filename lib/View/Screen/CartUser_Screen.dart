@@ -41,7 +41,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
         _isLoading = false;
       });
     }
-    if(data.isEmpty){
+    if (data.isEmpty) {
       setState(() {
         _isNull = true;
         _isLoading = false;
@@ -58,24 +58,29 @@ class _CartUserScreenState extends State<CartUserScreen> {
         child: Scaffold(
           backgroundColor: Colors.grey[50],
           appBar: _buildAppBar(),
-          body: _isNull ? Center(child: Text("Không có sản phẩm nào trong giỏ hàng"),) : Column(
-            children: [
-              Expanded(
-                child: CustomScrollView(
-                  slivers: [
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _buildCartItem(_cartItems[index]),
-                        childCount: _cartItems.length,
+          body: _isNull
+              ? Center(
+                  child: Text("Không có sản phẩm nào trong giỏ hàng"),
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) =>
+                                  _buildCartItem(_cartItems[index]),
+                              childCount: _cartItems.length,
+                            ),
+                          ),
+                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                        ],
                       ),
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    _buildCheckoutPanel(),
                   ],
                 ),
-              ),
-              _buildCheckoutPanel(),
-            ],
-          ),
         ));
   }
 
@@ -352,15 +357,13 @@ class _CartUserScreenState extends State<CartUserScreen> {
               context, "Lỗi: ${shoppingCartVM.errorMessage}", DialogType.error);
         }
       }
-    }
-    else{
+    } else {
       if (id.isEmpty) {
         showDialogMessage(
             context,
             "Không tìm thấy id của sản phẩm trong giỏ hàng",
             DialogType.warning);
-      }
-      else{
+      } else {
         bool isSuccess = await shoppingCartVM.UpdateQuantity(id, newQuantity);
         if (isSuccess) {
           setState(() {
@@ -390,8 +393,8 @@ class _CartUserScreenState extends State<CartUserScreen> {
     });
     showDialog(
         context: context,
-        builder: (context) => CheckoutForm(
-              totalAmount: 25000,
+        builder: (context) => CheckoutForm(dataCart: _cartItems,
+              totalAmount: _totalPrice,
             ));
   }
 

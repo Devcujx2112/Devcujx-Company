@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:order_food/Models/ProfileUser.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:order_food/ViewModels/Order_ViewModel.dart';
+import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutForm extends StatefulWidget {
+  List<Map<String, dynamic>> dataCart;
   final double totalAmount;
 
-  const CheckoutForm({
-    super.key,
-    required this.totalAmount,
-  });
+  CheckoutForm({super.key, required this.totalAmount, required this.dataCart});
 
   @override
   State<CheckoutForm> createState() => _CheckoutFormState();
@@ -20,7 +24,6 @@ class _CheckoutFormState extends State<CheckoutForm> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   String _paymentMethod = 'cod';
-  final _deliveryFee = 15000;
 
   final FocusNode _nameFocusNode = FocusNode();
   final FocusNode _phoneFocusNode = FocusNode();
@@ -38,8 +41,29 @@ class _CheckoutFormState extends State<CheckoutForm> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    LoadAllData();
+  }
+
+  void LoadAllData() async {
+    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    if (authVM.uid!.isNotEmpty) {
+      ProfileUser? profileUser =
+          await profileVM.GetAllDataProfileUser(authVM.uid!);
+      if (profileUser != null) {
+        setState(() {
+          _nameController.text = profileUser.fullName;
+          _phoneController.text = profileUser.phone;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final total = widget.totalAmount + _deliveryFee;
+    final total = widget.totalAmount;
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
 
     return Dialog(
@@ -48,9 +72,10 @@ class _CheckoutFormState extends State<CheckoutForm> {
         borderRadius: BorderRadius.circular(20),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Container(
+      child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.9,
+          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -77,7 +102,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
             ),
 
             // Form content
-            Expanded(
+            Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Form(
@@ -111,11 +136,15 @@ class _CheckoutFormState extends State<CheckoutForm> {
                       _buildTextField(
                         controller: _phoneController,
                         focusNode: _phoneFocusNode,
+                        maxlenght: 10,
                         label: 'Số điện thoại',
                         icon: Icons.phone_android_outlined,
                         keyboardType: TextInputType.phone,
+                        isNumber: true,
                         validator: (value) {
-                          if (value?.isEmpty ?? true) return 'Vui lòng nhập số điện thoại';
+                          if (value?.isEmpty ?? true) {
+                            return 'Vui lòng nhập số điện thoại';
+                          }
                           if (!RegExp(r'^(0|\+84)\d{9,10}$').hasMatch(value!)) {
                             return 'Số điện thoại không hợp lệ';
                           }
@@ -135,9 +164,8 @@ class _CheckoutFormState extends State<CheckoutForm> {
                             ? 'Vui lòng nhập địa chỉ'
                             : null,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
-                      // Phương thức thanh toán
                       const Text(
                         'Phương thức thanh toán',
                         style: TextStyle(
@@ -146,7 +174,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
                           color: Colors.green,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 5),
 
                       _buildPaymentMethodCard(
                         value: 'cod',
@@ -154,23 +182,15 @@ class _CheckoutFormState extends State<CheckoutForm> {
                         subtitle: 'Tiền mặt hoặc quẹt thẻ khi giao hàng',
                         icon: Icons.attach_money,
                       ),
-                      const SizedBox(height: 12),
-
+                      SizedBox(height: 5),
                       _buildPaymentMethodCard(
                         value: 'banking',
                         title: 'Chuyển khoản ngân hàng',
-                        subtitle: 'Thanh toán qua Internet Banking',
-                        icon: Icons.account_balance_outlined,
+                        subtitle: 'Thanh toán an toàn qua tài khoản ngân hàng',
+                        icon: Icons.account_balance,
                       ),
-                      const SizedBox(height: 12),
 
-                      _buildPaymentMethodCard(
-                        value: 'ewallet',
-                        title: 'Ví điện tử',
-                        subtitle: 'Momo, ZaloPay, VNPay',
-                        icon: Icons.wallet_outlined,
-                      ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
                       // Tổng tiền
                       Container(
@@ -187,11 +207,8 @@ class _CheckoutFormState extends State<CheckoutForm> {
                               currencyFormat.format(widget.totalAmount),
                             ),
                             const SizedBox(height: 8),
-                            _buildAmountRow(
-                              'Phí vận chuyển',
-                              currencyFormat.format(_deliveryFee),
-                            ),
-                            const Divider(height: 24, thickness: 1, color: Colors.green),
+                            const Divider(
+                                height: 24, thickness: 1, color: Colors.green),
                             _buildAmountRow(
                               'Tổng thanh toán',
                               currencyFormat.format(total),
@@ -269,23 +286,27 @@ class _CheckoutFormState extends State<CheckoutForm> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required String label,
-    required IconData icon,
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    int? maxLines = 1,
-  }) {
+  Widget _buildTextField(
+      {required TextEditingController controller,
+      required FocusNode focusNode,
+      required String label,
+      required IconData icon,
+      String? Function(String?)? validator,
+      TextInputType? keyboardType,
+      int? maxLines = 1,
+      bool isNumber = false,
+      int? maxlenght}) {
     return TextFormField(
+      maxLength: maxlenght,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : [],
       controller: controller,
       focusNode: focusNode,
       validator: validator,
-      keyboardType: keyboardType,
       maxLines: maxLines,
       style: const TextStyle(fontSize: 14),
       decoration: InputDecoration(
+        counterText: "",
         labelText: label,
         labelStyle: const TextStyle(color: Colors.green, fontSize: 16),
         prefixIcon: Icon(icon, color: Colors.green, size: 27),
@@ -386,19 +407,40 @@ class _CheckoutFormState extends State<CheckoutForm> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm() async {
+    final orderVM = Provider.of<Order_ViewModel>(context, listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    String uid;
+    double total = double.parse(widget.totalAmount.toString());
     if (_formKey.currentState!.validate()) {
-      final orderInfo = {
-        'customerName': _nameController.text,
-        'phone': _phoneController.text,
-        'address': _addressController.text,
-        'paymentMethod': _paymentMethod,
-        'orderTime': DateTime.now().toString(),
-        'subtotal': widget.totalAmount,
-        'deliveryFee': _deliveryFee,
-        'total': widget.totalAmount + _deliveryFee,
-      };
-      // Navigator.of(context).pop(orderInfo);
+      if(_paymentMethod == "cod"){
+        if (authVM.uid!.isEmpty) {
+          showDialogMessage(
+              context, "Không tìm thấy uid của tài khoản ", DialogType.warning);
+          return;
+        } else {
+          uid = authVM.uid!;
+
+          bool isSucess = await orderVM.InsertOrder(
+              uid,
+              _nameController.text,
+              _phoneController.text,
+              _addressController.text,
+              total,
+              widget.dataCart);
+          if (isSucess) {
+            Navigator.of(context);
+            showDialogMessage(
+                context, "Thêm đơn hàng thành công", DialogType.success);
+          } else {
+            showDialogMessage(
+                context, "Lỗi: ${orderVM.errorMessage}", DialogType.error);
+          }
+        }
+      }
+      if(_paymentMethod == "banking"){
+
+      }
     }
   }
 }

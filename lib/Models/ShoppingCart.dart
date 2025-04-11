@@ -1,6 +1,7 @@
 class ShoppingCart{
   String _cartId;
-  String _uid;
+  String _sellerId;
+  String _userId;
   String _productId;
   String _productName;
   int _quantity;
@@ -8,8 +9,16 @@ class ShoppingCart{
   String _image;
   String _storeName;
 
-  ShoppingCart(this._cartId, this._uid, this._productId, this._productName,
-      this._quantity, this._price, this._image, this._storeName);
+  ShoppingCart(
+      this._cartId,
+      this._sellerId,
+      this._userId,
+      this._productId,
+      this._productName,
+      this._quantity,
+      this._price,
+      this._image,
+      this._storeName);
 
   String get storeName => _storeName;
 
@@ -47,10 +56,16 @@ class ShoppingCart{
     _productId = value;
   }
 
-  String get uid => _uid;
+  String get userId => _userId;
 
-  set uid(String value) {
-    _uid = value;
+  set userId(String value) {
+    _userId = value;
+  }
+
+  String get sellerId => _sellerId;
+
+  set sellerId(String value) {
+    _sellerId = value;
   }
 
   String get cartId => _cartId;
@@ -61,6 +76,6 @@ class ShoppingCart{
 
   @override
   String toString() {
-    return 'ShoppingCart{_cartId: $_cartId, _uid: $_uid, _productId: $_productId, _productName: $_productName, _quantity: $_quantity, _price: $_price, _image: $_image, _storeName: $_storeName}';
+    return 'ShoppingCart{_cartId: $_cartId, _sellerId: $_sellerId, _userId: $_userId, _productId: $_productId, _productName: $_productName, _quantity: $_quantity, _price: $_price, _image: $_image, _storeName: $_storeName}';
   }
 }

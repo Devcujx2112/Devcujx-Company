@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:order_food/Models/Product.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Order_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
@@ -37,7 +38,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
     final authVM = Provider.of<AuthViewModel>(context, listen: false);
     if (authVM.uid!.isNotEmpty) {
       List<Map<String, dynamic>>? orderData =
-          await orderVM.ShowAllDataOrderDetail(authVM.uid!, _selectedStatus);
+          await orderVM.ShowAllDataOrderDetail(authVM.uid!,"", _selectedStatus);
       if (orderData == null) {
         setState(() {
           _isNull = true;
@@ -46,7 +47,6 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
         return;
       } else {
         setState(() {
-          // print('UI data $productData');
           _isNull = false;
           _orders = orderData;
           _isLoading = false;
@@ -98,7 +98,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
               filled: true,
               fillColor: Colors.white,
               hintText: 'Tìm kiếm đơn hàng...',
-              hintStyle: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              hintStyle: TextStyle(fontSize: 15, color: Colors.grey[600]),
               prefixIcon: Icon(
                 Icons.search,
                 color: Colors.green,
@@ -139,9 +139,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
         ),
         _isNull
             ? _buildEmptyState()
-            :
-            //Reload screen
-            Expanded(
+            : Expanded(
                 child: RefreshIndicator(
                     onRefresh: _refreshOrders,
                     color: Colors.green,
@@ -176,7 +174,6 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
       child: Container(
         height: 200,
         alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
       ),
     );
   }
@@ -194,7 +191,8 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
           children: [
             Icon(Icons.error_outline, color: Colors.red, size: 40),
             const SizedBox(height: 8),
-            Text('Không thể tải thông', style: TextStyle(color: Colors.red)),
+            Text('Không thể tải thông tin đơn hàng',
+                style: TextStyle(color: Colors.red)),
           ],
         ),
       ),
@@ -255,7 +253,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        dataProduct.productName,
+                        dataProduct.storeName,
                         style: const TextStyle(
                           fontSize: 15,
                           color: Colors.green,
@@ -313,9 +311,9 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
                       children: [
                         // Product Name
                         Text(
-                          'Tesst',
+                          dataProduct.productName,
                           style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: Colors.green,
                           ),
@@ -400,18 +398,20 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
                         SizedBox(
                           width: 100,
                           child: OutlinedButton(
-                            onPressed: () => _cancelOrder(order),
+                            onPressed: () => _showDialogDeleteOrder(
+                                order["OrderDetailId"], context),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.red,
                               side: const BorderSide(color: Colors.red),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                             child: const Text(
                               'Hủy đơn',
-                              style: TextStyle(fontSize: 13),
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -462,19 +462,78 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
     );
   }
 
-  // Các hàm xử lý
   Future<void> _refreshOrders() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
+    ShowAllData();
   }
 
   void _filterOrders() {
     // Logic lọc đơn hàng
   }
 
-  void _cancelOrder(Map<String, dynamic> order) {
-    // Hủy đơn hàng
+  void _showDialogDeleteOrder(String orderId, BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(
+              Icons.warning_rounded,
+              color: Colors.orange,
+              size: 30,
+            ),
+            SizedBox(width: 20),
+            Text('Xác nhận xóa', style: TextStyle(fontSize: 20)),
+          ],
+        ),
+        content: const Text(
+          'Bạn chắc chắn muốn xóa đơn hàng này? Thao tác này không thể hoàn tác.',
+          style: TextStyle(fontSize: 13),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+          ),
+          FilledButton.tonal(
+            onPressed: () {
+              _deleteOrder(orderId);
+              Navigator.pop(context);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade100,
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Xóa'),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteOrder(String orderId) async {
+    try {
+      final orderVM = Provider.of<Order_ViewModel>(context, listen: false);
+      if (orderId.isEmpty) {
+        showDialogMessage(
+            context, "Không tìm thấy id của đơn hàng", DialogType.warning);
+        return;
+      } else {
+        bool isSuccess = await orderVM.DeleteOrderDetail(orderId);
+        if (isSuccess) {
+          showDialogMessage(
+              context, "Xóa đơn hàng thành công", DialogType.success);
+          ShowAllData();
+        } else {
+          showDialogMessage(context, "Xóa sản phẩm thất bại", DialogType.error);
+        }
+      }
+    } catch (e) {
+      debugPrint('Lỗi khi xóa đơn hàng: $e');
+    }
   }
 
   String _formatPrice(num price) {

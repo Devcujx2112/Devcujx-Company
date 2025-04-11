@@ -205,27 +205,6 @@ class Product_ViewModel extends ChangeNotifier {
       return null;
     }
   }
-  //
-  // Future<List<Map<String, dynamic>>?> ShowAllProductFormProductId(
-  //     String productId) async {
-  //   try {
-  //     _errorMessage = null;
-  //     notifyListeners();
-  //
-  //     List<Map<String, dynamic>>? productData =
-  //         await product_service.SearchProductFormProductId(productId);
-  //     if (productData == null) {
-  //       _SetError("Không tìm thấy sản phẩm ");
-  //       return null;
-  //     }
-  //
-  //     notifyListeners();
-  //     return productData;
-  //   } catch (e) {
-  //     _SetError("Lỗi khi tìm sản phẩm $e");
-  //     return null;
-  //   }
-  // }
 
   Future<List<Map<String, dynamic>>> ShowAllProductById(
       List<String> productId) async {

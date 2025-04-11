@@ -83,7 +83,7 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
             title: Text(
               "Sản phẩm yêu thích",
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   color: Colors.white,
                   fontWeight: FontWeight.bold),
             ),

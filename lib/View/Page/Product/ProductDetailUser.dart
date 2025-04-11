@@ -411,7 +411,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
   void _addToCart() async {
     final shoppingVM = Provider.of<ShoppingCart_ViewModel>(
         context, listen: false);
-    final authVM = Provider.of<AuthViewModel>(context,listen: false);
+    final authVM = Provider.of<AuthViewModel>(context, listen: false);
     if (widget.product.isEmpty && authVM.uid!.isEmpty) {
       showDialogMessage(
           context, "Thông tin sản phẩm không đầy đủ", DialogType.warning);
@@ -420,16 +420,19 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
       bool isSuccess = await shoppingVM.InsertProductShoppingCart(
           widget.product["ProductName"],
           widget.product["StoreName"],
+          widget.product["Uid"],
           _quantity,
           widget.product["Price"],
           widget.product["Image"],
           authVM.uid!,
           widget.product["ProductId"]);
-      if(isSuccess){
-        Navigator.pop(context,true);
-        showDialogMessage(context, "Thêm sản phẩm vào giỏ hàng thành công", DialogType.success);
-      }else{
-        showDialogMessage(context, "Lỗi: ${shoppingVM.errorMessage}", DialogType.error);
+      if (isSuccess) {
+        Navigator.pop(context, true);
+        showDialogMessage(context, "Thêm sản phẩm vào giỏ hàng thành công",
+            DialogType.success);
+      } else {
+        showDialogMessage(
+            context, "Lỗi: ${shoppingVM.errorMessage}", DialogType.error);
       }
     }
   }

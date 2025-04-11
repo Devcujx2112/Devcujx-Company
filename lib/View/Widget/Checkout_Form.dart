@@ -48,6 +48,7 @@ class _CheckoutFormState extends State<CheckoutForm> {
   void initState() {
     super.initState();
     LoadAllData();
+    print('UI data ${widget.dataCart}');
   }
 
   void LoadAllData() async {
@@ -442,11 +443,12 @@ class _CheckoutFormState extends State<CheckoutForm> {
           return;
         } else {
           uid = authVM.uid!;
-
+          String paymentMethod = "Thanh toán khi nhận hàng";
           bool isSucess = await orderVM.InsertOrder(
               uid,
               _nameController.text,
               _phoneController.text,
+              paymentMethod,
               _addressController.text,
               total,
               widget.dataCart);

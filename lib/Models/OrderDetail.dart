@@ -2,13 +2,23 @@ class OrderDetail{
   String _orderDetailId;
   String _orderId;
   String _sellerId;
+  String _userId;
   String _productid;
   int _quantity;
+  String _paymentMethod;
   String _status;
   String _createAt;
 
-  OrderDetail(this._orderDetailId, this._orderId, this._sellerId,
-      this._productid, this._quantity, this._status, this._createAt);
+  OrderDetail(
+      this._orderDetailId,
+      this._orderId,
+      this._sellerId,
+      this._userId,
+      this._productid,
+      this._quantity,
+      this._paymentMethod,
+      this._status,
+      this._createAt);
 
   String get createAt => _createAt;
 
@@ -22,6 +32,12 @@ class OrderDetail{
     _status = value;
   }
 
+  String get paymentMethod => _paymentMethod;
+
+  set paymentMethod(String value) {
+    _paymentMethod = value;
+  }
+
   int get quantity => _quantity;
 
   set quantity(int value) {
@@ -32,6 +48,12 @@ class OrderDetail{
 
   set productid(String value) {
     _productid = value;
+  }
+
+  String get userId => _userId;
+
+  set userId(String value) {
+    _userId = value;
   }
 
   String get sellerId => _sellerId;
@@ -54,6 +76,6 @@ class OrderDetail{
 
   @override
   String toString() {
-    return 'OrderDetail{_orderDetailId: $_orderDetailId, _orderId: $_orderId, _sellerId: $_sellerId, _productid: $_productid, _quantity: $_quantity, _status: $_status, _createAt: $_createAt}';
+    return 'OrderDetail{_orderDetailId: $_orderDetailId, _orderId: $_orderId, _sellerId: $_sellerId, _userId: $_userId, _productid: $_productid, _quantity: $_quantity, _paymentMethod: $_paymentMethod, _status: $_status, _createAt: $_createAt}';
   }
 }

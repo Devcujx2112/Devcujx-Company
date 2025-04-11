@@ -22,6 +22,7 @@ class ShoppingCart_ViewModel extends ChangeNotifier {
   Future<bool> InsertProductShoppingCart(
     String productName,
     String storeName,
+    String sellerId,
     int quantity,
     int price,
     String image,
@@ -32,7 +33,7 @@ class ShoppingCart_ViewModel extends ChangeNotifier {
       _errorMessage = null;
 
       String cartId =  const Uuid().v4();
-      ShoppingCart shoppingCart = ShoppingCart(cartId, uid, productId,productName, quantity, price, image, storeName);
+      ShoppingCart shoppingCart = ShoppingCart(cartId,sellerId, uid, productId, productName, quantity, price, image, storeName);
     bool isSuccess = await shoppingCart_Service.InsertProductShoppingCart(shoppingCart);
     if(isSuccess == false){
       _SetError("Không thể thêm sản phẩm vào giỏ hàng");

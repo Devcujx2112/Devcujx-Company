@@ -37,6 +37,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
     if (data!.isNotEmpty) {
       setState(() {
         _cartItems = data;
+        print('UI data cart $_cartItems');
         uid = authVM.uid!;
         _calculateTotal();
         _isLoading = false;
@@ -56,7 +57,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
       inAsyncCall: _isLoading,
       progressIndicator: LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.grey[100],
         appBar: _buildAppBar(),
         body: _isNull
             ? Center(
@@ -114,7 +115,7 @@ class _CartUserScreenState extends State<CartUserScreen> {
       backgroundColor: Colors.green,
       title: Text('Giỏ hàng',
           style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white)),
+              fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white)),
       centerTitle: true,
       automaticallyImplyLeading: false,
     );

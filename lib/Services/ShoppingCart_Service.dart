@@ -16,7 +16,8 @@ class ShoppingCart_Service{
 
       Map<String, dynamic> shoppingData = {
         "CartId": shopping.cartId,
-        "Uid": shopping.uid ,
+        "SellerId": shopping.sellerId,
+        "UserId": shopping.userId ,
         "ProductId": shopping.productId,
         "Quantity" : shopping.quantity,
         "ProductName": shopping.productName,
@@ -55,7 +56,7 @@ class ShoppingCart_Service{
             .toList();
 
           productData =
-              productData.where((id) => id["Uid"] == uid).toList();
+              productData.where((id) => id["UserId"] == uid).toList();
 
         return productData;
       } else {

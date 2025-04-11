@@ -91,11 +91,33 @@ class _FavoriteUserScreenState extends State<FavoriteUserScreen> {
           ),
           body: _isNull
               ? Center(
-                  child: Text("Danh sách sản phẩm yêu thích trống",
-                      style: TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18)))
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Chưa có sản phẩm yêu thích',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Mô tả
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'Bạn chưa thêm sản phẩm yêu thích nào. Hãy khám phá cửa hàng và thêm sản phẩm yêu thích nhé!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
               : SingleChildScrollView(child: _buildProductGridSection()),
         ));
   }

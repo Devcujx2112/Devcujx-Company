@@ -48,6 +48,22 @@ class Order_ViewModel extends ChangeNotifier {
     }
   }
 
+  Future<List<Map<String,dynamic>>?> ShowAllDataOrderDetail(String uid, String status) async {
+    try{
+      _errorMessage = null;
+      List<Map<String,dynamic>>? orderData = await order_service.ShowAllDataOrderDetail(uid, status);
+      if(orderData!.isEmpty){
+        _SetError("Không có đơn hàng nào");
+        return null;
+      }
+      notifyListeners();
+      return orderData;
+    }catch(e){
+      _SetError("Lỗi khi tải dữ liệu đơn hàng $e");
+      return null;
+    }
+  }
+
   void _SetError(String message) {
     _errorMessage = message;
     notifyListeners();

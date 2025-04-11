@@ -383,6 +383,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
               if (isSuccess) {
                 setState(() {
                   _isFavorite = true;
+                  LoadData();
                 });
                 showDialogMessage(context, "Thêm sản phẩm yêu thích thành công",
                     DialogType.success);

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:order_food/Models/ProfileUser.dart';
 import 'package:order_food/View/Screen/FavoriteUser_Screen.dart';
 import 'package:order_food/View/Screen/ProfileUser_Screen.dart';
-import 'package:order_food/View/Screen/StatisticalUser_Screen.dart';
+import 'package:order_food/View/Screen/OrderUser_Screen.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import '../../../ViewModels/Profile_ViewModel.dart';
 import '../../Screen/CartUser_Screen.dart';
@@ -30,7 +30,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     HomeUserScreen(),
     FavoriteUserScreen(),
     CartUserScreen(),
-    StatisticaluserScreen(),
+    OrderUserScreen(),
     ProfileUserScreen()
   ];
 

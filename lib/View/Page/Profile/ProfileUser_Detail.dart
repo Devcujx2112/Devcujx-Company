@@ -222,7 +222,7 @@ class _ProfileUserDetailState extends State<ProfileUserDetail> {
             label: 'Ngày tạo',
             icon: Icons.date_range_outlined,
             value: profileUserData.createAt != null
-                ? _dateFormat.format(DateTime.parse(profileUserData.createAt!))
+                ? _dateFormat.format(DateTime.parse(profileUserData.createAt))
                 : 'Không có ngày tạo',
             isEditable: false,
           ),

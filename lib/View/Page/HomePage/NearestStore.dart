@@ -18,7 +18,7 @@ class NearestStore extends StatefulWidget {
 class _NearestStoreState extends State<NearestStore> {
   bool _isLoading = true;
   List<Map<String, dynamic>> listStore = [];
-  final Profile_ViewModel profileVM = Profile_ViewModel(); // Khởi tạo ViewModel
+  final Profile_ViewModel profileVM = Profile_ViewModel();
 
   @override
   void initState() {

@@ -89,14 +89,24 @@ class ShoppingCart_Service{
     }
   }
 
-  Future<bool> DeleteProductFormCart(String cartId) async {
+  Future<bool> DeleteProductFormCart(String? cartId) async {
     try{
-      final response =
-      await http.delete(Uri.parse("$realTimeAPI/$cartId.json"));
-      if(response.statusCode == 200){
-        return true;
+      if(cartId != null){
+        final response =
+        await http.delete(Uri.parse("$realTimeAPI/$cartId.json"));
+        if(response.statusCode == 200){
+          return true;
+        }
+        return  false;
       }
-      return  false;
+      else{
+        final response =
+        await http.delete(Uri.parse("$realTimeAPI.json"));
+        if(response.statusCode == 200){
+          return true;
+        }
+        return  false;
+      }
 
     }catch(e){
       print(e);

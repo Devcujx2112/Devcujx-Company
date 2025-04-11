@@ -190,87 +190,108 @@ class Product_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String,dynamic>>?> ShowAllFavoriteProduct(String uid) async{
-    try{
+  Future<List<Map<String, dynamic>>?> ShowAllFavoriteProduct(String uid) async {
+    try {
       _errorMessage = null;
-      List<Map<String,dynamic>>? data = await product_service.ShowAllFavoriteProduct(uid);
-      if(data == null){
+      List<Map<String, dynamic>>? data =
+          await product_service.ShowAllFavoriteProduct(uid);
+      if (data == null) {
         _SetError("Không có sản phẩm yêu thích");
         return [];
       }
       return data;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi tải dữ liệu");
       return null;
     }
   }
+  //
+  // Future<List<Map<String, dynamic>>?> ShowAllProductFormProductId(
+  //     String productId) async {
+  //   try {
+  //     _errorMessage = null;
+  //     notifyListeners();
+  //
+  //     List<Map<String, dynamic>>? productData =
+  //         await product_service.SearchProductFormProductId(productId);
+  //     if (productData == null) {
+  //       _SetError("Không tìm thấy sản phẩm ");
+  //       return null;
+  //     }
+  //
+  //     notifyListeners();
+  //     return productData;
+  //   } catch (e) {
+  //     _SetError("Lỗi khi tìm sản phẩm $e");
+  //     return null;
+  //   }
+  // }
 
-  Future<List<Map<String,dynamic>>?> ShowAllProductFormProductId(String productId) async{
+  Future<List<Map<String, dynamic>>> ShowAllProductById(
+      List<String> productId) async {
     try {
       _errorMessage = null;
-      notifyListeners();
-
-      List<Map<String, dynamic>>? productData =
-      await product_service.SearchProductFormProductId(productId);
-      if (productData == null) {
-        _SetError("Không tìm thấy sản phẩm ");
-        return null;
-      }
-
-      notifyListeners();
-      return productData;
-    } catch (e) {
-      _SetError("Lỗi khi tìm sản phẩm $e");
-      return null;
-    }
-  }
-
-  Future<List<Map<String,dynamic>>> ShowAllProductById(List<String> productId) async{
-    try{
-      _errorMessage = null;
-      List<Map<String,dynamic>> allProduct = [];
+      List<Map<String, dynamic>> allProduct = [];
       allProduct = await product_service.GetAllProductById(productId);
-      if(allProduct.isEmpty){
-      return [];
+      if (allProduct.isEmpty) {
+        return [];
       }
       return allProduct;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi tìm kiếm sản phẩm qua id $e");
       return [];
     }
   }
 
-  Future<String?> GetFavoriteId(List<Map<String,dynamic>> favoriteList, String productId, String uid) async{
-    try{
+  Future<String?> GetFavoriteId(List<Map<String, dynamic>> favoriteList,
+      String productId, String uid) async {
+    try {
       _errorMessage = null;
       final favoriteItem = favoriteList.firstWhere(
-            (item) =>
-        item['ProductId'].toString() == productId &&
+        (item) =>
+            item['ProductId'].toString() == productId &&
             item['Uid'].toString() == uid,
         orElse: () => <String, dynamic>{},
       );
       notifyListeners();
-      return favoriteItem.isNotEmpty ? favoriteItem['FavoriteId'].toString() : null;
-
-    }catch(e){
+      return favoriteItem.isNotEmpty
+          ? favoriteItem['FavoriteId'].toString()
+          : null;
+    } catch (e) {
       _SetError("Lỗi khi tìm kiếm id sản phẩm yêu thích");
       return null;
     }
   }
-  Future<bool> DeleteFavoritProduct(String favoriteId) async{
-    try{
+
+  Future<bool> DeleteFavoritProduct(String favoriteId) async {
+    try {
       _errorMessage = null;
       bool isSuccess = await product_service.DeleteFavoriteProduct(favoriteId);
-      if(isSuccess == false){
+      if (isSuccess == false) {
         _SetError("Không thể xóa sản phẩm yêu thích");
         return false;
       }
       notifyListeners();
       return true;
-
-    }catch(e){
+    } catch (e) {
       _SetError("Ngoại lệ khi xóa sản phẩm $e");
       return false;
+    }
+  }
+
+  Future<Product?> ShowAllProductFormProductId(String productId) async {
+    try{
+      _errorMessage = null;
+      Product? product = await product_service.ShowAllProductFormProductId(productId);
+      if(product == null){
+        _SetError("Không có sản phẩm nào");
+        return null;
+      }
+      notifyListeners();
+      return product;
+    }catch(e){
+      _SetError("Lỗi khi show sản phẩm $e");
+      return null;
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:order_food/View/Screen/HomeUser_Screen.dart';
 import 'package:order_food/View/Widget/Checkout_Form.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
@@ -52,36 +53,60 @@ class _CartUserScreenState extends State<CartUserScreen> {
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
-        inAsyncCall: _isLoading,
-        progressIndicator:
-            LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
-        child: Scaffold(
-          backgroundColor: Colors.grey[50],
-          appBar: _buildAppBar(),
-          body: _isNull
-              ? Center(
-                  child: Text("Không có sản phẩm nào trong giỏ hàng"),
-                )
-              : Column(
-                  children: [
-                    Expanded(
-                      child: CustomScrollView(
-                        slivers: [
-                          SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) =>
-                                  _buildCartItem(_cartItems[index]),
-                              childCount: _cartItems.length,
-                            ),
-                          ),
-                          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-                        ],
-                      ),
-                    ),
-                    _buildCheckoutPanel(),
-                  ],
+      inAsyncCall: _isLoading,
+      progressIndicator: LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
+      child: Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: _buildAppBar(),
+        body: _isNull
+            ? Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Giỏ hàng trống',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
                 ),
-        ));
+              ),
+              const SizedBox(height: 12),
+              // Mô tả
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  'Bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy khám phá cửa hàng và thêm sản phẩm yêu thích nhé!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+            : Column(
+          children: [
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                          (context, index) => _buildCartItem(_cartItems[index]),
+                      childCount: _cartItems.length,
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                ],
+              ),
+            ),
+            _buildCheckoutPanel(),
+          ],
+        ),
+      ),
+    );
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -386,16 +411,19 @@ class _CartUserScreenState extends State<CartUserScreen> {
         0, (sum, item) => sum + (item['Price'] * item['Quantity']));
   }
 
-  void _checkout() {
-    setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() => _isLoading = false);
-    });
-    showDialog(
-        context: context,
-        builder: (context) => CheckoutForm(dataCart: _cartItems,
-              totalAmount: _totalPrice,
-            ));
+  void _checkout() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return CheckoutForm(
+          dataCart: _cartItems,
+          totalAmount: _totalPrice,
+        );
+      },
+    );
+    if (result == true) {
+      LoadAllData();
+    }
   }
 
   String _formatPrice(dynamic price) {

@@ -50,8 +50,8 @@ class Product_Service {
     }
   }
 
-  Future<List<Map<String, dynamic>>> ShowAllProduct(
-      String query, String uid) async {
+  Future<List<Map<String, dynamic>>> ShowAllProduct(String query,
+      String uid) async {
     try {
       final response = await http.get(Uri.parse("$realTimeAPI.json"));
       if (response.statusCode == 200) {
@@ -59,10 +59,11 @@ class Product_Service {
         if (data == null) return [];
 
         List<Map<String, dynamic>> productData = data.entries
-            .map((entry) => {
-                  "ProductId": entry.key,
-                  ...(entry.value as Map<String, dynamic>),
-                })
+            .map((entry) =>
+        {
+          "ProductId": entry.key,
+          ...(entry.value as Map<String, dynamic>),
+        })
             .toList();
 
         if (uid.isNotEmpty) {
@@ -73,11 +74,11 @@ class Product_Service {
         if (query.isNotEmpty) {
           productData = productData
               .where((product) =>
-                  product["ProductName"]
-                      ?.toString()
-                      .toLowerCase()
-                      .contains(query.toLowerCase().trim()) ??
-                  false)
+          product["ProductName"]
+              ?.toString()
+              .toLowerCase()
+              .contains(query.toLowerCase().trim()) ??
+              false)
               .toList();
         }
         return productData;
@@ -93,7 +94,7 @@ class Product_Service {
   Future<bool> DeleteProduct(String productId) async {
     try {
       final imageURL =
-          await http.get(Uri.parse("$realTimeAPI/$productId.json"));
+      await http.get(Uri.parse("$realTimeAPI/$productId.json"));
       if (imageURL.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(imageURL.body);
         if (data != null && data.containsKey("Image")) {
@@ -107,7 +108,7 @@ class Product_Service {
         }
       }
       final response =
-          await http.delete(Uri.parse("$realTimeAPI/$productId.json"));
+      await http.delete(Uri.parse("$realTimeAPI/$productId.json"));
       if (response.statusCode == 200) {
         return true;
       }
@@ -118,8 +119,7 @@ class Product_Service {
     }
   }
 
-  Future<bool> UpdateProduct(
-      String productId,
+  Future<bool> UpdateProduct(String productId,
       String productName,
       String categoryName,
       String description,
@@ -133,11 +133,11 @@ class Product_Service {
           if (imageOld.isNotEmpty) {
             print("Service $imageOld");
             Reference oldImageRef =
-                FirebaseStorage.instance.refFromURL(imageOld);
+            FirebaseStorage.instance.refFromURL(imageOld);
             await oldImageRef.delete();
           }
           Reference newImageRef =
-              FirebaseStorage.instance.ref().child("Product/$productId.jpg");
+          FirebaseStorage.instance.ref().child("Product/$productId.jpg");
           UploadTask uploadTask = newImageRef.putFile(newImage);
           TaskSnapshot snapshot = await uploadTask;
           imageUrl = await snapshot.ref.getDownloadURL();
@@ -175,10 +175,11 @@ class Product_Service {
         if (data == null) return [];
 
         List<Map<String, dynamic>> productData = data.entries
-            .map((entry) => {
-                  "ProductId": entry.key,
-                  ...(entry.value as Map<String, dynamic>),
-                })
+            .map((entry) =>
+        {
+          "ProductId": entry.key,
+          ...(entry.value as Map<String, dynamic>),
+        })
             .toList();
 
         productData = productData
@@ -196,7 +197,8 @@ class Product_Service {
   Future<bool> InsertFavoriteProduct(Favorite favorite) async {
     try {
       Uri url = Uri.parse(
-          "https://test-login-lyasob-default-rtdb.firebaseio.com/Favorite/${favorite.favoriteId}.json");
+          "https://test-login-lyasob-default-rtdb.firebaseio.com/Favorite/${favorite
+              .favoriteId}.json");
 
       Map<String, dynamic> favoriteData = {
         "FavoriteId": favorite.favoriteId,
@@ -227,10 +229,11 @@ class Product_Service {
         final Map<String, dynamic>? data = jsonDecode(response.body);
         if (data == null) return [];
         List<Map<String, dynamic>> favoriteData = data.entries
-            .map((entry) => {
-                  "FavoriteId": entry.key,
-                  ...(entry.value as Map<String, dynamic>),
-                })
+            .map((entry) =>
+        {
+          "FavoriteId": entry.key,
+          ...(entry.value as Map<String, dynamic>),
+        })
             .toList();
         favoriteData =
             favoriteData.where((favorite) => favorite["Uid"] == uid).toList();
@@ -242,37 +245,38 @@ class Product_Service {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> SearchProductFormProductId(
-      String productId) async {
-    try {
-      final response = await http.get(Uri.parse("$realTimeAPI.json"));
-      if (response.statusCode == 200) {
-        final Map<String, dynamic>? data = jsonDecode(response.body);
-        if (data == null) return [];
-
-        List<Map<String, dynamic>> productData = data.entries
-            .map((entry) => {
-                  "ProductId": entry.key,
-                  ...(entry.value as Map<String, dynamic>),
-                })
-            .toList();
-
-        productData = productData
-            .where((product) => product["ProductId"] == productId)
-            .toList();
-
-        return productData;
-      }
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
+  //
+  // Future<List<Map<String, dynamic>>?> SearchProductFormProductId(
+  //     String productId) async {
+  //   try {
+  //     final response = await http.get(Uri.parse("$realTimeAPI.json"));
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic>? data = jsonDecode(response.body);
+  //       if (data == null) return [];
+  //
+  //       List<Map<String, dynamic>> productData = data.entries
+  //           .map((entry) => {
+  //                 "ProductId": entry.key,
+  //                 ...(entry.value as Map<String, dynamic>),
+  //               })
+  //           .toList();
+  //
+  //       productData = productData
+  //           .where((product) => product["ProductId"] == productId)
+  //           .toList();
+  //
+  //       return productData;
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //     return null;
+  //   }
+  // }
 
   Future<List<Map<String, dynamic>>> GetAllProductById(
-      List<String> productIds) async {
+      List<String> productId) async {
     try {
-      if (productIds.isEmpty) return [];
+      if (productId.isEmpty) return [];
 
       final response = await http.get(Uri.parse("$realTimeAPI.json"));
       if (response.statusCode != 200) return [];
@@ -281,15 +285,50 @@ class Product_Service {
       if (data == null) return [];
 
       return data.entries
-          .where((entry) => productIds.contains(entry.key))
-          .map((entry) => {
-                "ProductId": entry.key,
-                ...(entry.value as Map<String, dynamic>),
-              })
+          .where((entry) => productId.contains(entry.key))
+          .map((entry) =>
+      {
+        "ProductId": entry.key,
+        ...(entry.value as Map<String, dynamic>),
+      })
           .toList();
     } catch (e) {
       print('Error in GetAllProductById: $e');
       return [];
+    }
+  }
+
+  Future<Product?> ShowAllProductFormProductId(String productId) async {
+    try {
+      Uri url = Uri.parse("$realTimeAPI/$productId.json");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic>? data = jsonDecode(response.body);
+        if (data != null) {
+          Product? dataProduct = Product(
+              data["ProductId"] ?? [],
+              data["Uid"] ?? [],
+              data["StoreName"] ?? [],
+              data["CategoryName"] ?? [],
+              data["ProductName"] ?? [],
+              data["Image"] ?? [],
+              data["Price"] ?? [],
+              data["Description"] ?? [],
+              data["Rating"] ?? [],
+              data["CreateAt"] ?? []);
+          return dataProduct;
+        } else {
+          print("Không tìm thấy thông tin người dùng!");
+          return null;
+        }
+      } else {
+        print("Lỗi khi lấy dữ liệu: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print('');
+      return null;
     }
   }
 

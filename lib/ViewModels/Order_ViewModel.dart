@@ -13,8 +13,14 @@ class Order_ViewModel extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  Future<bool> InsertOrder(String uidUser, String nameUser, String phone,String paymentMethod,
-      String address, double total, List<Map<String, dynamic>> dataCart) async {
+  Future<bool> InsertOrder(
+      String uidUser,
+      String nameUser,
+      String phone,
+      String paymentMethod,
+      String address,
+      double total,
+      List<Map<String, dynamic>> dataCart) async {
     try {
       _errorMessage = null;
       String orderId = const Uuid().v4();
@@ -32,8 +38,16 @@ class Order_ViewModel extends ChangeNotifier {
       for (int i = 0; i < dataCart.length; i++) {
         String orderDetailId = const Uuid().v4();
         final item = dataCart[i];
-        OrderDetail orderDetail = OrderDetail(orderDetailId, orderId,item["SellerId"],
-            item["UserId"], item["ProductId"], item["Quantity"],paymentMethod, status, createAt);
+        OrderDetail orderDetail = OrderDetail(
+            orderDetailId,
+            orderId,
+            item["SellerId"],
+            item["UserId"],
+            item["ProductId"],
+            item["Quantity"],
+            paymentMethod,
+            status,
+            createAt);
         bool success = await order_service.InsertOrdersDetail(orderDetail);
         if (success == false) {
           _SetError("Không thể tạo chi tiết đơn hàng");
@@ -49,50 +63,67 @@ class Order_ViewModel extends ChangeNotifier {
     }
   }
 
-  Future<List<Map<String,dynamic>>?> ShowAllDataOrderDetail(String userId,String sellerId, String status) async {
-    try{
+  Future<List<Map<String, dynamic>>?> ShowAllDataOrderDetail(
+      String userId, String sellerId, String status, String orderId) async {
+    try {
       _errorMessage = null;
-      List<Map<String,dynamic>>? orderData = await order_service.ShowAllDataOrderDetail(userId,sellerId, status);
-      if(orderData!.isEmpty){
+      List<Map<String, dynamic>>? orderData =
+          await order_service.ShowAllDataOrderDetail(userId, sellerId, status,orderId);
+      if (orderData!.isEmpty) {
         _SetError("Không có đơn hàng nào");
         return null;
       }
       notifyListeners();
       return orderData;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi tải dữ liệu đơn hàng $e");
       return null;
     }
   }
 
-  Future<bool> DeleteOrderDetail(String orderDetailId) async{
-    try{
+  Future<bool> DeleteOrderDetail(String orderDetailId) async {
+    try {
       _errorMessage = null;
       bool isSuccess = await order_service.DeleteOrderDetail(orderDetailId);
-      if(isSuccess == false){
+      if (isSuccess == false) {
         _SetError("Xóa đơn hàng thất bại");
         return false;
       }
       notifyListeners();
       return true;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi xóa đơn hàng");
       return false;
     }
   }
 
+  Future<bool> UpdateStatusOrder(String orderId, String status) async {
+    try {
+      _errorMessage = null;
+      bool isSuccess = await order_service.UpdateStatusOrder(orderId,status);
+      if (isSuccess == false) {
+        _SetError("Lỗi không thể sửa trạng thái đơn hàng");
+        return false;
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _SetError("Lỗi khi sửa trạng thái đơn hàng đơn hàng $e");
+      return false;
+    }
+  }
 
   Future<PlaceOrder?> ShowAllPlaceOrder(String orderId) async {
-    try{
+    try {
       _errorMessage = null;
       PlaceOrder? placeOrder = await order_service.ShowAllPlaceOrder(orderId);
-      if(placeOrder == null){
+      if (placeOrder == null) {
         _SetError("Không có đơn hàng nào");
         return null;
       }
       notifyListeners();
       return placeOrder;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi show all order");
       return null;
     }
@@ -103,3 +134,14 @@ class Order_ViewModel extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+
+
+
+
+
+
+
+
+
+

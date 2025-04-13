@@ -148,7 +148,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     return ModalProgressHUD(
       inAsyncCall: _isLoading,
       progressIndicator:
-          LoadingAnimationWidget.inkDrop(color: Colors.green, size: 60),
+          LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         child: Column(

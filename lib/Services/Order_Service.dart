@@ -70,7 +70,7 @@ class Order_Service {
   }
 
   Future<List<Map<String, dynamic>>?> ShowAllDataOrderDetail(
-      String userId, String sellerId, String status) async {
+      String userId, String sellerId, String status,String orderId) async {
     try {
       final response =
           await http.get(Uri.parse("$realTimeAPI/OrderDetail.json"));
@@ -93,6 +93,17 @@ class Order_Service {
                       .toLowerCase()
                       .contains(status.toLowerCase().trim()) ??
                   false)
+              .toList();
+        }
+
+        if (orderId.isNotEmpty) {
+          orderData = orderData
+              .where((order) =>
+          order["OrderDetailId"]
+              ?.toString()
+              .toLowerCase()
+              .contains(orderId.toLowerCase().trim()) ??
+              false)
               .toList();
         }
 
@@ -160,6 +171,24 @@ class Order_Service {
     } catch (e) {
       print(e);
       return null;
+    }
+  }
+
+  Future<bool> UpdateStatusOrder(String orderId, String status) async {
+    try {
+      Map<String, dynamic> data = {"Status": status};
+      Uri url = Uri.parse("$realTimeAPI/OrderDetail/$orderId.json");
+      final response = await http.patch(url,
+          body: jsonEncode(data),
+          headers: {"Content-Type": "application/json"});
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

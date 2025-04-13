@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:order_food/Models/ProfileUser.dart';
 import 'package:order_food/View/Screen/FavoriteUser_Screen.dart';
 import 'package:order_food/View/Screen/ProfileUser_Screen.dart';
@@ -135,7 +136,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                       },
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return Center(child: CircularProgressIndicator());
+                        return Center(child: LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50));
                       },
                     )
                   : Image.asset('asset/images/avatar_default.jpg',

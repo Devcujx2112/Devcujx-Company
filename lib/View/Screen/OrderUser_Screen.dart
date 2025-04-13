@@ -38,7 +38,8 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
     final authVM = Provider.of<AuthViewModel>(context, listen: false);
     if (authVM.uid!.isNotEmpty) {
       List<Map<String, dynamic>>? orderData =
-          await orderVM.ShowAllDataOrderDetail(authVM.uid!,"", _selectedStatus);
+          await orderVM.ShowAllDataOrderDetail(
+              authVM.uid!, "", _selectedStatus,_searchController.text);
       if (orderData == null) {
         setState(() {
           _isNull = true;
@@ -118,7 +119,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
               ),
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
             ),
-            onChanged: (value) => _filterOrders(),
+            onChanged: (value) => ShowAllData(),
           ),
         ),
 
@@ -134,6 +135,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
               _buildStatusChip('Chờ lấy hàng'),
               _buildStatusChip('Đang giao hàng'),
               _buildStatusChip('Hoàn thành'),
+              _buildStatusChip('Từ chối'),
             ],
           ),
         ),
@@ -228,204 +230,226 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
   }
 
   Widget _buildOrderCard(Map<String, dynamic> order, Product dataProduct) {
-    return Card(
-      elevation: 3,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey[200]!, width: 1),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Colors.green[500],
-                        child: Icon(Icons.store, size: 18, color: Colors.white),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        dataProduct.storeName,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.green,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 4),
-                  Text(
-                    order["CreateAt"] != null
-                        ? dateFormat.format(
-                            DateTime.parse(order["CreateAt"].toString()))
-                        : 'Không có ngày',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+    final primaryColor = Colors.green;
+    final secondaryColor = Colors.grey[600]!;
 
-              // Product Info - Dòng 2
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Image
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey[100],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        dataProduct.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Center(
-                          child: Icon(Icons.image_not_supported,
-                              color: Colors.grey[400]),
-                        ),
+    final orderCode = order["OrderDetailId"]?.toString().substring(0, 7).toUpperCase() ?? "------";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      child: Card(
+        elevation: 3,
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: primaryColor.withOpacity(0.3)),
                       ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Product Details - Cột dọc
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Product Name
-                        Text(
-                          dataProduct.productName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 6),
-                        Padding(
-                            padding: EdgeInsets.only(right: 10, bottom: 10),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.green[500],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'Số lượng: ${order['Quantity']}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )),
-                        const SizedBox(width: 8),
-                        // Status
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(order['Status'])
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            order['Status'],
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _getStatusColor(order['Status']),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-
-              Column(
-                children: [
-                  Divider(color: Colors.green, height: 20),
-                  Row(
-                    children: [
-                      // Total Price
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
+                          Icon(Icons.receipt_long, size: 16, color: primaryColor),
+                          const SizedBox(width: 6),
                           Text(
-                            'Thành tiền',
+                            "Mã đơn hàng: $orderCode",
                             style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatPrice(dataProduct.price * order["Quantity"]),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.green,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: primaryColor,
                             ),
                           ),
                         ],
                       ),
-                      const Spacer(),
+                    ),
+                    const Spacer(),
+                    Text(
+                      order["CreateAt"] != null
+                          ? dateFormat.format(DateTime.parse(order["CreateAt"].toString()))
+                          : 'Không có ngày',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-                      if (order['Status'] == 'Chờ xác nhận')
-                        SizedBox(
-                          width: 100,
-                          child: OutlinedButton(
-                            onPressed: () => _showDialogDeleteOrder(
-                                order["OrderDetailId"], context),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red,
-                              side: const BorderSide(color: Colors.red),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: primaryColor,
+                      child: Icon(Icons.store, size: 18, color: Colors.white),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      dataProduct.storeName,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.grey[100],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          dataProduct.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Icon(Icons.image_not_supported, color: Colors.grey[400]),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            dataProduct.productName,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+
+
+                          // Trạng thái
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(order['Status']).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              order['Status'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: _getStatusColor(order['Status']),
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: const Text(
-                              'Hủy đơn',
-                              style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: primaryColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Số lượng: ${order['Quantity']}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+
+                            ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+
+                Divider(color: Colors.grey[300], thickness: 2,),
+                Row(
+                  children: [
+                    // Tổng tiền
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thành tiền',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: secondaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatPrice(dataProduct.price * order["Quantity"]),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+
+                    if (order['Status'] == 'Chờ xác nhận')
+                      SizedBox(
+                        width: 100,
+                        child: OutlinedButton(
+                          onPressed: () => _showDialogDeleteOrder(order["OrderDetailId"], context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Hủy đơn',
+                            style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                      ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -464,10 +488,6 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
 
   Future<void> _refreshOrders() async {
     ShowAllData();
-  }
-
-  void _filterOrders() {
-    // Logic lọc đơn hàng
   }
 
   void _showDialogDeleteOrder(String orderId, BuildContext context) async {
@@ -553,6 +573,8 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
         return const Color(0xFF7B1FA2); // Purple
       case 'Hoàn thành':
         return const Color(0xFF388E3C); // Green
+      case 'Từ chối':
+        return Colors.red; // Green
       default:
         return Colors.grey;
     }

@@ -245,34 +245,6 @@ class Product_Service {
     }
   }
 
-  //
-  // Future<List<Map<String, dynamic>>?> SearchProductFormProductId(
-  //     String productId) async {
-  //   try {
-  //     final response = await http.get(Uri.parse("$realTimeAPI.json"));
-  //     if (response.statusCode == 200) {
-  //       final Map<String, dynamic>? data = jsonDecode(response.body);
-  //       if (data == null) return [];
-  //
-  //       List<Map<String, dynamic>> productData = data.entries
-  //           .map((entry) => {
-  //                 "ProductId": entry.key,
-  //                 ...(entry.value as Map<String, dynamic>),
-  //               })
-  //           .toList();
-  //
-  //       productData = productData
-  //           .where((product) => product["ProductId"] == productId)
-  //           .toList();
-  //
-  //       return productData;
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //     return null;
-  //   }
-  // }
-
   Future<List<Map<String, dynamic>>> GetAllProductById(
       List<String> productId) async {
     try {

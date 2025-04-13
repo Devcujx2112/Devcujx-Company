@@ -100,15 +100,7 @@ class ShoppingCart_Service{
         }
         return  false;
       }
-      else{
-        final response =
-        await http.delete(Uri.parse("$realTimeAPI.json"));
-        if(response.statusCode == 200){
-          return true;
-        }
-        return  false;
-      }
-
+      return false;
     }catch(e){
       print(e);
       return false;

@@ -7,6 +7,7 @@ class OrderDetail{
   int _quantity;
   String _paymentMethod;
   String _status;
+  String _comment;
   String _createAt;
 
   OrderDetail(
@@ -18,12 +19,19 @@ class OrderDetail{
       this._quantity,
       this._paymentMethod,
       this._status,
+      this._comment,
       this._createAt);
 
   String get createAt => _createAt;
 
   set createAt(String value) {
     _createAt = value;
+  }
+
+  String get comment => _comment;
+
+  set comment(String value) {
+    _comment = value;
   }
 
   String get status => _status;
@@ -76,6 +84,6 @@ class OrderDetail{
 
   @override
   String toString() {
-    return 'OrderDetail{_orderDetailId: $_orderDetailId, _orderId: $_orderId, _sellerId: $_sellerId, _userId: $_userId, _productid: $_productid, _quantity: $_quantity, _paymentMethod: $_paymentMethod, _status: $_status, _createAt: $_createAt}';
+    return 'OrderDetail{_orderDetailId: $_orderDetailId, _orderId: $_orderId, _sellerId: $_sellerId, _userId: $_userId, _productid: $_productid, _quantity: $_quantity, _paymentMethod: $_paymentMethod, _status: $_status,_comment: $_comment, _createAt: $_createAt}';
   }
 }

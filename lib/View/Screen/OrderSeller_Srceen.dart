@@ -66,25 +66,6 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
     ShowAllDataOrder();
   }
 
-  // void _filterOrders() async {
-  //   final authVM = Provider.of<AuthViewModel>(context,listen: false);
-  //   final orderVM = Provider.of<Order_ViewModel>(context,listen: false);
-  //   if(authVM.uid!.isNotEmpty){
-  //     List<Map<String,dynamic>>? data = await orderVM.SearchOrderFormOrderDetailId(_searchController.text, "", authVM.uid!);
-  //     if(data != null){
-  //       setState(() {
-  //         _orders = data;
-  //       });
-  //     }
-  //     else{
-  //       showDialogMessage(context, "Không tìm thấy uid tài khoản",DialogType.warning);
-  //       setState(() {
-  //         _orders = [];
-  //       });
-  //     }
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(

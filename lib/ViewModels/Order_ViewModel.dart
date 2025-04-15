@@ -26,6 +26,7 @@ class Order_ViewModel extends ChangeNotifier {
       String orderId = const Uuid().v4();
       String createAt = DateTime.now().toString();
       String status = "Chờ xác nhận";
+      String comment = "";
 
       PlaceOrder placeOrder =
           PlaceOrder(orderId, uidUser, nameUser, phone, address, createAt);
@@ -47,6 +48,7 @@ class Order_ViewModel extends ChangeNotifier {
             item["Quantity"],
             paymentMethod,
             status,
+            comment,
             createAt);
         bool success = await order_service.InsertOrdersDetail(orderDetail);
         if (success == false) {
@@ -100,7 +102,8 @@ class Order_ViewModel extends ChangeNotifier {
   Future<bool> UpdateStatusOrder(String orderId, String status) async {
     try {
       _errorMessage = null;
-      bool isSuccess = await order_service.UpdateStatusOrder(orderId,status);
+      String dateTime = DateTime.now().toString() ;
+      bool isSuccess = await order_service.UpdateStatusOrder(orderId,status,dateTime);
       if (isSuccess == false) {
         _SetError("Lỗi không thể sửa trạng thái đơn hàng");
         return false;

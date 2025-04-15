@@ -51,6 +51,7 @@ class Order_Service {
         "Quantity": orderDetail.quantity,
         "PaymentMethod": orderDetail.paymentMethod,
         "Status": orderDetail.status,
+        "Comment" : orderDetail.comment,
         "CreateAt": orderDetail.createAt
       };
       final response = await http.put(
@@ -174,9 +175,9 @@ class Order_Service {
     }
   }
 
-  Future<bool> UpdateStatusOrder(String orderId, String status) async {
+  Future<bool> UpdateStatusOrder(String orderId, String status, String dateTime) async {
     try {
-      Map<String, dynamic> data = {"Status": status};
+      Map<String, dynamic> data = {"Status": status,"CreateAt": dateTime};
       Uri url = Uri.parse("$realTimeAPI/OrderDetail/$orderId.json");
       final response = await http.patch(url,
           body: jsonEncode(data),

@@ -136,7 +136,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                       },
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
-                        return Center(child: LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50));
+                        return Center(child: LoadingAnimationWidget.waveDots(color: Colors.green, size: 20));
                       },
                     )
                   : Image.asset('asset/images/avatar_default.jpg',

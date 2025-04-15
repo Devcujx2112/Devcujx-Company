@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:order_food/Models/ProfileUser.dart';
-import 'package:order_food/View/Page/Profile/Contact.dart';
+import 'package:order_food/View/Page/Profile/Contact_Page.dart';
 import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
+import 'package:order_food/View/Page/Profile/PurchaseHistory_Page.dart';
 import 'package:order_food/View/Page/Profile/PurchasePolicy.dart';
 import 'package:order_food/View/Widget/DialogChangePassword.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
@@ -233,7 +234,11 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
             icon: Icons.history,
             title: "Lịch sử mua hàng",
             color: Colors.orange,
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => PurchaseHistoryPage()),
+              );
+            },
           ),
           const Divider(
             height: 5,

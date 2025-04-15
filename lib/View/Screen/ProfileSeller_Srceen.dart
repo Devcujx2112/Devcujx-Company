@@ -4,7 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:order_food/Models/ProfileSeller.dart';
 import 'package:order_food/Models/ProfileUser.dart';
-import 'package:order_food/View/Page/Profile/Contact.dart';
+import 'package:order_food/View/Page/Profile/Contact_Page.dart';
 import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
 import 'package:order_food/View/Page/Profile/PurchasePolicy.dart';
 import 'package:order_food/View/Widget/DialogChangePassword.dart';

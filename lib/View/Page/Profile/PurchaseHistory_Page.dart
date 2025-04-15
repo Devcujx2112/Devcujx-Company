@@ -3,12 +3,13 @@ import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:order_food/Models/Product.dart';
+import 'package:order_food/View/Page/Product/ProductDetailUser.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Order_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
 import 'package:provider/provider.dart';
 
-import '../../Widget/DialogReview.dart';
+import '../../Widget/DialogReview_Form.dart';
 
 class PurchaseHistoryPage extends StatefulWidget {
   const PurchaseHistoryPage({super.key});
@@ -136,6 +137,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   }
 
   Widget _buildPurchaseCard(Map<String, dynamic> order, Product product) {
+    final orderDetailVM = Provider.of<Order_ViewModel>(context, listen: false);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -316,6 +318,12 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
+                      Map<String, dynamic>? dataProduct = orderDetailVM.ChangeProductToMap(product);
+                      if(dataProduct != null){
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => ProductDetailUser(product: dataProduct)),
+                        );
+                      }
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.green),
@@ -342,10 +350,14 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                             showDialog(
                               context: context,
                               builder: (context) => ReviewDialog(
-                                productName: 'Áo thun nam cao cấp',
-                                productImage: 'https://images.kienthuc.net.vn/zoom/800/uploaded/ctvcongdongtre/2024_05_29/5/tiktoker-ha-moi-khoe-nhan-sac-cuc-pham-netizen-nghi-dao-keo-vong-mot.jpg',
+                                dataProduct: product,
+                                orderId: order["OrderDetailId"],
                               ),
-                            );
+                            ).then((isSuccess) {
+                              if (isSuccess == true && mounted) {
+                                ShowAllData();
+                              }
+                            });
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,

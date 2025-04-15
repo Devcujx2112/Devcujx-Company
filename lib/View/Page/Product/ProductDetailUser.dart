@@ -344,55 +344,72 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.green),
-          onPressed: () => Navigator.pop(context, true)),
+      leading: Container(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.6),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.green[600]),
+          onPressed: () => Navigator.pop(context, true),
+          padding: EdgeInsets.zero,
+        ),
+      ),
       actions: [
-        IconButton(
-          icon: Icon(
-            _isFavorite ? Icons.favorite : Icons.favorite_outline,
-            color: Colors.red,
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.6),
+            shape: BoxShape.circle,
           ),
-          onPressed: () async {
-            if (_isFavorite) {
-              if (favoriteId.isEmpty) {
-                showDialogMessage(
-                    context,
-                    "Không tìm thấy id của sản phẩm yêu thích",
-                    DialogType.warning);
-              } else {
-                bool isSuccess =
-                await productVm.DeleteFavoritProduct(favoriteId);
-                if (isSuccess) {
-                  _isFavorite = false;
-                  Navigator.pop(context, true);
+          child: IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_outline,
+              color: Colors.red,
+            ),
+            onPressed: () async {
+              if (_isFavorite) {
+                if (favoriteId.isEmpty) {
                   showDialogMessage(
-                      context, "Đã xóa sản phẩm yêu thích", DialogType.success);
+                      context,
+                      "Không tìm thấy id của sản phẩm yêu thích",
+                      DialogType.warning);
                 } else {
-                  showDialogMessage(context, "Lỗi: ${productVm.errorMessage}",
-                      DialogType.error);
+                  bool isSuccess = await productVm.DeleteFavoritProduct(favoriteId);
+                  if (isSuccess) {
+                    setState(() => _isFavorite = false);
+                    Navigator.pop(context, true);
+                    showDialogMessage(
+                        context, "Đã xóa sản phẩm yêu thích", DialogType.success);
+                  } else {
+                    showDialogMessage(context, "Lỗi: ${productVm.errorMessage}",
+                        DialogType.error);
+                  }
+                }
+              } else {
+                String productId = widget.product["ProductId"];
+                if (productId.isEmpty || uid.isEmpty) {
+                  showDialogMessage(
+                      context, "Không tìm thấy thông tin", DialogType.warning);
+                } else {
+                  bool isSuccess = await productVm.InsertFavorite(productId, uid);
+                  if (isSuccess) {
+                    setState(() {
+                      _isFavorite = true;
+                      LoadData();
+                    });
+                    showDialogMessage(context, "Thêm sản phẩm yêu thích thành công",
+                        DialogType.success);
+                  } else {
+                    showDialogMessage(context, "Lỗi: ${productVm.errorMessage}",
+                        DialogType.error);
+                  }
                 }
               }
-            } else {
-              String productId = widget.product["ProductId"];
-              if (productId.isEmpty || uid.isEmpty) {
-                showDialogMessage(
-                    context, "Không tìm thấy thông tin", DialogType.warning);
-              }
-              bool isSuccess = await productVm.InsertFavorite(productId, uid);
-              if (isSuccess) {
-                setState(() {
-                  _isFavorite = true;
-                  LoadData();
-                });
-                showDialogMessage(context, "Thêm sản phẩm yêu thích thành công",
-                    DialogType.success);
-              } else {
-                showDialogMessage(context, "Lỗi : ${productVm.errorMessage}",
-                    DialogType.error);
-              }
-            }
-          },
+            },
+            padding: EdgeInsets.zero,
+          ),
         ),
       ],
     );

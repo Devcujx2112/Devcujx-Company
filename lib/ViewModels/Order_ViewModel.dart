@@ -132,6 +132,28 @@ class Order_ViewModel extends ChangeNotifier {
     }
   }
 
+  Map<String,dynamic>? ChangeProductToMap(Product product){
+    try{
+      _errorMessage = null;
+      Map<String,dynamic> data = {
+        "ProductId": product.productId,
+        "SellerId": product.uid,
+        "ProductName": product.productName,
+        "StoreName": product.storeName,
+        "Rating": product.rating,
+        "CategoryName": product.categoryName,
+        "CreateAt": product.createAt,
+        "Description": product.description,
+        "Image": product.image,
+        "Price": product.price,
+      };
+      return data;
+    }catch(e){
+      print(e);
+      return null;
+    }
+  }
+
   void _SetError(String message) {
     _errorMessage = message;
     notifyListeners();

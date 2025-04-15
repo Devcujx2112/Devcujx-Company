@@ -192,4 +192,22 @@ class Order_Service {
       return false;
     }
   }
+  Future<bool> UpdateCommentOrder(String orderId,String comment) async{
+    try{
+      Map<String, dynamic> data = {"Comment": comment};
+      Uri url = Uri.parse("$realTimeAPI/OrderDetail/$orderId.json");
+      final response = await http.patch(url,
+          body: jsonEncode(data),
+          headers: {"Content-Type": "application/json"});
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    }catch(e){
+      print(e);
+      return false;
+    }
+  }
+
 }

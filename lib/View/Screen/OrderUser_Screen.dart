@@ -350,7 +350,6 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
                           const SizedBox(height: 8),
 
 
-                          // Trạng thái
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(

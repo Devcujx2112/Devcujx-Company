@@ -6,12 +6,12 @@ import 'package:order_food/ViewModels/Category_ViewModel.dart';
 import 'package:order_food/ViewModels/Order_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
+import 'package:order_food/ViewModels/Review_ViewModel.dart';
 import 'package:order_food/ViewModels/ShoppingCart_ViewModel.dart';
 import 'package:provider/provider.dart';
 import 'Services/firebase_options.dart';
 
 Future<void> main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MultiProvider(
@@ -20,8 +20,9 @@ Future<void> main() async {
       ChangeNotifierProvider(create: (context) => Profile_ViewModel()),
       ChangeNotifierProvider(create: (context) => Category_ViewModel()),
       ChangeNotifierProvider(create: (context) => Product_ViewModel()),
-      ChangeNotifierProvider(create: (contex) => ShoppingCart_ViewModel()),
-      ChangeNotifierProvider(create: (contex) => Order_ViewModel()),
+      ChangeNotifierProvider(create: (context) => ShoppingCart_ViewModel()),
+      ChangeNotifierProvider(create: (context) => Order_ViewModel()),
+      ChangeNotifierProvider(create: (context) => Review_ViewModel()),
     ],
     child: CompanyDev(),
   ));

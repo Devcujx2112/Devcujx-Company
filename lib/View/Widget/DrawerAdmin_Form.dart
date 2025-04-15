@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:order_food/View/Page/Account/AccountManagement.dart';
 import 'package:order_food/View/Page/Category/CategoryManagement.dart';
 import 'package:order_food/View/Page/GoogleMap/GoogleMapManagement.dart';
@@ -53,7 +53,7 @@ class DrawerAdminScreen extends StatelessWidget {
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
                           return Center(
-                            child: CircularProgressIndicator(),
+                            child: LoadingAnimationWidget.progressiveDots(color: Colors.green, size: 20),
                           );
                         },
                       )

@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
+import 'package:order_food/View/Widget/ListReview.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
+import 'package:order_food/ViewModels/Review_ViewModel.dart';
 import 'package:order_food/ViewModels/ShoppingCart_ViewModel.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +22,9 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
   bool _isFavorite = false;
   int _quantity = 1;
   String favoriteId = "";
+  bool _isNullReview = true;
+  List<Map<String,dynamic>> dataReview = [];
+  double? rattingData;
 
   @override
   void initState() {
@@ -29,6 +35,7 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
   void LoadData() async {
     final productVM = Provider.of<Product_ViewModel>(context, listen: false);
     final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    final reviewVM = Provider.of<Review_ViewModel>(context,listen: false);
     List<Map<String, dynamic>>? productListId =
         await productVM.ShowAllFavoriteProduct(authVM.uid!) ?? [];
     List<String> productId =
@@ -44,6 +51,20 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
     }
     if (fav != null) {
       favoriteId = fav;
+    }
+    List<Map<String,dynamic>> dataReviewDb = await reviewVM.ShowAllDataReview(widget.product["ProductId"]);
+    if(dataReviewDb != []){
+      List allRattings = dataReviewDb
+          .map((review) => review['Ratting']?.toDouble() ?? 0.0)
+          .toList();
+      double averageRating = allRattings.isNotEmpty
+          ? allRattings.reduce((a, b) => a + b) / allRattings.length
+          : 0.0;
+      setState(() {
+        rattingData = double.tryParse(averageRating.toStringAsFixed(1));
+        dataReview = dataReviewDb;
+        _isNullReview = false;
+      });
     }
   }
 
@@ -102,8 +123,8 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                           Icon(Icons.star, color: Colors.amber, size: 20),
                           SizedBox(width: 4),
                           Text(
-                            widget.product['Rating']?.toStringAsFixed(1) ??
-                                '0.0',
+                            rattingData?.toString() ??
+                                'Loading...',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey,
@@ -251,6 +272,12 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
                       fontFamily: 'Poppins',
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Divider(color: Colors.grey, thickness: 2),
+                  const SizedBox(height: 10),
+                  _buildReviewHeader(),
+                  const SizedBox(height: 10),
+                  _buildReviewList(widget.product["ProductId"]),
                 ],
               ),
             ),
@@ -258,6 +285,77 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
         ),
       ),
       bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildReviewHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          "Đánh giá sản phẩm",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
+        if (dataReview.isNotEmpty)
+          Text(
+            "(${dataReview.length} đánh giá)",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildReviewList(String productId) {
+    if (_isNullReview) {
+      return SizedBox(
+        height: 100,
+        child: Center(
+          child: LoadingAnimationWidget.inkDrop(
+            color: Colors.green,
+            size: 35,
+          ),
+        ),
+      );
+    }
+
+    if (dataReview.isEmpty) {
+      return SizedBox(
+        height: 60,
+        child: Center(
+          child: Text(
+            "Chưa có đánh giá",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+              height: 1,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...dataReview.map(
+              (review) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ListReview(
+              dataReview: review,
+              productId: productId,
+              reload: LoadData,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -318,16 +416,16 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                padding: EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
               onPressed: _addToCart,
               child: Text(
                 'THÊM VÀO GIỎ HÀNG',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),

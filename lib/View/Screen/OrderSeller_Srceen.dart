@@ -66,6 +66,10 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
     ShowAllDataOrder();
   }
 
+  String _formatPrice(num price) {
+    return NumberFormat('#,###').format(price);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ModalProgressHUD(
@@ -284,13 +288,12 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Tên sản phẩm
                           Text(
                             product.productName,
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.green[700],
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -301,19 +304,16 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
                           _buildInfoItem(
                             icon: Icons.person_outline,
                             value: order.nameUser,
-                            color: secondaryColor,
                           ),
                           // Thông tin đơn hàng
                           _buildInfoItem(
                             icon: Icons.phone_outlined,
                             value: order.phoneUser,
-                            color: secondaryColor,
                           ),
                           _buildInfoItem(
                             icon: Icons.shopping_cart_outlined,
                             label: "Số lượng",
                             value: "${orderDetail["Quantity"]}",
-                            color: secondaryColor,
                           ),
                         ],
                       ),
@@ -326,13 +326,11 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
                   icon: Icons.location_on_outlined,
                   label: "Địa chỉ",
                   value: order.addressUser,
-                  color: secondaryColor,
                 ),
                 _buildInfoItem(
                   icon: Icons.payment_outlined,
                   label: "Thanh toán",
                   value: orderDetail["PaymentMethod"],
-                  color: secondaryColor,
                 ),
                 _buildInfoItem(
                   icon: Icons.calendar_today_outlined,
@@ -341,7 +339,6 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
                     DateTime.parse(
                         orderDetail['CreateAt'] ?? order.createAt.toString()),
                   ),
-                  color: secondaryColor,
                 ),
 
                 const SizedBox(height: 12),
@@ -392,13 +389,12 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
     required IconData icon,
     String? label,
     required String value,
-    required Color color,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.grey[600]),
+          Icon(icon, size: 18, color: Colors.green),
           const SizedBox(width: 8),
           Expanded(
             child: RichText(
@@ -410,13 +406,13 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
                 ),
                 children: [
                   TextSpan(
-                    text: "${label ?? ""}:  ",
+                    text: "${label ?? ""} :  ",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: color,
+                      color: Colors.green,
                     ),
                   ),
-                  TextSpan(text: value),
+                  TextSpan(text: value,style: TextStyle(color: Colors.grey[700])),
                 ],
               ),
             ),
@@ -650,9 +646,4 @@ class _OrderSellerScreenState extends State<OrderSellerScreen> {
       ),
     );
   }
-
-  String _formatPrice(num price) {
-    return NumberFormat('#,###').format(price);
-  }
-
 }

@@ -36,6 +36,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
   void ShowAllData() async {
     final orderVM = Provider.of<Order_ViewModel>(context, listen: false);
     final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    final productVM = Provider.of<Product_ViewModel>(context, listen: false);
     if (authVM.uid!.isNotEmpty) {
       List<Map<String, dynamic>>? orderData =
           await orderVM.ShowAllDataOrderDetail(
@@ -263,7 +264,7 @@ class _OrderUserScreenState extends State<OrderUserScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.receipt_long, size: 16, color: primaryColor),
+                          Icon(Icons.receipt_long, size: 16, color: Colors.green,),
                           const SizedBox(width: 6),
                           Text(
                             "Mã đơn hàng: $orderCode",

@@ -202,7 +202,13 @@ class _CreateProfileSellerState extends State<CreateProfileSeller> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (_selectedImage == null) {
-                    showDialogMessage(context, "Vui lòng thêm ảnh của cửa hàng",
+                    showDialogMessage(context, "Vui lòng thêm ảnh của cửa hàng!",
+                        DialogType.warning);
+                    return;
+                  }
+                  if(!RegExp(r'^(0|\+84)\d{9,10}$')
+                      .hasMatch(txtPhone.text)){
+                    showDialogMessage(context, "Số điện thoại không hợp lệ!",
                         DialogType.warning);
                     return;
                   }

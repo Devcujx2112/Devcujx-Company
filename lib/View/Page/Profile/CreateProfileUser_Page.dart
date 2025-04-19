@@ -135,6 +135,17 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () async {
+                      if(txtPhone!.text.isEmpty || txtFullName.text.isEmpty || txtAge!.text.isEmpty){
+                        showDialogMessage(context, "Vui lòng nhập đầy đủ thông tin!",
+                            DialogType.warning);
+                        return;
+                      }
+                      if(!RegExp(r'^(0|\+84)\d{9,10}$')
+                          .hasMatch(txtPhone!.text)){
+                        showDialogMessage(context, "Số điện thoại không hợp lệ!",
+                            DialogType.warning);
+                        return;
+                      }
                       ProfileUser? profile = ProfileUser(
                           uid: uid,
                           email: email!,
@@ -223,7 +234,6 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     );
   }
 
-  /// Hiển thị tiêu đề cho mỗi TextField
   Widget _buildLabel(String text) {
     return Text(
       text,
@@ -235,7 +245,6 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     );
   }
 
-  /// Ô nhập liệu có thể chỉnh sửa
   Widget _buildTextField(
       {required TextEditingController controller,
       bool isNumber = false,
@@ -260,7 +269,6 @@ class _CreateProfileUserState extends State<CreateProfileUser> {
     );
   }
 
-  /// Ô nhập liệu chỉ đọc
   Widget _buildReadOnlyTextField(String value) {
     return TextField(
       readOnly: true,

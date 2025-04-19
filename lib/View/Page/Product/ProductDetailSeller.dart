@@ -91,7 +91,6 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
     ProfileSeller? profileSeller = await profile.GetAllDataProfileSeller(uid);
     if(profileSeller != null){
       storeName = profileSeller.storeName;
-      print("UI StoreName : $storeName");
     }
   }
 
@@ -213,6 +212,10 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
                             const SizedBox(height: 10),
                             _buildTextField("Mô tả sản phẩm", txt_desc,
                                 maxLines: 3),
+                            const SizedBox(height: 15),
+                            Divider(color: Colors.green,thickness: 1.5),
+                            const SizedBox(height: 15),
+                            _buildCommentHeader()
                           ],
                         ),
                       ),
@@ -345,6 +348,22 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
             ],
           ),
         ));
+  }
+
+  Widget _buildCommentHeader() {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "Đánh giá & Bình luận",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildTextField(String label, TextEditingController controller,

@@ -474,5 +474,10 @@ class _CheckoutFormState extends State<CheckoutForm> {
       }
       if (_paymentMethod == "banking") {}
     }
+    else{
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 }

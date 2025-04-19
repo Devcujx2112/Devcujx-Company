@@ -14,7 +14,7 @@ class Review_ViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   Future<bool> InsertReviewUser(String productId, String userId,
-      String sellerId, int ratting, String comment, String orderId) async {
+      String sellerId, double ratting, String comment, String orderId) async {
     try {
       _errorMessage = null;
       String reviewId = const Uuid().v4();
@@ -45,6 +45,53 @@ class Review_ViewModel extends ChangeNotifier {
       return true;
     } catch (e) {
       _SetError("Lỗi khi gửi đánh giá sản phẩm $e");
+      return false;
+    }
+  }
+
+  Future<List<Map<String,dynamic>>> ShowAllDataReview(String productId) async {
+    try{
+      _errorMessage = null;
+      List<Map<String,dynamic>> dataReview = await review_service.ShowAllCommentProduct(productId);
+      if(dataReview == []){
+        _SetError("Không có bình luận");
+        return [];
+      }
+      notifyListeners();
+      return dataReview;
+    }catch(e){
+      _SetError("Lỗi khi show đánh giá $e");
+      return [];
+    }
+  }
+
+  Future<bool> UpdateComment(String reviewId,String comment,double ratting) async {
+    try{
+      _errorMessage = null;
+      bool isSuccess = await review_service.UpdateComment(comment, reviewId, ratting);
+      if(isSuccess == false){
+        _SetError('Chỉnh sửa bình luận đánh giá thất bại');
+        return false;
+      }
+      notifyListeners();
+      return true;
+    }catch(e){
+      _SetError("Lỗi khi sửa đánh giá $e");
+      return false;
+    }
+  }
+
+  Future<bool> DeleteComment(String reviewId) async {
+    try{
+      _errorMessage = null;
+      bool isSuccess = await review_service.DeleteComment(reviewId);
+      if(isSuccess){
+        return true;
+      }
+      notifyListeners();
+      return false;
+    }catch(e){
+      _SetError("Lỗi khi xóa bình luận $e");
       return false;
     }
   }

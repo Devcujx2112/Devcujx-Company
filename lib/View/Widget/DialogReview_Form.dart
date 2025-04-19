@@ -21,7 +21,7 @@ class ReviewDialog extends StatefulWidget {
 }
 
 class _ReviewDialogState extends State<ReviewDialog> {
-  int _rating = 0;
+  double _rating = 0.0;
   final TextEditingController _reviewController = TextEditingController();
   bool _isSubmitting = false;
   bool _isLoading = false;

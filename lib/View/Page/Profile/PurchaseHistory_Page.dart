@@ -103,7 +103,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
                 ),
               )
             : ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 itemCount: _purchaseHistory.length,
                 itemBuilder: (context, index) {
                   final order = _purchaseHistory[index];
@@ -139,6 +139,7 @@ class _PurchaseHistoryPageState extends State<PurchaseHistoryPage> {
   Widget _buildPurchaseCard(Map<String, dynamic> order, Product product) {
     final orderDetailVM = Provider.of<Order_ViewModel>(context, listen: false);
     return Container(
+      margin: EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

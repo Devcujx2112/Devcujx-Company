@@ -4,7 +4,7 @@ class Review{
   String _replies;
   String _userId;
   String _sellerId;
-  int _ratting;
+  double _ratting;
   String _createAt;
   String _comment;
 
@@ -23,9 +23,9 @@ class Review{
     _createAt = value;
   }
 
-  int get ratting => _ratting;
+  double get ratting => _ratting;
 
-  set ratting(int value) {
+  set ratting(double value) {
     _ratting = value;
   }
 

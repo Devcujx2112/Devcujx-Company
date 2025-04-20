@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:order_food/Models/ProfileSeller.dart';
 import 'package:order_food/Models/ProfileUser.dart';
 import 'package:order_food/View/Widget/DialogMessage_Form.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
 import 'package:order_food/ViewModels/Review_ViewModel.dart';
 import 'package:provider/provider.dart';
+
+import '../../Models/Replies.dart';
 
 class ListReview extends StatefulWidget {
   Map<String, dynamic> dataReview;
@@ -28,26 +31,46 @@ class _ListReviewState extends State<ListReview> {
   bool _isUpdate = true;
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
   ProfileUser? profileUser;
+  ProfileSeller? profileSeller;
   double _selectedRatting = 0;
-  TextEditingController comment = TextEditingController();
+  TextEditingController txt_comment = TextEditingController();
+  bool _isReplies = false;
+  TextEditingController txt_replies = TextEditingController();
+  Replies? replies;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     ShowAllData();
-    print('UI data ${widget.dataReview}');
   }
 
-  void ShowAllData() async {
-    final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
-    ProfileUser? dataUser =
-        await profileVM.GetAllDataProfileUser(widget.dataReview["UserId"]);
-    if (dataUser != null) {
-      setState(() {
-        profileUser = dataUser;
-        comment.text = widget.dataReview["Comment"];
-        _selectedRatting = widget.dataReview["Ratting"];
-      });
+  Future<void> ShowAllData() async {
+    try {
+      final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
+      final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+
+      final results = await Future.wait([
+        profileVM.GetAllDataProfileUser(widget.dataReview["UserId"]),
+        profileVM.GetAllDataProfileSeller(widget.dataReview["SellerId"]),
+        reviewVM.ShowRepliesComment(widget.dataReview["ReviewId"])
+      ]);
+
+      if (mounted) {
+        setState(() {
+          profileUser = results[0] as ProfileUser?;
+          profileSeller = results[1] as ProfileSeller?;
+          replies = results[2] as Replies?;
+          txt_comment.text = widget.dataReview["Comment"];
+          _selectedRatting = widget.dataReview["Ratting"];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        showDialogMessage(context, "Lỗi tải dữ liệu", DialogType.error);
+      }
     }
   }
 
@@ -58,20 +81,21 @@ class _ListReviewState extends State<ListReview> {
       });
     } else {
       final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
-      if (comment.text.length < 10) {
+      if (txt_comment.text.length < 10) {
         showDialogMessage(context, "Bình luận phải có nhiều hơn 10 kí tự",
             DialogType.warning);
         return;
       }
 
       bool isSuccess = await reviewVM.UpdateComment(
-          widget.dataReview["ReviewId"], comment.text, _selectedRatting);
+          widget.dataReview["ReviewId"], txt_comment.text, _selectedRatting);
 
       if (isSuccess && mounted) {
-        showDialogMessage(context, "Chỉnh sửa bình luận thành công", DialogType.success);
+        showDialogMessage(
+            context, "Chỉnh sửa bình luận thành công", DialogType.success);
         setState(() {
           _isUpdate = true;
-          widget.dataReview["Comment"] = comment.text;
+          widget.dataReview["Comment"] = txt_comment.text;
           widget.dataReview["Ratting"] = _selectedRatting;
           widget.reload?.call();
         });
@@ -127,27 +151,90 @@ class _ListReviewState extends State<ListReview> {
   }
 
   void DeleteComment() async {
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+    final deletedData = widget.dataReview;
+
+    try {
+      final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+      final reviewId = widget.dataReview["ReviewId"]?.toString();
+      final repliesId = replies?.repliesId;
+
+      if (reviewId == null) {
+        showDialogMessage(context, "ID bình luận không hợp lệ", DialogType.warning);
+        return;
+      }
+
+      widget.reload?.call();
+
+      final isSuccess = await reviewVM.DeleteComment(reviewId, repliesId);
+
+      if (!mounted) return;
+
+      if (!isSuccess) {
+        setState(() => widget.dataReview = deletedData);
+        showDialogMessage(
+            context,
+            "Xóa thất bại: ${reviewVM.errorMessage}",
+            DialogType.error
+        );
+        return;
+      }
+
+      await ShowAllData();
+
+      showDialogMessage(context, "Xóa thành công", DialogType.success);
+    } catch (e) {
+      if (mounted) {
+        setState(() => widget.dataReview = deletedData);
+        showDialogMessage(
+            context,
+            "Lỗi hệ thống: ${e.toString()}",
+            DialogType.error
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void InsertRepliesComment(String sellerId) async {
     final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
-    if(widget.dataReview["ReviewId"] != null){
-      bool isSuccess = await reviewVM.DeleteComment(widget.dataReview["ReviewId"]);
-      if(isSuccess){
-        showDialogMessage(context, "Xóa bình luận thành công",DialogType.success );
-        setState(() {
-          ShowAllData();
-          widget.reload?.call();
-        });
+    setState(() {
+      _isLoading = true;
+    });
+    if (txt_replies.text.isNotEmpty) {
+      bool isSuccess = await reviewVM.InsertRepliesComment(
+          widget.dataReview["ReviewId"], sellerId, txt_replies.text);
+      if (isSuccess) {
+          setState(() {
+            _isReplies = false;
+            ShowAllData();
+            widget.reload!.call();
+            _isLoading = false;
+          });
+      } else {
+        showDialogMessage(
+            context,
+            "Lỗi khi gửi phản hồi tới người dùng ${reviewVM.errorMessage}",
+            DialogType.error);
       }
-      else{
-        showDialogMessage(context, "Xóa bình luận thất bại ${reviewVM.errorMessage}",DialogType.error);
-      }
+    } else {
+      showDialogMessage(
+          context, "Hãy nhập phản hồi của bạn", DialogType.warning);
+      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final authVM = Provider.of<AuthViewModel>(context, listen: false);
+    if (_isLoading) {
+      return _buildLoadingShimmer();
+    }
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -207,14 +294,15 @@ class _ListReviewState extends State<ListReview> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
-                controller: comment,
-                style: const TextStyle(fontSize: 14, height: 1.4),
+                controller: txt_comment,
+                style: const TextStyle(fontSize: 14),
                 readOnly: _isUpdate,
                 maxLines: 3,
                 minLines: 1,
                 decoration: InputDecoration(
                   isDense: true,
-                  contentPadding: const EdgeInsets.all(12),
+                  contentPadding:
+                      const EdgeInsets.only(top: 5, left: 10, bottom: 5),
                   border: InputBorder.none,
                   // Remove underline
                   enabledBorder: InputBorder.none,
@@ -253,6 +341,271 @@ class _ListReviewState extends State<ListReview> {
                     ),
                 ],
               ),
+            if (authVM.role == "Seller" &&
+                widget.dataReview["RepliesId"].toString().isEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isReplies = !_isReplies;
+                      });
+                    },
+                    child: Text(
+                      "Phản hồi",
+                      style: TextStyle(color: Colors.blue),
+                    ),
+                  ),
+                ],
+              ),
+            if (_isReplies)
+              Padding(
+                padding: const EdgeInsets.only(top: 10, left: 10),
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: txt_replies,
+                        maxLines: 3,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[800],
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Nhập phản hồi của bạn...",
+                          hintStyle: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: EdgeInsets.all(16),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.green.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.green,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _isReplies = !_isReplies;
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey[600],
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            "HỦY",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            InsertRepliesComment(authVM.uid!);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            shadowColor: Colors.green.withOpacity(0.3),
+                          ),
+                          child: Text(
+                            "GỬI",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            if (widget.dataReview["RepliesId"].toString().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.all(0),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.green.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.grey[200],
+                            backgroundImage: profileSeller?.image != null
+                                ? NetworkImage(profileSeller!.image)
+                                : null,
+                            child: profileSeller?.image == null
+                                ? Center(
+                                    child:
+                                        LoadingAnimationWidget.progressiveDots(
+                                            color: Colors.green, size: 30))
+                                : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  profileSeller?.storeName ?? "Loading...",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green[700],
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Text(
+                                  replies?.createAt != null
+                                      ? _dateFormat.format(
+                                          DateTime.parse(replies!.createAt))
+                                      : "",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (widget.dataReview["SellerId"] == authVM.uid)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit,
+                                      size: 18, color: Colors.blueAccent),
+                                  onPressed: () {},
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete,
+                                      size: 18, color: Colors.red[300]),
+                                  onPressed: () {},
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        replies?.repText ?? "",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(radius: 20, backgroundColor: Colors.grey),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 16,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 80,
+                        height: 12,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ),
+                const Row(
+                  children: [
+                    Icon(Icons.star, color: Colors.grey, size: 20),
+                    Icon(Icons.star, color: Colors.grey, size: 20),
+                    Icon(Icons.star, color: Colors.grey, size: 20),
+                    Icon(Icons.star, color: Colors.grey, size: 20),
+                    Icon(Icons.star, color: Colors.grey, size: 20),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 60,
+              color: Colors.grey,
+            ),
           ],
         ),
       ),

@@ -342,6 +342,13 @@ class _ProductDetailUserState extends State<ProductDetailUser> {
       );
     }
 
+    print('UI data reviews: ${dataReview.map((review) => review.toString()).toList()}');
+    for (var review in dataReview) {
+      debugPrint('Review ID: ${review["ReviewId"]}, ProductId: ${review["ProductId"]}');
+      if (review["RepliesId"] != null) {
+        debugPrint('-> Has reply: ${review["Comment"]}');
+      }
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

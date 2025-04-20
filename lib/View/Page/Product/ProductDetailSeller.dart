@@ -10,9 +10,11 @@ import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Category_ViewModel.dart';
 import 'package:order_food/ViewModels/Product_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
+import 'package:order_food/ViewModels/Review_ViewModel.dart';
 import 'package:provider/provider.dart';
 
 import '../../Widget/DialogMessage_Form.dart';
+import '../../Widget/ListReview.dart';
 
 class ProductDetailSeller extends StatefulWidget {
   final Map<String, dynamic>? productData;
@@ -32,8 +34,10 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
   String uid = "";
   String storeName = "";
   late List<String> _categories = [];
+  bool _isNullReview = true;
   bool _isDataOld = false;
   bool _isLoading = true;
+  List<Map<String, dynamic>> dataReview = [];
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -61,15 +65,15 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
     Future.microtask(() async {
       final authVM = Provider.of<AuthViewModel>(context, listen: false);
       final categoryVM =
-      Provider.of<Category_ViewModel>(context, listen: false);
+          Provider.of<Category_ViewModel>(context, listen: false);
       List<Map<String, dynamic>>? dataCategory =
-      await categoryVM.ShowAllCategory("");
+          await categoryVM.ShowAllCategory("");
       setState(() {
         if (authVM.uid != null) {
           uid = authVM.uid!;
           _categories = dataCategory
-              ?.map((category) => category['CategoryName'] as String)
-              .toList() ??
+                  ?.map((category) => category['CategoryName'] as String)
+                  .toList() ??
               [];
           if (widget.productData != null) {
             _isDataOld = true;
@@ -83,13 +87,26 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
           _isLoading = false;
         }
       });
+      ShowAllData();
     });
   }
 
-  Future<void> LoadStoreName(String uid) async{
-    final profile = Provider.of<Profile_ViewModel>(context,listen: false);
+  void ShowAllData() async {
+    final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+    List<Map<String, dynamic>> dataReviewDB =
+        await reviewVM.ShowAllDataReview(widget.productData!["ProductId"]);
+    if (dataReviewDB.isNotEmpty) {
+      setState(() {
+        dataReview = dataReviewDB;
+        _isNullReview = false;
+      });
+    }
+  }
+
+  Future<void> LoadStoreName(String uid) async {
+    final profile = Provider.of<Profile_ViewModel>(context, listen: false);
     ProfileSeller? profileSeller = await profile.GetAllDataProfileSeller(uid);
-    if(profileSeller != null){
+    if (profileSeller != null) {
       storeName = profileSeller.storeName;
     }
   }
@@ -98,256 +115,252 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
   Widget build(BuildContext context) {
     final productVM = Provider.of<Product_ViewModel>(context, listen: true);
     return ModalProgressHUD(
-        inAsyncCall: _isLoading,
-        progressIndicator: LoadingAnimationWidget.inkDrop(
-            color: Colors.green, size: 50),
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(
-              _isDataOld ? "Chỉnh sửa sản phẩm" : "Thêm Sản Phẩm",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 19,
-                color: Colors.white,
+      inAsyncCall: _isLoading,
+      progressIndicator:
+          LoadingAnimationWidget.inkDrop(color: Colors.green, size: 50),
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(
+            _isDataOld ? "Chỉnh sửa sản phẩm" : "Thêm Sản Phẩm",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 19,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+          actions: [
+            if (_isDataOld)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.white),
+                onPressed: () async {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  bool isSuccess = await productVM.DeleteProduct(
+                      widget.productData?["ProductId"]);
+                  if (isSuccess) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    Navigator.pop(context, true);
+                    showDialogMessage(
+                        context, "Xóa sản phẩm thành công", DialogType.success);
+                  } else {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    showDialogMessage(
+                        context,
+                        "Xóa sản phẩm thất bại (UI) ${productVM.errorMessage}",
+                        DialogType.error);
+                  }
+                },
+              ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Phần nội dung có thể cuộn
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(color: Colors.green, width: 1),
+                            image: _image != null
+                                ? DecorationImage(
+                                    image: FileImage(_image!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : (_isDataOld
+                                    ? DecorationImage(
+                                        image: NetworkImage(
+                                            widget.productData?["Image"] ?? ""),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(0, 5),
+                              )
+                            ],
+                          ),
+                          child: _isDataOld || _image != null
+                              ? null
+                              : const Icon(Icons.add_a_photo,
+                                  size: 40, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    _buildTextField("Tên sản phẩm", txt_name),
+                    const SizedBox(height: 10),
+                    _buildDropdownField(
+                        "Danh mục", _categories, _selectedCategory, (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    }),
+                    const SizedBox(height: 10),
+                    _buildTextField("Giá sản phẩm", txt_price,
+                        keyboardType: TextInputType.number),
+                    const SizedBox(height: 10),
+                    _buildTextField("Mô tả sản phẩm", txt_desc, maxLines: 3),
+                    const SizedBox(height: 20),
+                    Divider(color: Colors.green, thickness: 1.5),
+                    const SizedBox(height: 15),
+                    _buildCommentHeader(),
+                    const SizedBox(height: 15),
+                    _buildReviewList(widget.productData!["ProductId"]),
+                    const SizedBox(height: 80),
+                    // Khoảng trống để không bị nút che
+                  ],
+                ),
               ),
             ),
-            backgroundColor: Colors.green,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context, true),
-            ),
-            actions: [
-              if (_isDataOld)
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.white),
-                  onPressed: () async {
+          ],
+        ),
+        // Nút "Lưu sản phẩm" cố định ở dưới
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                // Giữ nguyên logic xử lý nút như cũ
+                if (_isDataOld) {
+                  if (txt_desc.text.isEmpty ||
+                      txt_price.text.isEmpty ||
+                      txt_desc.text.isEmpty ||
+                      _selectedCategory!.isEmpty) {
+                    showDialogMessage(
+                        context,
+                        "Vui lòng điền đầy đủ thông tin sản phẩm",
+                        DialogType.warning);
+                    return;
+                  } else {
                     setState(() {
                       _isLoading = true;
                     });
-                    bool isSuccess = await productVM.DeleteProduct(
-                        widget.productData?["ProductId"]);
+                    int? price = int.tryParse(
+                        txt_price.text.replaceAll(RegExp(r'[,.]'), ''));
+                    bool isSuccess = await productVM.UpdateProduct(
+                        widget.productData!["ProductId"],
+                        txt_name.text,
+                        _selectedCategory!,
+                        txt_desc.text,
+                        price!,
+                        widget.productData!["Image"],
+                        _image);
+
                     if (isSuccess) {
+                      showDialogMessage(
+                          context,
+                          "Update thông tin sản phẩm thành công",
+                          DialogType.success);
                       setState(() {
                         _isLoading = false;
                       });
-                      Navigator.pop(context, true);
-                      showDialogMessage(context, "Xóa sản phẩm thành công",
-                          DialogType.success);
                     } else {
                       setState(() {
                         _isLoading = false;
                       });
                       showDialogMessage(
                           context,
-                          "Xóa sản phẩm thất bại (UI) ${productVM
-                              .errorMessage}",
+                          "Update thông tin sản phẩm thất bại (UI): ${productVM.errorMessage}",
                           DialogType.error);
                     }
-                  },
+                  }
+                } else {
+                  // Giữ nguyên phần xử lý thêm sản phẩm mới
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-            ],
-          ),
-          body: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: GestureDetector(
-                                onTap: _pickImage,
-                                child: Container(
-                                  width: 120,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius:
-                                    BorderRadius.circular(15),
-                                    border: Border.all(
-                                        color: Colors.green, width: 1),
-                                    image:  _image != null
-                                        ? DecorationImage(
-                                      image: FileImage(_image!),
-                                      fit: BoxFit.cover,
-                                    )
-                                        : (_isDataOld
-                                        ? DecorationImage(
-                                      image: NetworkImage(widget.productData?["Image"] ?? ""),
-                                      fit: BoxFit.cover,
-                                    )
-                                        : null),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 4,
-                                        offset: Offset(0, 5),
-                                      ),
-                                    ],
-                                  ),
-                                  child: _isDataOld || _image != null
-                                      ? null
-                                      : const Icon(Icons.add_a_photo,
-                                      size: 40, color: Colors.grey),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 18),
-                            _buildTextField("Tên sản phẩm", txt_name),
-                            const SizedBox(height: 10),
-                            _buildDropdownField("Danh mục", _categories,
-                                _selectedCategory, (value) {
-                                  setState(() {
-                                    _selectedCategory = value;
-                                  });
-                                }),
-                            const SizedBox(height: 10),
-                            _buildTextField("Giá sản phẩm", txt_price,
-                                keyboardType: TextInputType.number),
-                            const SizedBox(height: 10),
-                            _buildTextField("Mô tả sản phẩm", txt_desc,
-                                maxLines: 3),
-                            const SizedBox(height: 15),
-                            Divider(color: Colors.green,thickness: 1.5),
-                            const SizedBox(height: 15),
-                            _buildCommentHeader()
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                shadowColor: Colors.black38,
+                elevation: 5,
               ),
-              Positioned(
-                bottom: 18,
-                left: 16,
-                right: 16,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_isDataOld) {
-                        if (txt_desc.text.isEmpty || txt_price.text.isEmpty ||
-                            txt_desc.text.isEmpty ||
-                            _selectedCategory!.isEmpty) {
-                          showDialogMessage(context,
-                              "Vui lòng điền đầy đủ thông tin sản phẩm",
-                              DialogType.warning);
-                          return;
-                        }
-                        else {
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          int? price = int.tryParse(txt_price.text.replaceAll(RegExp(r'[,.]'), ''));
-                          bool isSuccess = await productVM.UpdateProduct(
-                              widget.productData!["ProductId"],
-                              txt_name.text,
-                              _selectedCategory!,
-                              txt_desc.text,
-                              price!,
-                              widget.productData!["Image"],
-                              _image);
-                          if (isSuccess) {
-                            showDialogMessage(
-                                context, "Update thông tin sản phẩm thành công",
-                                DialogType.success);
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                          else {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                            showDialogMessage(context,
-                                "Update thông tin sản phẩm thất bại (UI): ${productVM
-                                    .errorMessage}", DialogType.error);
-                          }
-                        }
-                      } else {
-                        if (_image == null) {
-                          showDialogMessage(
-                              context,
-                              "Vui lòng thêm ảnh của sản phẩm",
-                              DialogType.warning);
-                          return;
-                        } else {
-                          if (txt_price.text.isEmpty ||
-                              txt_desc.text.isEmpty ||
-                              txt_desc.text.isEmpty ||
-                              _selectedCategory == null) {
-                            showDialogMessage(
-                                context,
-                                "Vui lòng điền đầy đủ thông tin sản phẩm",
-                                DialogType.warning);
-                            return;
-                          }
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          int? price = int.parse(
-                              txt_price.text.replaceAll('.', ''));
-                          bool isSuccess = await productVM.InsertProduct(
-                              uid,
-                              storeName,
-                              _selectedCategory!,
-                              txt_name.text,
-                              price,
-                              txt_desc.text,
-                              _image!);
+              child: const Text(
+                "Lưu sản phẩm",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-                          if (isSuccess) {
-                            showDialogMessage(
-                                context,
-                                "Thêm sản phẩm thành công",
-                                DialogType.success);
-                            setState(() {
-                              InsertSuccessfull();
-                              _isLoading = false;
-                            });
-                          } else {
-                            showDialogMessage(
-                                context,
-                                "Thêm sản phẩm thất bại ${productVM
-                                    .errorMessage}",
-                                DialogType.error);
-                          }
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadowColor: Colors.black38,
-                      elevation: 5,
-                    ),
-                    child: const Text(
-                      "Lưu sản phẩm",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+  Widget _buildReviewList(String productId) {
+    if (_isNullReview) {
+      return SizedBox(
+        height: 100,
+        child: Center(
+          child: LoadingAnimationWidget.inkDrop(
+            color: Colors.green,
+            size: 35,
           ),
-        ));
+        ),
+      );
+    }
+
+    if (dataReview.isEmpty) {
+      return SizedBox(
+        height: 60,
+        child: Center(
+          child: Text(
+            "Chưa có đánh giá",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+              height: 1,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...dataReview.map(
+          (review) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: ListReview(
+              dataReview: review,
+              productId: productId,
+              reload: ShowAllData,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildCommentHeader() {
@@ -395,7 +408,7 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
         labelStyle: const TextStyle(
             color: Colors.green, fontWeight: FontWeight.w500, fontSize: 14),
         contentPadding:
-        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: Colors.green),
@@ -411,7 +424,7 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
         suffixText: label == "Giá sản phẩm" ? "VNĐ" : null,
         // Thêm đơn vị VNĐ
         suffixStyle:
-        const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+            const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -444,7 +457,7 @@ class _ProductDetailSellerState extends State<ProductDetailSeller> {
         labelStyle: TextStyle(
             color: Colors.green, fontWeight: FontWeight.w500, fontSize: 14),
         contentPadding:
-        const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         // Giảm chiều cao
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

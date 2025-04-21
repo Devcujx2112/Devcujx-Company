@@ -7,6 +7,7 @@ import 'package:order_food/View/Page/Profile/Contact_Page.dart';
 import 'package:order_food/View/Page/Profile/ProfileUser_Detail.dart';
 import 'package:order_food/View/Page/Profile/PurchaseHistory_Page.dart';
 import 'package:order_food/View/Page/Profile/PurchasePolicy.dart';
+import 'package:order_food/View/Page/Profile/StatisticUser_Page.dart';
 import 'package:order_food/View/Widget/DialogChangePassword.dart';
 import 'package:order_food/ViewModels/Auth_ViewModel.dart';
 import 'package:order_food/ViewModels/Profile_ViewModel.dart';
@@ -221,7 +222,11 @@ class _ProfileUserScreenState extends State<ProfileUserScreen> {
             icon: Icons.bar_chart,
             title: "Thống kê chi tiêu",
             color: Colors.green,
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => StatisticUserPage()),
+              );
+            },
           ),
           const Divider(
             height: 5,

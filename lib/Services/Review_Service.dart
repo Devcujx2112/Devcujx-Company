@@ -44,10 +44,11 @@ class Review_Service {
         if (data == null) return [];
 
         List<Map<String, dynamic>> reviewData = data.entries
-            .map((entry) => {
-                  "ReviewId": entry.key,
-                  ...(entry.value as Map<String, dynamic>),
-                })
+            .map((entry) =>
+        {
+          "ReviewId": entry.key,
+          ...(entry.value as Map<String, dynamic>),
+        })
             .toList();
 
         reviewData =
@@ -63,8 +64,8 @@ class Review_Service {
     }
   }
 
-  Future<bool> UpdateComment(
-      String comment, String reviewId, double ratting, String dateTime) async {
+  Future<bool> UpdateComment(String comment, String reviewId, double ratting,
+      String dateTime) async {
     try {
       Map<String, dynamic> data = {
         "Comment": comment,
@@ -87,10 +88,30 @@ class Review_Service {
     }
   }
 
+  Future<bool> UpdateReplies(String createAt, String repText,
+      String repliesId) async {
+    try {
+      Map<String, dynamic> data = {
+        "CreateAt": createAt,
+        "RepText": repText
+      };
+      final response = await http.patch(
+          Uri.parse("$realTimeAPI/Replies/$repliesId.json"),
+          body: jsonEncode(data), headers: {"Content-Type": "application/json"});
+      if(response.statusCode == 200){
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
   Future<bool> DeleteComment(String reviewID) async {
     try {
       final response =
-          await http.delete(Uri.parse("$realTimeAPI/Review/$reviewID.json"));
+      await http.delete(Uri.parse("$realTimeAPI/Review/$reviewID.json"));
       if (response.statusCode == 200) {
         return true;
       }
@@ -100,12 +121,24 @@ class Review_Service {
       return false;
     }
   }
-  Future<bool> DeleteReplies(String replies) async {
+
+  Future<bool> DeleteReplies(String replies, String reviewId) async {
     try {
       final response =
       await http.delete(Uri.parse("$realTimeAPI/Replies/$replies.json"));
-      if (response.statusCode == 200) {
-        return true;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Map<String, dynamic> data = {
+          "RepliesId": "",
+        };
+        final response = await http.patch(
+          Uri.parse("$realTimeAPI/Review/$reviewId.json"),
+          body: jsonEncode(data),
+          headers: {"Content-Type": "application/json"},
+        );
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          return true;
+        }
+        return false;
       }
       return false;
     } catch (e) {
@@ -160,14 +193,15 @@ class Review_Service {
 
         final List<Replies> repliesList = data.entries
             .where((entry) =>
-                entry.value["ReviewId"] == reviewId)
-            .map((entry) => Replies(
-                  entry.key,
-                  entry.value["ReviewId"],
-                  entry.value["SellerId"],
-                  entry.value["RepText"],
-                  entry.value["CreateAt"],
-                ))
+        entry.value["ReviewId"] == reviewId)
+            .map((entry) =>
+            Replies(
+              entry.key,
+              entry.value["ReviewId"],
+              entry.value["SellerId"],
+              entry.value["RepText"],
+              entry.value["CreateAt"],
+            ))
             .toList();
 
         if (repliesList.isEmpty) {

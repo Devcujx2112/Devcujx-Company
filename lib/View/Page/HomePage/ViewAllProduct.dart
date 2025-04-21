@@ -46,7 +46,7 @@ class _ViewAllProductState extends State<ViewAllProduct> {
       child: Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: AppBar(
-          title: Text(widget.uid!.isNotEmpty ? "Sản phẩm " :
+          title: Text(
             "Tất cả sản phẩm",
             style: TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),

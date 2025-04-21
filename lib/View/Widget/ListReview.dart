@@ -38,6 +38,8 @@ class _ListReviewState extends State<ListReview> {
   TextEditingController txt_replies = TextEditingController();
   Replies? replies;
   bool _isLoading = true;
+  bool sellerUpdate = true;
+  bool update = false;
 
   @override
   void initState() {
@@ -49,6 +51,13 @@ class _ListReviewState extends State<ListReview> {
     try {
       final profileVM = Provider.of<Profile_ViewModel>(context, listen: false);
       final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+      final authVM = Provider.of<AuthViewModel>(context, listen: false);
+
+      if(authVM.role == "Seller"){
+        setState(() {
+          sellerUpdate = false;
+        });
+      }
 
       final results = await Future.wait([
         profileVM.GetAllDataProfileUser(widget.dataReview["UserId"]),
@@ -63,6 +72,7 @@ class _ListReviewState extends State<ListReview> {
           replies = results[2] as Replies?;
           txt_comment.text = widget.dataReview["Comment"];
           _selectedRatting = widget.dataReview["Ratting"];
+          txt_replies.text = replies?.repText ?? "";
           _isLoading = false;
         });
       }
@@ -106,7 +116,50 @@ class _ListReviewState extends State<ListReview> {
     }
   }
 
-  void _showDiaLogDelete() async {
+  void ShowUIUpdateReplies(){
+    setState(() {
+      _isReplies = true;
+      sellerUpdate = false;
+      update = true;
+    });
+  }
+
+  void UpdateReplies() async {
+    final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+    setState(() {
+      _isLoading = true;
+    });
+    if (txt_replies.text.isEmpty) {
+      showDialogMessage(
+          context, "Vui lòng điền vào phản hồi của bạn", DialogType.warning);
+      return;
+    } else {
+      if (replies?.repliesId != null) {
+        bool isSuccess =
+            await reviewVM.UpdateReplies(replies!.repliesId, txt_replies.text);
+        if (isSuccess) {
+          showDialogMessage(
+              context, "Cập nhật phản hồi thành công", DialogType.success);
+          setState(() {
+            _isReplies = false;
+            sellerUpdate = true;
+            _isLoading = false;
+            update = false;
+          });
+          return;
+        } else {
+          showDialogMessage(
+              context, "Lỗi: ${reviewVM.errorMessage}", DialogType.error);
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+    }
+  }
+
+  void _showDiaLogDelete(String reviewId, String repliesId) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -133,8 +186,16 @@ class _ListReviewState extends State<ListReview> {
           ),
           FilledButton.tonal(
             onPressed: () {
-              DeleteComment();
-              Navigator.pop(context);
+              if (reviewId.isNotEmpty) {
+                DeleteComment(reviewId);
+                Navigator.pop(context);
+                return;
+              }
+              if (repliesId.isNotEmpty) {
+                DeleteReplies(repliesId);
+                Navigator.pop(context);
+                return;
+              }
             },
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red.shade100,
@@ -150,7 +211,33 @@ class _ListReviewState extends State<ListReview> {
     );
   }
 
-  void DeleteComment() async {
+  void DeleteReplies(String repliesId) async {
+    setState(() {
+      _isLoading = true;
+    });
+    final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
+    bool isSuccess =
+        await reviewVM.DeleteReplies(repliesId, widget.dataReview["ReviewId"]);
+    if (isSuccess) {
+      widget.reload?.call();
+      await ShowAllData();
+      showDialogMessage(context, "Xóa phản hồi thành công", DialogType.success);
+      setState(() {
+        txt_replies.clear();
+        _isLoading = false;
+      });
+    } else {
+      showDialogMessage(context,
+          "Xóa phản hồi thất bại ${reviewVM.errorMessage}", DialogType.error);
+      setState(() {
+        _isLoading = false;
+        _isReplies = false;
+      });
+      return;
+    }
+  }
+
+  void DeleteComment(String reviewId) async {
     if (!mounted) return;
 
     setState(() => _isLoading = true);
@@ -158,15 +245,13 @@ class _ListReviewState extends State<ListReview> {
 
     try {
       final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
-      final reviewId = widget.dataReview["ReviewId"]?.toString();
       final repliesId = replies?.repliesId;
 
       if (reviewId == null) {
-        showDialogMessage(context, "ID bình luận không hợp lệ", DialogType.warning);
+        showDialogMessage(
+            context, "ID bình luận không hợp lệ", DialogType.warning);
         return;
       }
-
-      widget.reload?.call();
 
       final isSuccess = await reviewVM.DeleteComment(reviewId, repliesId);
 
@@ -174,14 +259,11 @@ class _ListReviewState extends State<ListReview> {
 
       if (!isSuccess) {
         setState(() => widget.dataReview = deletedData);
-        showDialogMessage(
-            context,
-            "Xóa thất bại: ${reviewVM.errorMessage}",
-            DialogType.error
-        );
+        showDialogMessage(context, "Xóa thất bại: ${reviewVM.errorMessage}",
+            DialogType.error);
         return;
       }
-
+      widget.reload?.call();
       await ShowAllData();
 
       showDialogMessage(context, "Xóa thành công", DialogType.success);
@@ -189,10 +271,7 @@ class _ListReviewState extends State<ListReview> {
       if (mounted) {
         setState(() => widget.dataReview = deletedData);
         showDialogMessage(
-            context,
-            "Lỗi hệ thống: ${e.toString()}",
-            DialogType.error
-        );
+            context, "Lỗi hệ thống: ${e.toString()}", DialogType.error);
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -208,12 +287,12 @@ class _ListReviewState extends State<ListReview> {
       bool isSuccess = await reviewVM.InsertRepliesComment(
           widget.dataReview["ReviewId"], sellerId, txt_replies.text);
       if (isSuccess) {
-          setState(() {
-            _isReplies = false;
-            ShowAllData();
-            widget.reload!.call();
-            _isLoading = false;
-          });
+        setState(() {
+          _isReplies = false;
+          ShowAllData();
+          widget.reload!.call();
+          _isLoading = false;
+        });
       } else {
         showDialogMessage(
             context,
@@ -332,7 +411,7 @@ class _ListReviewState extends State<ListReview> {
                       authVM.uid! == widget.dataReview["UserId"])
                     TextButton(
                       onPressed: () {
-                        _showDiaLogDelete();
+                        _showDiaLogDelete(widget.dataReview["ReviewId"], "");
                       },
                       child: const Text(
                         "Xóa",
@@ -341,136 +420,10 @@ class _ListReviewState extends State<ListReview> {
                     ),
                 ],
               ),
-            if (authVM.role == "Seller" &&
-                widget.dataReview["RepliesId"].toString().isEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isReplies = !_isReplies;
-                      });
-                    },
-                    child: Text(
-                      "Phản hồi",
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                ],
-              ),
-            if (_isReplies)
+            if (widget.dataReview["RepliesId"].toString().isNotEmpty ||
+                sellerUpdate == false)
               Padding(
-                padding: const EdgeInsets.only(top: 10, left: 10),
-                child: Column(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: txt_replies,
-                        maxLines: 3,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[800],
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Nhập phản hồi của bạn...",
-                          hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 14,
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: EdgeInsets.all(16),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.green.withOpacity(0.3),
-                              width: 1,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.green,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isReplies = !_isReplies;
-                            });
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.grey[600],
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            "HỦY",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            InsertRepliesComment(authVM.uid!);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            shadowColor: Colors.green.withOpacity(0.3),
-                          ),
-                          child: Text(
-                            "GỬI",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            if (widget.dataReview["RepliesId"].toString().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(0),
+                padding: const EdgeInsets.only(top: 10),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -525,30 +478,160 @@ class _ListReviewState extends State<ListReview> {
                               ],
                             ),
                           ),
-                          if (widget.dataReview["SellerId"] == authVM.uid)
+                          if ((widget.dataReview["SellerId"] == authVM.uid ||
+                                  authVM.role == "Admin") &&
+                              txt_replies.text.isNotEmpty)
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                IconButton(
-                                  icon: Icon(Icons.edit,
-                                      size: 18, color: Colors.blueAccent),
-                                  onPressed: () {},
-                                ),
+                                if (widget.dataReview["SellerId"] == authVM.uid)
+                                  IconButton(
+                                    icon: Icon(Icons.edit,
+                                        size: 18, color: Colors.blueAccent),
+                                    onPressed: () {
+                                      ShowUIUpdateReplies() ;
+                                    },
+                                  ),
                                 IconButton(
                                   icon: Icon(Icons.delete,
                                       size: 18, color: Colors.red[300]),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    String repliesId = replies!.repliesId;
+                                    if (repliesId.isNotEmpty) {
+                                      _showDiaLogDelete("", replies!.repliesId);
+                                    } else {
+                                      showDialogMessage(
+                                          context,
+                                          "Id replies is empty",
+                                          DialogType.warning);
+                                      return;
+                                    }
+                                  },
                                 ),
                               ],
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        replies?.repText ?? "",
-                        style: TextStyle(fontSize: 14),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10, left: 10),
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: TextField(
+                                readOnly: sellerUpdate,
+                                controller: txt_replies,
+                                maxLines: 3,
+                                minLines: 1,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[800],
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: "Nhập phản hồi của bạn...",
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 14,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  contentPadding: EdgeInsets.all(16),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.green.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.green,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 10),
+                      if (widget.dataReview["RepliesId"].toString().isEmpty ||
+                          _isReplies)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isReplies = !_isReplies;
+                                  sellerUpdate = true;
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.grey,
+                                elevation: 7,
+                                padding: EdgeInsets.all(2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                shadowColor: Colors.green.withOpacity(0.3),
+                              ),
+                              child: Text(
+                                "HỦY",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.green,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: () {
+                                if(update){
+                                  UpdateReplies();
+                                  return;
+                                }else{
+                                  InsertRepliesComment(authVM.uid!);
+                                  return;
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                elevation: 7,
+                                padding: EdgeInsets.all(2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                shadowColor: Colors.green.withOpacity(0.3),
+                              ),
+                              child: Text(
+                                "LƯU",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),

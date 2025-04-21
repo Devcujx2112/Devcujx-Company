@@ -80,32 +80,65 @@ class Review_ViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> UpdateReplies(String repliesId, String repText) async {
+    try {
+      _errorMessage = null;
+      String dateTime = DateTime.now().toString();
+      bool isSuccess =
+          await review_service.UpdateReplies(dateTime, repText, repliesId);
+      if (isSuccess == false) {
+        _SetError("Chỉnh sửa phản hồi thất bại");
+        return false;
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _SetError("Lỗi khi cập nhật phản hồi");
+      return false;
+    }
+  }
+
   Future<bool> DeleteComment(String reviewId, String? repliesId) async {
     try {
       _errorMessage = null;
+      bool allSuccess = true;
 
       final bool commentDeleted = await review_service.DeleteComment(reviewId);
       if (!commentDeleted) {
         _SetError("Không thể xóa bình luận");
-        notifyListeners();
-        return false;
+        allSuccess = false;
       }
 
-      if (repliesId != null && repliesId.isNotEmpty) {
-        final bool replyDeleted = await review_service.DeleteReplies(repliesId);
+      if (allSuccess && repliesId != null && repliesId.isNotEmpty) {
+        final bool replyDeleted = await DeleteReplies(repliesId, reviewId);
         if (!replyDeleted) {
           _SetError("Đã xóa bình luận nhưng không thể xóa phản hồi");
-          notifyListeners();
-          return false;
+          allSuccess = false;
         }
       }
 
       notifyListeners();
-      return true;
-
+      return allSuccess;
     } catch (e) {
       _SetError("Lỗi hệ thống khi xóa: ${e.toString()}");
       notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> DeleteReplies(String repliesId, String reviewId) async {
+    try {
+      _errorMessage = null;
+      final bool isSuccess =
+          await review_service.DeleteReplies(repliesId, reviewId);
+
+      if (!isSuccess) {
+        _SetError("Xóa phản hồi thất bại");
+      }
+
+      return isSuccess;
+    } catch (e) {
+      _SetError("Lỗi khi xóa phản hồi: ${e.toString()}");
       return false;
     }
   }
@@ -131,19 +164,20 @@ class Review_ViewModel extends ChangeNotifier {
   }
 
   Future<Replies?> ShowRepliesComment(String reviewId) async {
-    try{
+    try {
       _errorMessage = null;
       Replies? replies;
       List<Replies>? data = await review_service.ShowRepliesComment(reviewId);
-      for(var index in data!){
-       replies = Replies(index.repliesId, index.reviewId,index.sellerId, index.repText, index.createAt);
+      for (var index in data!) {
+        replies = Replies(index.repliesId, index.reviewId, index.sellerId,
+            index.repText, index.createAt);
       }
-      if(replies != null){
+      if (replies != null) {
         return replies;
       }
       notifyListeners();
       return null;
-    }catch(e){
+    } catch (e) {
       _SetError("Lỗi khi tìm kiếm phản hồi $e");
       return null;
     }

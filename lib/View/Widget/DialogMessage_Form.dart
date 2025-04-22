@@ -7,7 +7,7 @@ void showDialogMessage(BuildContext context, String message, DialogType type) {
     barrierDismissible: false,
     context: context,
     builder: (BuildContext context) {
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(milliseconds: 1500), () {
         if (Navigator.canPop(context)) {
           Navigator.pop(context);
         }

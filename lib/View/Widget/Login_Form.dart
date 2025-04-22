@@ -113,6 +113,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 10),
           TextField(
+            key: const Key("EmailLogin"),
             style: TextStyle(fontSize: 13, color: Colors.black),
             controller: txt_email,
             decoration: InputDecoration(
@@ -131,6 +132,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           const SizedBox(height: 15),
           TextField(
+            key: const Key("PasswordLogin"),
             style: TextStyle(fontSize: 13, color: Colors.black),
             controller: txt_pasword,
             obscureText: _hidePassword,
@@ -208,14 +210,15 @@ class _LoginFormState extends State<LoginForm> {
                       CircularProgressIndicator(color: const Color(0xFFB02700)),
                 )
               : ElevatedButton(
+            key: Key("ButtonLogin"),
                   onPressed: () async {
                     bool success =
                         await authVM.LoginVM(txt_email.text, txt_pasword.text);
                     if (success) {
-                      showDialogMessage(
-                          context, "Đăng nhập thành công", DialogType.success);
                       String? role = authVM.role;
                       CheckRoleAccount(role!);
+                      showDialogMessage(
+                          context, "Đăng nhập thành công", DialogType.success);
                     } else {
                       showDialogMessage(
                           context, "${authVM.errorMessage}", DialogType.error);

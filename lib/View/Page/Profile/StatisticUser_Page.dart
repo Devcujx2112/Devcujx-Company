@@ -26,7 +26,7 @@ class _StatisticUserPageState extends State<StatisticUserPage> {
       'date': '15/05/2023',
       'total': '450,000 ₫',
       'status': 'Hoàn thành',
-      'image': 'https://images.kienthuc.net.vn/zoom/800/uploaded/ctvcongdongtre/2024_05_29/5/tiktoker-ha-moi-khoe-nhan-sac-cuc-pham-netizen-nghi-dao-keo-vong-mot.jpg',
+      'image': 'https://i.ytimg.com/vi/hxI-i5jAeB8/maxresdefault.jpg',
     },
     {
       'code': 'DH${101}',
@@ -34,7 +34,7 @@ class _StatisticUserPageState extends State<StatisticUserPage> {
       'date': '10/05/2023',
       'total': '320,000 ₫',
       'status': 'Hoàn thành',
-      'image': 'https://images.kienthuc.net.vn/zoom/800/uploaded/ctvcongdongtre/2024_05_29/5/tiktoker-ha-moi-khoe-nhan-sac-cuc-pham-netizen-nghi-dao-keo-vong-mot.jpg',
+      'image': 'https://i.ytimg.com/vi/gZt9CsZCpDM/maxresdefault.jpg',
     },
     {
       'code': 'DH${102}',
@@ -42,7 +42,7 @@ class _StatisticUserPageState extends State<StatisticUserPage> {
       'date': '05/05/2023',
       'total': '280,000 ₫',
       'status': 'Đã hủy',
-      'image': 'https://images.kienthuc.net.vn/zoom/800/uploaded/ctvcongdongtre/2024_05_29/5/tiktoker-ha-moi-khoe-nhan-sac-cuc-pham-netizen-nghi-dao-keo-vong-mot.jpg',
+      'image': 'https://i.ytimg.com/vi/hxI-i5jAeB8/maxresdefault.jpg',
     },
   ];
 
@@ -51,14 +51,14 @@ class _StatisticUserPageState extends State<StatisticUserPage> {
     ChartData('T2', 800000),
     ChartData('T3', 1500000),
     ChartData('T4', 900000),
-    ChartData('T5', 1440000),
-    ChartData('T6', 1440000),
-    ChartData('T7', 1440000),
-    ChartData('T8', 1440000),
-    ChartData('T9', 1440000),
+    ChartData('T5', 240000),
+    ChartData('T6', 144000),
+    ChartData('T7', 1240000),
+    ChartData('T8', 1140000),
+    ChartData('T9', 100000),
     ChartData('T10', 1440000),
     ChartData('T11', 1440000),
-    ChartData('T12', 1440000),
+    ChartData('T12', 1500000),
   ];
 
   final List<ChartData> _yearlyData = [

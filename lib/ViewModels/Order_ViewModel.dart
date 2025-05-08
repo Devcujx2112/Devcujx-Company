@@ -83,6 +83,26 @@ class Order_ViewModel extends ChangeNotifier {
     }
   }
 
+  Future<List<Map<String,dynamic>>?> ShowAllDataOrderDoneAndFail(String uid) async {
+    try{
+      _errorMessage = null;
+      List<Map<String,dynamic>>? orderData = await order_service.ShowAllDataOrderDetail(uid, "", "Tất cả", "");
+      if(orderData!.isEmpty){
+        _SetError("Bạn chưa có đơn hàng nào");
+        return null;
+      }
+      else{
+        List<Map<String,dynamic>> data = orderData.where((order){
+          return order["Status"] == 'Hoàn thành' || order["Status"] == "Đã hủy";
+        }).toList();
+        return data;
+      }
+    }catch(e){
+      _SetError("Lỗi khi tìm kiếm đơn hàng trong thống kê chi tiêu của User");
+      return null;
+    }
+  }
+
   Future<bool> DeleteOrderDetail(String orderDetailId) async {
     try {
       _errorMessage = null;

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import 'package:order_food/View/Widget/DialogMessage_Form.dart';
+import 'package:order_food/ViewModels/Auth_ViewModel.dart';
+import 'package:order_food/ViewModels/Order_ViewModel.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Widget/ListHistoryOrder.dart';
@@ -14,37 +18,37 @@ class StatisticUserPage extends StatefulWidget {
 }
 
 class _StatisticUserPageState extends State<StatisticUserPage> {
-  bool _isLoading = false;
+  bool _isLoading = true;
   String _selectedTimeRange = 'Tháng';
   int _totalOrders = 24;
   double _totalSpending = 5840000;
 
-  final orders = [
-    {
-      'code': 'DH${100}',
-      'name': 'Đơn hàng thực phẩm hữu cơ',
-      'date': '15/05/2023',
-      'total': '450,000 ₫',
-      'status': 'Hoàn thành',
-      'image': 'https://i.ytimg.com/vi/hxI-i5jAeB8/maxresdefault.jpg',
-    },
-    {
-      'code': 'DH${101}',
-      'name': 'Combo đồ dùng gia đình',
-      'date': '10/05/2023',
-      'total': '320,000 ₫',
-      'status': 'Hoàn thành',
-      'image': 'https://i.ytimg.com/vi/gZt9CsZCpDM/maxresdefault.jpg',
-    },
-    {
-      'code': 'DH${102}',
-      'name': 'Mỹ phẩm chăm sóc da',
-      'date': '05/05/2023',
-      'total': '280,000 ₫',
-      'status': 'Đã hủy',
-      'image': 'https://i.ytimg.com/vi/hxI-i5jAeB8/maxresdefault.jpg',
-    },
-  ];
+  List<Map<String,dynamic>> orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    ShowAllDataOrder();
+  }
+
+  void ShowAllDataOrder() async{
+    final orderVM = Provider.of<Order_ViewModel>(context,listen: false);
+    final authVM = Provider.of<AuthViewModel>(context,listen: false);
+    if(authVM.uid!.isNotEmpty){
+      List<Map<String,dynamic>>? dataOrder = await orderVM.ShowAllDataOrderDoneAndFail(authVM.uid!);
+      if(dataOrder != null){
+        setState(() {
+          orders = dataOrder;
+        });
+      }
+      else{
+        showDialogMessage(context, "Bạn chưa có đơn hàng nào hoàn thành hoặc bị hủy", DialogType.warning);
+      }
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   final List<ChartData> _monthlyData = [
     ChartData('T1', 1200000),
@@ -332,7 +336,6 @@ class _StatisticUserPageState extends State<StatisticUserPage> {
             return HistoryOrder(dataOrder: orders[index]);
           },
         ),
-
       ],
     );
   }

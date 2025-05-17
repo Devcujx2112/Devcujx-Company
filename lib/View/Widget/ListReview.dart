@@ -53,7 +53,7 @@ class _ListReviewState extends State<ListReview> {
       final reviewVM = Provider.of<Review_ViewModel>(context, listen: false);
       final authVM = Provider.of<AuthViewModel>(context, listen: false);
 
-      if(authVM.role == "Seller"){
+      if (authVM.role == "Seller") {
         setState(() {
           sellerUpdate = false;
         });
@@ -116,7 +116,7 @@ class _ListReviewState extends State<ListReview> {
     }
   }
 
-  void ShowUIUpdateReplies(){
+  void ShowUIUpdateReplies() {
     setState(() {
       _isReplies = true;
       sellerUpdate = false;
@@ -488,7 +488,7 @@ class _ListReviewState extends State<ListReview> {
                                     icon: Icon(Icons.edit,
                                         size: 18, color: Colors.blueAccent),
                                     onPressed: () {
-                                      ShowUIUpdateReplies() ;
+                                      ShowUIUpdateReplies();
                                     },
                                   ),
                                 IconButton(
@@ -604,10 +604,10 @@ class _ListReviewState extends State<ListReview> {
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
-                                if(update){
+                                if (update) {
                                   UpdateReplies();
                                   return;
-                                }else{
+                                } else {
                                   InsertRepliesComment(authVM.uid!);
                                   return;
                                 }

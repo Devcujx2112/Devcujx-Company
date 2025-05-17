@@ -210,4 +210,35 @@ class Order_Service {
     }
   }
 
+  Future<List<Map<String,dynamic>>> StatisticUser(String userId) async {
+    try{
+      final response = await http.get(Uri.parse("$realTimeAPI/OrderDetail/.json"));
+      if(response.statusCode == 200){
+        final Map<String,dynamic>? data = json.decode(response.body);
+        if(data == null) return [];
+
+        List<Map<String,dynamic>> results = [];
+
+        data.forEach((orderID,orderData){
+          if(orderData["UserId"] == userId){
+            results.add({
+              'OrderDetailId': orderID,
+              "CreateAt": orderData["CreateAt"],
+              "ProductId": orderData["ProductId"],
+              "Quantity": orderData["Quantity"]
+            });
+          }
+        });
+        return results;
+      }
+      else{
+        print('Không thể truy cập');
+        return [];
+      }
+    }catch(e){
+      print(e);
+      return [];
+    }
+  }
+
 }

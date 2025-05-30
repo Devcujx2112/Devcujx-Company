@@ -21,3 +21,27 @@
 
 ```bash
 choco install ngrok
+```
+
+**Cách 2: Dowload form "https://ngrok.com/downloads"
+
+### ✅ Bước 2: Create tunnel 
+
+** cd to "flutter_app_be"
+
+```bash
+npm i
+npm start
+```
+
+
+
+### ✅ Bước 3: Copy tunnel of ngrok "https://***.ngrok-free-app"
+
+### ✅ Bước 4:  and past the URL as the value of "BASE_URL".
+
+
+## RUN APP 🚀🚀🚀
+
+
+

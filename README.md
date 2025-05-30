@@ -34,7 +34,7 @@ npm i
 npm start
 ```
 
-**Turn on ngrok and connect to 3030
+**Turn on ngrok and connect to 3030**
 
 ```bash
 ngrok http 3030
@@ -42,10 +42,7 @@ ngrok http 3030
 
 ### ✅ Bước 3: Copy tunnel of ngrok "https://***.ngrok-free-app"
 
-### ✅ Bước 4:  and past the URL as the value of "BASE_URL".
-
-
-## RUN APP 🚀🚀🚀
+### ✅ Bước 4: Go to file .env from "Devcujx Company" and past the URL as the value of "BASE_URL". 🚀
 
 
 

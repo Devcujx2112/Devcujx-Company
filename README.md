@@ -1,31 +1,31 @@
 # 🍔 Devcujx Food App
 
-**Devcujx Food App** là ứng dụng đặt đồ ăn trực tuyến được phát triển bằng **Flutter**. Hệ thống gồm ba vai trò: **Người dùng**, **Nhà bán**, và **Admin**, hỗ trợ các chức năng quản lý món ăn, đơn hàng, giao hàng và thanh toán hiệu quả.
+**Devcujx Food App** is an online food ordering application developed with **Flutter**. The system supports three roles: **User**, **Seller**, and **Admin**, with features for managing food items, orders, delivery, and secure online payments via QR code.
 
 ---
 
-## ✨ Tính năng chính
+## ✨ Key Features
 
-- 🍽️ Đặt đồ ăn trực tuyến
-- 🛍️ Quản lý thông tin món ăn, đơn hàng
-- 🧾 Đăng tải phiếu giảm giá theo thời gian đã định *(sắp phát triển)*
-- ⭐️ Gợi ý món ăn, đánh giá và phản hồi (AI) *(sắp phát triển)*
+- 🍽️ Order food online  
+- 🛍️ Manage food items and orders  
+- 🧾 Schedule and publish discount vouchers *(coming soon)*  
+- ⭐️ AI-based food suggestions, reviews, and feedback *(coming soon)*  
 
 ---
 
-## 🚀 Hướng dẫn chạy ứng dụng
+## 🚀 Getting Started
 
-### ✅ Bước 1: Cài đặt ngrok
+### ✅ Step 1: Install ngrok
 
-**Cách 1: Dùng Chocolatey (Windows)**
+**Option 1: Using Chocolatey (Windows)**
 
 ```bash
 choco install ngrok
 ```
 
-**Cách 2: Dowload form https://ngrok.com/downloads)**
+**Option 2: Dowload form https://ngrok.com/downloads)**
 
-### ✅ Bước 2: Create tunnel 
+### ✅ Step 2: Create the tunnel 
 
 **cd to "flutter_app_be"**
 
@@ -40,9 +40,9 @@ npm start
 ngrok http 3030
 ```
 
-### ✅ Bước 3: Copy tunnel of ngrok "https://***.ngrok-free-app"
+### ✅ Step 3: Copy tunnel of ngrok "https://***.ngrok-free-app"
 
-### ✅ Bước 4: Go to file .env from "Devcujx Company" and past the URL as the value of "BASE_URL". 🚀
+### ✅ Step 4: Go to file .env from "Devcujx Company" and past the URL as the value of "BASE_URL". 🚀
 
 
 

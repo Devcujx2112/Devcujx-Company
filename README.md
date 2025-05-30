@@ -23,7 +23,7 @@
 choco install ngrok
 ```
 
-**Option 2: Dowload form https://ngrok.com/downloads)**
+**Option 2: Dowload form https://ngrok.com/downloads**
 
 ### ✅ Step 2: Create the tunnel 
 
